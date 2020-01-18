@@ -1,4 +1,7 @@
 from pygame import *
+import pygame
+from NewHope import *
+from Enemies import *
 
 MOVE_SPEED = 7
 WIDTH = 22
@@ -22,22 +25,37 @@ class Player(sprite.Sprite):
         self.rect = Rect(x, y, WIDTH, HEIGHT)  # прямоугольный объект
         self.yvel = 0  # скорость вертикального перемещения
         self.onGround = False  # На земле ли я?
+        self.previosly_move = "right"
 
 
-    def update(self, left, right, up, platforms, down, enemies):
+    def update(self, left, right, up, platforms, down, enemies, hit, screen):
         if up:
             if self.onGround:  # прыгаем, только когда можем оттолкнуться от земли
                 self.yvel = -JUMP_POWER
         if left:
             self.xvel = -MOVE_SPEED  # Лево = x- n
+            self.previosly_move = "left"
 
         if right:
             self.xvel = MOVE_SPEED  # Право = x + n
+            self.previosly_move = "right"
 
         if down:
             if not self.onGround:
                 self.yvel += JUMP_POWER // 2
                 self.xvel = 0
+
+        if hit:
+            for e in enemies:
+                if self.previosly_move == "right":
+                    if self.rect.x <= e.rect.x <= self.rect.x + 86 and \
+                            self.rect.y <= e.rect.y <= self.rect.y + 32:
+                        e.kill()
+                else:
+                    if self.rect.x >= e.rect.x >= self.rect.x - 64 and \
+                            self.rect.y <= e.rect.y <= self.rect.y + 32:
+                        e.kill()
+
 
         if not (left or right):  # стоим, когда нет указаний идти
             self.xvel = 0
@@ -71,8 +89,10 @@ class Player(sprite.Sprite):
                     self.yvel = 0                 # и энергия прыжка пропадает
 
         for p in enemies:
-            if sprite.collide_rect(self, p):  # если есть пересечение платформы с игроком
+            if sprite.collide_rect(self, p):
                 self.die()
 
     def die(self):
         self.kill()
+
+

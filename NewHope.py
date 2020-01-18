@@ -62,8 +62,9 @@ def main():
     hero = Player(55, 55)  #
 
     # создаем героя по (x,y) координатам
-    left = right = up = down = False  # по умолчанию — стоим
-    all_sprites = pygame.sprite.Group()  # Все объекты
+    left = right = up = down = hit = False  # по умолчанию — стоим
+    all_sprites = pygame.sprite.Group()
+    enemies_group = pygame.sprite.Group()
     platforms = [] # то, во что мы будем врезаться или опираться
     enemies = [] # Враги
     blanks = []
@@ -82,6 +83,7 @@ def main():
                 uka = Uka(x, y)
                 all_sprites.add(uka)
                 enemies.append(uka)
+                enemies_group.add(uka)
             elif col == "b":
                 blank = Blank(x, y)
                 all_sprites.add(blank)
@@ -90,6 +92,7 @@ def main():
                 flyling = Flyling(x, y)
                 all_sprites.add(flyling)
                 enemies.append(flyling)
+                enemies_group.add(flyling)
 
             x += PLATFORM_WIDTH  # блоки платформы ставятся на ширине блоков
         y += PLATFORM_HEIGHT  # то же самое и с высотой
@@ -121,12 +124,16 @@ def main():
                 down = True
             if event.type == KEYUP and event.key == K_DOWN:
                 down = False
+            if event.type == KEYDOWN and event.key == K_z:
+                hit = True
+            if event.type == KEYUP and event.key == K_z:
+                hit = False
         screen.blit(bg, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
 
 
-        hero.update(left, right, up, platforms, down, enemies)  # передвижение
-        enemy.update(blanks)
+        hero.update(left, right, up, platforms, down, enemies, hit, screen)  # передвижение
         camera.update(hero)
+        enemies_group.update(blanks, platforms)
         for i in all_sprites:
             screen.blit(i.image, camera.apply(i))
         pygame.display.update()  # обновление и вывод всех изменений на экран
