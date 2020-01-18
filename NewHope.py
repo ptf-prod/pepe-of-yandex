@@ -31,9 +31,7 @@ class Camera(object):
 
 def camera_configure(camera, target_rect):
     x, y = target_rect[0], target_rect[1]
-    print(target_rect)
     w, h = camera[2], camera[3]
-    print(camera)
     x, y = -x + WIN_WIDTH / 2, -y + WIN_HEIGHT / 2
 
     x = min(0, x)  # Не движемся дальше левой границы
@@ -81,13 +79,17 @@ def main():
                 all_sprites.add(plat)
                 platforms.append(plat)
             elif col == "U":
-                enemy = Enemy(x, y)
-                all_sprites.add(enemy)
-                enemies.append(enemy)
+                uka = Uka(x, y)
+                all_sprites.add(uka)
+                enemies.append(uka)
             elif col == "b":
                 blank = Blank(x, y)
                 all_sprites.add(blank)
-                enemies.append(blank)
+                blanks.append(blank)
+            elif col == "F":
+                flyling = Flyling(x, y)
+                all_sprites.add(flyling)
+                enemies.append(flyling)
 
             x += PLATFORM_WIDTH  # блоки платформы ставятся на ширине блоков
         y += PLATFORM_HEIGHT  # то же самое и с высотой
@@ -122,8 +124,8 @@ def main():
         screen.blit(bg, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
 
 
-        hero.update(left, right, up, platforms, down)  # передвижение
-        enemy.update(left, right, up, blanks, down)  # передвижение
+        hero.update(left, right, up, platforms, down, enemies)  # передвижение
+        enemy.update(blanks)
         camera.update(hero)
         for i in all_sprites:
             screen.blit(i.image, camera.apply(i))
