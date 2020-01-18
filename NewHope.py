@@ -5,6 +5,8 @@ import pygame
 from pygame import *
 from PepeHero import *
 from Platforms import *
+from Enemies import *
+from OtherBlocks import *
 
 # Объявляем переменные
 WIN_WIDTH = 800  # Ширина создаваемого окна
@@ -64,7 +66,9 @@ def main():
     # создаем героя по (x,y) координатам
     left = right = up = down = False  # по умолчанию — стоим
     all_sprites = pygame.sprite.Group()  # Все объекты
-    platforms = []  # то, во что мы будем врезаться или опираться
+    platforms = [] # то, во что мы будем врезаться или опираться
+    enemies = [] # Враги
+    blanks = []
     all_sprites.add(hero)
     timer = pygame.time.Clock()
     level = load_level("level.txt")
@@ -76,6 +80,14 @@ def main():
                 plat = Platform(x, y)
                 all_sprites.add(plat)
                 platforms.append(plat)
+            elif col == "U":
+                enemy = Enemy(x, y)
+                all_sprites.add(enemy)
+                enemies.append(enemy)
+            elif col == "b":
+                blank = Blank(x, y)
+                all_sprites.add(blank)
+                enemies.append(blank)
 
             x += PLATFORM_WIDTH  # блоки платформы ставятся на ширине блоков
         y += PLATFORM_HEIGHT  # то же самое и с высотой
@@ -111,6 +123,7 @@ def main():
 
 
         hero.update(left, right, up, platforms, down)  # передвижение
+        enemy.update(left, right, up, blanks, down)  # передвижение
         camera.update(hero)
         for i in all_sprites:
             screen.blit(i.image, camera.apply(i))
