@@ -5,7 +5,7 @@ WIDTH = 22
 HEIGHT = 32
 COLOR = "#888888"
 JUMP_POWER = 10
-GRAVITY = 0.35 # Сила, которая будет тянуть нас вниз
+GRAVITY = 0.35  # Сила, которая будет тянуть нас вниз
 
 
 
@@ -15,8 +15,8 @@ class Player(sprite.Sprite):
     def __init__(self, x, y):
         sprite.Sprite.__init__(self)
         self.xvel = 0  # скорость перемещения. 0 - стоять на месте
-        self.startX = x  # Начальная позиция Х, пригодится когда будем переигрывать уровень
-        self.startY = y
+        self.start_x = x  # Начальная позиция Х, пригодится когда будем переигрывать уровень
+        self.start_y = y
         self.image = Surface((WIDTH, HEIGHT))
         self.image.fill(Color(COLOR))
         self.rect = Rect(x, y, WIDTH, HEIGHT)  # прямоугольный объект
@@ -35,15 +35,16 @@ class Player(sprite.Sprite):
             self.xvel = MOVE_SPEED  # Право = x + n
 
         if down:
-            if not self.onGround:  # прыгаем, только когда можем оттолкнуться от земли
+            if not self.onGround:
                 self.yvel += JUMP_POWER // 2
+                self.xvel = 0
 
         if not (left or right):  # стоим, когда нет указаний идти
             self.xvel = 0
         if not self.onGround:
             self.yvel += GRAVITY
 
-        self.onGround = False  # Мы не знаем, когда мы на земле((
+        self.onGround = False
         self.rect.y += self.yvel
         self.collide(0, self.yvel, platforms)
 

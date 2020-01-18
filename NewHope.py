@@ -28,15 +28,17 @@ class Camera(object):
 
 
 def camera_configure(camera, target_rect):
-    l, t, _, _ = target_rect
-    _, _, w, h = camera
-    l, t = -l + WIN_WIDTH / 2, -t + WIN_HEIGHT / 2
+    x, y = target_rect[0], target_rect[1]
+    print(target_rect)
+    w, h = camera[2], camera[3]
+    print(camera)
+    x, y = -x + WIN_WIDTH / 2, -y + WIN_HEIGHT / 2
 
-    l = min(0, l)  # Не движемся дальше левой границы
-    l = max(-(camera.width - WIN_WIDTH), l)  # Не движемся дальше правой границы
-    t = max(-(camera.height - WIN_HEIGHT), t)  # Не движемся дальше нижней границы
-    t = min(0, t)  # Не движемся дальше верхней границы
-    return Rect(l, t, w, h)
+    x = min(0, x)  # Не движемся дальше левой границы
+    x = max(-(camera.width - WIN_WIDTH), x)  # Не движемся дальше правой границы
+    y = max(-(camera.height - WIN_HEIGHT), y)  # Не движемся дальше нижней границы
+    y = min(0, y)  # Не движемся дальше верхней границы
+    return Rect(x, y, w, h)
 
 def load_level(filename):
     filename = "data/" + filename
