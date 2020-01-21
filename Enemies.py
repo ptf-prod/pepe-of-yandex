@@ -25,7 +25,6 @@ class Enemy(sprite.Sprite):
         self.image = Surface((WIDTH, HEIGHT))
         self.image.fill(Color(COLOR))
         self.rect = Rect(x, y, WIDTH, HEIGHT)  # прямоугольный объект
-        self.onGround = False  # На земле ли я?
 
 
     def update(self, blanks, platforms):
@@ -42,8 +41,6 @@ class Enemy(sprite.Sprite):
 class Uka(Enemy):
     def __init__(self, x, y):
         super().__init__(x, y)
-
-
 class Flyling(Enemy):
     def __init__(self, x , y):
         super().__init__(x, y)

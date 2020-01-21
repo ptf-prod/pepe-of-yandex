@@ -59,15 +59,18 @@ def main():
     bg = Surface((WIN_WIDTH, WIN_HEIGHT))  # Создание видимой поверхности
     # будем использовать как фон
     bg.fill(BACKGROUND_COLOR)  # Заливаем поверхность сплошным цветом
-    hero = Player(55, 55)  #
+    hero = Player(55, 55)
+    hp = HitPoints()
 
     # создаем героя по (x,y) координатам
-    left = right = up = down = hit = False  # по умолчанию — стоим
+    left = right = up = down = blast = False  # по умолчанию — стоим
     all_sprites = pygame.sprite.Group()
     enemies_group = pygame.sprite.Group()
+    bullets_group = pygame.sprite.Group()
     platforms = [] # то, во что мы будем врезаться или опираться
     enemies = [] # Враги
     blanks = []
+    bullets = []
     all_sprites.add(hero)
     timer = pygame.time.Clock()
     level = load_level("level.txt")
@@ -104,39 +107,49 @@ def main():
     camera = Camera(camera_configure, total_level_width, total_level_height)
 
     while 1:  # Основной цикл программы
-        timer.tick(60)
         for event in pygame.event.get():  # Обрабатываем события
             if event.type == QUIT:
                 raise SystemExit("QUIT")
             if event.type == KEYDOWN and event.key == K_LEFT:
                 left = True
+            elif event.type == KEYUP and event.key == K_LEFT:
+                left = False
             if event.type == KEYDOWN and event.key == K_RIGHT:
                 right = True
-            if event.type == KEYUP and event.key == K_RIGHT:
+            elif event.type == KEYUP and event.key == K_RIGHT:
                 right = False
-            if event.type == KEYUP and event.key == K_LEFT:
-                left = False
             if event.type == KEYDOWN and event.key == K_UP:
                 up = True
-            if event.type == KEYUP and event.key == K_UP:
+            elif event.type == KEYUP and event.key == K_UP:
                 up = False
             if event.type == KEYDOWN and event.key == K_DOWN:
                 down = True
-            if event.type == KEYUP and event.key == K_DOWN:
+            elif event.type == KEYUP and event.key == K_DOWN:
                 down = False
+            if event.type == KEYDOWN and event.key == K_c:
+                hero.hit(enemies)
             if event.type == KEYDOWN and event.key == K_z:
-                hit = True
-            if event.type == KEYUP and event.key == K_z:
-                hit = False
+                blast = True
+            elif event.type == KEYUP and event.key == K_z:
+                blast = False
+        if hero.shot_done is False and blast is True:
+            bullet = Bullet(hero.rect.x, hero.rect.y + 14, hero.previosly_move)
+            bullets.append(bullet)
+            bullets_group.add(bullet)
+            all_sprites.add(bullet)
+            hero.shot_done = True
         screen.blit(bg, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
 
 
-        hero.update(left, right, up, platforms, down, enemies, hit, screen)  # передвижение
+        hero.update(left, right, up, platforms, down, enemies, screen, hp)  # передвижение
         camera.update(hero)
         enemies_group.update(blanks, platforms)
+        bullets_group.update(enemies, platforms)
         for i in all_sprites:
             screen.blit(i.image, camera.apply(i))
+        hp.draw(screen)
         pygame.display.update()  # обновление и вывод всех изменений на экран
+        timer.tick(60)
 
 
 if __name__ == "__main__":
