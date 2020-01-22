@@ -6,7 +6,6 @@ from pygame import *
 from PepeHero import *
 from Platforms import *
 from Enemies import *
-from OtherBlocks import *
 
 # Объявляем переменные
 WIN_WIDTH = 800  # Ширина создаваемого окна
@@ -67,9 +66,11 @@ def main():
     all_sprites = pygame.sprite.Group()
     enemies_group = pygame.sprite.Group()
     bullets_group = pygame.sprite.Group()
+    other_blocks_group = pygame.sprite.Group()
     platforms = [] # то, во что мы будем врезаться или опираться
     enemies = [] # Враги
     blanks = []
+    other_blocks = []
     bullets = []
     all_sprites.add(hero)
     timer = pygame.time.Clock()
@@ -96,6 +97,19 @@ def main():
                 all_sprites.add(flyling)
                 enemies.append(flyling)
                 enemies_group.add(flyling)
+            elif col == "L":
+                lava = Lava(x, y)
+                all_sprites.add(lava)
+                other_blocks.append(lava)
+            elif col == "S":
+                spikes = Spikes(x, y)
+                all_sprites.add(spikes)
+                other_blocks.append(spikes)
+            elif col == "I":
+                ice = Ice(x, y)
+                all_sprites.add(ice)
+                platforms.append(ice)
+
 
             x += PLATFORM_WIDTH  # блоки платформы ставятся на ширине блоков
         y += PLATFORM_HEIGHT  # то же самое и с высотой
@@ -141,7 +155,7 @@ def main():
         screen.blit(bg, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
 
 
-        hero.update(left, right, up, platforms, down, enemies, screen, hp)  # передвижение
+        hero.update(left, right, up, platforms, down, enemies, screen, hp, other_blocks)  # передвижение
         camera.update(hero)
         enemies_group.update(blanks, platforms)
         bullets_group.update(enemies, platforms)

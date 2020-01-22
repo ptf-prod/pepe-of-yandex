@@ -30,11 +30,20 @@ class Player(sprite.Sprite):
         self.shot_done = False
         self.reload_time = 0
         self.blast = False
+        self.burn_time = 0
+        self.previosly_block = ""
+        self.block = ""
+        self.is_collide = False
 
-    def update(self, left, right, up, platforms, down, enemies, screen, hp):
+    def update(self, left, right, up, platforms, down, enemies, screen, hp, other_blocks):
         if up:
             if self.onGround:  # прыгаем, только когда можем оттолкнуться от земли
                 self.yvel = -JUMP_POWER
+                if self.block == "ice":
+                    if self.previosly_move == "left":
+                        self.xvel = -MOVE_SPEED
+                    else:
+                        self.xvel = MOVE_SPEED
         if left:
             self.xvel = -MOVE_SPEED  # Лево = x- n
             self.previosly_move = "left"
@@ -50,15 +59,21 @@ class Player(sprite.Sprite):
 
         if not (left or right):  # стоим, когда нет указаний идти
             self.xvel = 0
+            if self.block == "ice":
+                while self.xvel == 0:
+                    if self.previosly_move == "left":
+                        self.xvel = -MOVE_SPEED - 5
+                    else:
+                        self.xvel = MOVE_SPEED + 5
         if not self.onGround:
             self.yvel += GRAVITY
 
         self.onGround = False
         self.rect.y += self.yvel
-        self.collide(0, self.yvel, platforms, enemies, hp)
+        self.collide(0, self.yvel, platforms, enemies, hp, other_blocks)
 
         self.rect.x += self.xvel  # переносим свои положение на xvel
-        self.collide(self.xvel, 0, platforms, enemies, hp)
+        self.collide(self.xvel, 0, platforms, enemies, hp, other_blocks)
 
         if self.hit_take is False:
             self.immortal_time += 1
@@ -72,10 +87,18 @@ class Player(sprite.Sprite):
                 self.shot_done = False
                 self.reload_time = 0
 
-    def collide(self, xvel, yvel, platforms, enemies, hp):
+        if self.previosly_block == "lava" and self.block != "lava":
+            self.hp -= 0.1
+            hp.dmg += 0.1
+            self.burn_time += 1
+            if self.burn_time == 200 and self.block != "lava":
+                self.burn_time = 0
+                self.previosly_block = ""
+
+    def collide(self, xvel, yvel, platforms, enemies, hp, other_blocks):
         for p in platforms:
             if sprite.collide_rect(self, p):  # если есть пересечение платформы с игроком
-
+                self.block = "platform"
                 if xvel > 0:  # если движется вправо
                     self.rect.right = p.rect.left  # то не движется вправо
 
@@ -90,18 +113,39 @@ class Player(sprite.Sprite):
                 if yvel < 0:  # если движется вверх
                     self.rect.top = p.rect.bottom  # то не движется вверх
                     self.yvel = 0  # и энергия прыжка пропадает
+                if type(p) == Ice:
+                    self.previosly_block = self.block
+                    self.block = "ice"
 
         if self.hit_take is True:
             for e in enemies:
                 if sprite.collide_rect(self, e):
                     self.take_dmg(e, hp)
 
+        if self.hit_take is True:
+            for ob in other_blocks:
+                if sprite.collide_rect(self, ob):
+                    if type(ob) == Lava or Spikes:
+                        self.take_dmg(ob, hp)
+                        self.block = f"{ob}"
+
+
+
     def take_dmg(self, enemy, hp):
         if type(enemy) == Uka:
             self.hp -= 10
             hp.dmg += 10
             self.immortality()
-        elif enemy == Flyling:
+        elif type(enemy) == Flyling:
+            self.hp -= 15
+            hp.dmg += 15
+            self.immortality()
+        elif type(enemy) == Lava:
+            self.hp -= 0.05
+            hp.dmg += 0.05
+            self.previosly_block = "lava"
+            self.block = "lava"
+        elif type(enemy) == Spikes:
             self.hp -= 15
             hp.dmg += 15
             self.immortality()
