@@ -22,16 +22,23 @@ class Enemy(sprite.Sprite):
         self.image.fill(Color(COLOR))
         self.rect = Rect(x, y, WIDTH, HEIGHT)  # прямоугольный объект
         self.onGround = False
+        self.target_detected = False
 
     def update(self, blanks, platforms, target_coords):
 
-        self.rect.x += self.xvel  # переносим положение на xvel
-        self.collide(blanks, platforms)
+        if self.target_detected is False:
+            self.rect.x += self.xvel  # переносим положение на xvel
         if type(self) == Crackatoo:
-            self.target_check(target_coords)
+            if self.target_detected is False:
+                self.target_check(target_coords)
+            else:
+                self.chasing(target_coords)
 
-        if not self.onGround:
+        if self.onGround is False:
             self.yvel += GRAVITY
+        self.onGround = False
+        self.rect.y += self.yvel
+        self.collide(blanks, platforms)
 
     def collide(self, blanks, platforms):
         for b in blanks:
@@ -40,14 +47,12 @@ class Enemy(sprite.Sprite):
                     self.xvel = -self.xvel
         for p in platforms:
             if sprite.collide_rect(self, p):  # если есть пересечение платформы с игроком
-                if self.xvel != 0:
-                    self.xvel = -self.xvel
 
                 if self.yvel > 0:  # если падает вниз
                     self.onGround = True  # и становится на что-то твердое
                     self.yvel = 0  # и энергия падения пропадает
 
-                if self.yvel < 0:  # если движется вверх
+                if self.yvel < 0:
                     self.yvel = 0  # и энергия прыжка пропадает
 
 
@@ -64,7 +69,7 @@ class Flyling(Enemy):
 
     def update(self, blanks, platforms, target_coords):
         self.rect.x += self.xvel  # переносим положение на xvel
-        self.collide(platforms)
+        self.collide(blanks, platforms)
         self.check_time()
         self.flytime += 1
 
@@ -73,7 +78,7 @@ class Flyling(Enemy):
             self.xvel = -self.xvel
             self.flytime = 0
 
-    def collide(self, platforms):
+    def collide(self, blanks, platforms):
         hits = pygame.sprite.spritecollide(self, platforms, False)
         if hits:
             self.xvel = -self.xvel
@@ -87,15 +92,17 @@ class Crackatoo(Enemy):
         self.target_detected = False
 
     def target_check(self, coords):
-        if self.rect.x - 100 < coords[0] or\
-            self.rect.x + 100 > coords[0] or \
-            self.rect.y - 100 < coords[1] or \
-                self.rect.y + 100 > coords[1]:
-            self.xvel = 14
+        if self.rect.x - 64 < coords[0] or\
+            self.rect.x + 64 > coords[0] or \
+            self.rect.y - 64 < coords[1] or \
+                self.rect.y + 64 > coords[1]:
+            self.xvel = 8
             self.target_detected = True
-            if self.rect.y == coords[1] and self.rect < coords[0]:
-                self.rect.x += self.xvel
-            elif self.rect.y == coords[1] and self.rect > coords[0]:
-                self.rect.x -= self.xvel
+
+    def chasing(self, coords):
+        if self.rect.x <= coords[0]:
+            self.rect.x += self.xvel
+        elif self.rect.x > coords[0]:
+            self.rect.x -= self.xvel
 
 

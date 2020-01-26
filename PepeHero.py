@@ -1,4 +1,4 @@
-from NewHope import *
+from Main import *
 from Enemies import *
 from Bullet import *
 
@@ -134,6 +134,10 @@ class Player(sprite.Sprite):
         elif type(enemy) == Flyling:
             self.hp -= 15
             hp.dmg += 15
+            self.immortality()
+        elif type(enemy) == Crackatoo:
+            self.hp -= 20
+            hp.dmg += 20
             self.immortality()
         elif type(enemy) == Lava:
             self.hp -= 0.05
