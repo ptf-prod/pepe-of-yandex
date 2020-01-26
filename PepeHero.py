@@ -1,5 +1,3 @@
-from pygame import *
-import pygame
 from NewHope import *
 from Enemies import *
 from Bullet import *
@@ -33,7 +31,6 @@ class Player(sprite.Sprite):
         self.burn_time = 0
         self.previosly_block = ""
         self.block = ""
-        self.is_collide = False
 
     def update(self, left, right, up, platforms, down, enemies, screen, hp, other_blocks):
         if up:
@@ -129,8 +126,6 @@ class Player(sprite.Sprite):
                         self.take_dmg(ob, hp)
                         self.block = f"{ob}"
 
-
-
     def take_dmg(self, enemy, hp):
         if type(enemy) == Uka:
             self.hp -= 10
@@ -164,13 +159,15 @@ class Player(sprite.Sprite):
                 if self.rect.x <= e.rect.x <= self.rect.x + 86 and \
                         self.rect.y <= e.rect.y <= self.rect.y + 32:
                     e.kill()
+                    del enemies[enemies.index(e)]
             else:
                 if self.rect.x >= e.rect.x >= self.rect.x - 64 and \
                         self.rect.y <= e.rect.y <= self.rect.y + 32:
                     e.kill()
+                    del enemies[enemies.index(e)]
 
 
-class HitPoints():
+class HitPoints:
     def __init__(self):
         self.x = 50
         self.y = 50

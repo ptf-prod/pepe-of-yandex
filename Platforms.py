@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from pygame import *
-import os
 
 PLATFORM_WIDTH = 32
 PLATFORM_HEIGHT = 32

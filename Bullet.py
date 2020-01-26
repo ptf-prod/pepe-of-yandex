@@ -1,5 +1,4 @@
 from pygame import *
-import pygame
 
 
 class Bullet(sprite.Sprite):
@@ -15,17 +14,20 @@ class Bullet(sprite.Sprite):
         self.image.fill(Color("Green"))
         self.rect = Rect(x, y, 6, 4)  # прямоугольный объект
 
-    def update(self, enemies, platforms):
+    def update(self, enemies, platforms, bullets):
 
         self.rect.x += self.xvel  # переносим положение на xvel
-        self.collide(enemies, platforms)
+        self.collide(enemies, platforms, bullets)
         self.check_range()
 
-    def collide(self, enemies, platforms):
+    def collide(self, enemies, platforms, bullets):
         for e in enemies:
             if sprite.collide_rect(self, e):
                 e.kill()
                 self.kill()
+                del enemies[enemies.index(e)]
+                del bullets[bullets.index(self)]
+
         for p in platforms:
             if sprite.collide_rect(self, p):
                 self.kill()

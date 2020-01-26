@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 # Импортируем библиотеку pygame
-import pygame
-from pygame import *
 from PepeHero import *
 from Platforms import *
 from Enemies import *
@@ -15,6 +13,7 @@ BACKGROUND_COLOR = (50, 150, 255)
 PLATFORM_WIDTH = 32
 PLATFORM_HEIGHT = 32
 PLATFORM_COLOR = "#FF6262"
+
 
 class Camera(object):
     def __init__(self, camera_func, width, height):
@@ -39,6 +38,7 @@ def camera_configure(camera, target_rect):
     y = min(0, y)  # Не движемся дальше верхней границы
     return Rect(x, y, w, h)
 
+
 def load_level(filename):
     filename = "data/" + filename
     # читаем уровень, убирая символы перевода строки
@@ -50,6 +50,7 @@ def load_level(filename):
 
     # дополняем каждую строку пустыми клетками ('.')
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
+
 
 def main():
     pygame.init()  # Инициация PyGame, обязательная строчка
@@ -63,12 +64,11 @@ def main():
 
     # создаем героя по (x,y) координатам
     left = right = up = down = blast = False  # по умолчанию — стоим
-    all_sprites = pygame.sprite.Group()
     enemies_group = pygame.sprite.Group()
     bullets_group = pygame.sprite.Group()
-    other_blocks_group = pygame.sprite.Group()
-    platforms = [] # то, во что мы будем врезаться или опираться
-    enemies = [] # Враги
+    all_sprites = pygame.sprite.Group()
+    platforms = []  # то, во что мы будем врезаться или опираться
+    enemies = []  # Враги
     blanks = []
     other_blocks = []
     bullets = []
@@ -81,34 +81,39 @@ def main():
         for col in row:  # каждый символ
             if col == "-":
                 plat = Platform(x, y)
-                all_sprites.add(plat)
                 platforms.append(plat)
+                all_sprites.add(plat)
             elif col == "U":
                 uka = Uka(x, y)
-                all_sprites.add(uka)
                 enemies.append(uka)
                 enemies_group.add(uka)
+                all_sprites.add(uka)
             elif col == "b":
                 blank = Blank(x, y)
-                all_sprites.add(blank)
                 blanks.append(blank)
+                all_sprites.add(blank)
             elif col == "F":
                 flyling = Flyling(x, y)
-                all_sprites.add(flyling)
                 enemies.append(flyling)
                 enemies_group.add(flyling)
+                all_sprites.add(flyling)
             elif col == "L":
                 lava = Lava(x, y)
-                all_sprites.add(lava)
                 other_blocks.append(lava)
+                all_sprites.add(lava)
             elif col == "S":
                 spikes = Spikes(x, y)
-                all_sprites.add(spikes)
                 other_blocks.append(spikes)
+                all_sprites.add(spikes)
             elif col == "I":
                 ice = Ice(x, y)
-                all_sprites.add(ice)
                 platforms.append(ice)
+                all_sprites.add(ice)
+            elif col == "C":
+                crack = Crackatoo(x, y)
+                all_sprites.add(crack)
+                enemies.append(crack)
+                enemies_group.add(crack)
 
 
             x += PLATFORM_WIDTH  # блоки платформы ставятся на ширине блоков
@@ -154,11 +159,10 @@ def main():
             hero.shot_done = True
         screen.blit(bg, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
 
-
         hero.update(left, right, up, platforms, down, enemies, screen, hp, other_blocks)  # передвижение
         camera.update(hero)
-        enemies_group.update(blanks, platforms)
-        bullets_group.update(enemies, platforms)
+        enemies_group.update(blanks, platforms, (hero.rect.x, hero.rect.y))
+        bullets_group.update(enemies, platforms, bullets)
         for i in all_sprites:
             screen.blit(i.image, camera.apply(i))
         hp.draw(screen)
