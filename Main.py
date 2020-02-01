@@ -6,6 +6,7 @@ from PepeHero import *
 from Platforms import *
 from Enemies import *
 from Boss import *
+from Bullet import *
 import os
 
 # Объявляем переменные
@@ -13,8 +14,8 @@ WIN_WIDTH = 800  # Ширина создаваемого окна
 WIN_HEIGHT = 640  # Высота
 DISPLAY = (WIN_WIDTH, WIN_HEIGHT)  # Группируем ширину и высоту в одну переменную
 BACKGROUND_COLOR = (50, 150, 255)
-PLATFORM_WIDTH = 16
-PLATFORM_HEIGHT = 16
+PLATFORM_WIDTH = 32
+PLATFORM_HEIGHT = 32
 PLATFORM_COLOR = "#FF6262"
 LEVEL = 1
 MAX_WIDTH = 0
@@ -77,9 +78,10 @@ def load_image(name, colorkey=-1):
 def main():
     global LEVEL
     pygame.init()  # Инициация PyGame, обязательная строчка
-    screen = pygame.display.set_mode(DISPLAY)  # Создаем окошко
+    screen = pygame.display.set_mode((0, 0), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.FULLSCREEN)
+    w, h = pygame.display.get_surface().get_size()
     pygame.display.set_caption("Pepe the Frog")  # Пишем в шапку
-    BackGround = Background('data/Background.jpg', [0, 0])
+    BackGround = Background('data/Background.jpg', [0, 0], w, h)
     # будем использовать как фон
     hero = Player(55, 555)
     hp = HitPoints()
@@ -87,13 +89,16 @@ def main():
     # создаем героя по (x,y) координатам
     left = right = up = down = blast = hit = False  # по умолчанию — стоим
     enemies_group = pygame.sprite.Group()
+    lava_group = pygame.sprite.Group()
     bullets_group = pygame.sprite.Group()
     all_sprites = pygame.sprite.Group()
     all_sprites.add(hero)
     boss_group = pygame.sprite.Group()
+    boss_attacks_group = pygame.sprite.Group()
     platforms = []  # то, во что мы будем врезаться или опираться
     enemies = []  # Враги
     blanks = []
+    boss_attacks = []
     other_blocks = []
     bullets = []
     timer = pygame.time.Clock()
@@ -104,6 +109,10 @@ def main():
         for col in row:  # каждый символ
             if col == "G":
                 plat = Platform(x, y, "data/framestiles/tiles/up.png")
+                platforms.append(plat)
+                all_sprites.add(plat)
+            if col == "*":
+                plat = Platform(x, y, "data/framestiles/tiles/up.png", True)
                 platforms.append(plat)
                 all_sprites.add(plat)
             elif col == "/":
@@ -148,7 +157,7 @@ def main():
                 platforms.append(plat)
                 all_sprites.add(plat)
             elif col == ".":
-                plat = Platform(x, y, "data/framestiles/tiles/alonecenter.png")
+                plat = Platform(x, y, "data/framestiles/tiles/alonecentre.png")
                 platforms.append(plat)
                 all_sprites.add(plat)
             elif col == "{":
@@ -197,12 +206,13 @@ def main():
                 lava = Lava(x, y)
                 other_blocks.append(lava)
                 all_sprites.add(lava)
+                lava_group.add(lava)
             elif col == "[":
-                lava = Platform(x - 2, y + 2, "data/framestiles/tiles/lavaleft.png")
+                lava = Platform(x, y, "data/framestiles/tiles/lavaleft.png")
                 other_blocks.append(lava)
                 all_sprites.add(lava)
             elif col == "]":
-                lava = Platform(x - 2, y + 2, "data/framestiles/tiles/lavaright.png")
+                lava = Platform(x, y, "data/framestiles/tiles/lavaright.png")
                 other_blocks.append(lava)
                 all_sprites.add(lava)
             elif col == "S":
@@ -247,7 +257,7 @@ def main():
 
     while 1:  # Основной цикл программы
         for event in pygame.event.get():  # Обрабатываем события
-            if event.type == QUIT:
+            if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
                 raise SystemExit("QUIT")
             if event.type == KEYDOWN and event.key == K_LEFT:
                 left = True
@@ -294,7 +304,10 @@ def main():
 
         hero.update(left, right, up, platforms, down, enemies, screen, hp, other_blocks)  # передвижение
         camera.update(hero)
-        boss_group.update(hero, hp)
+        lava_group.update()
+        tp.update()
+        boss_group.update(hero, hp, enemies, boss_attacks_group, boss_attacks, all_sprites, enemies_group)
+        boss_attacks_group.update(enemies, hero, boss_attacks, hp, enemies_group, all_sprites)
         enemies_group.update(blanks, platforms, [hero.rect.x, hero.rect.y], enemies, enemies_group, all_sprites)
         bullets_group.update(enemies, platforms, bullets)
         for i in all_sprites:

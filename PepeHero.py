@@ -79,12 +79,12 @@ ANIMATION_HIT_LEFT = [('data\pepeframes\hit\pepe molot anim0006.png'),
                    ('data\pepeframes\hit\pepe molot anim0009.png'),
                    ('data\pepeframes\hit\pepe molot anim0010.png'),
                       ('data\pepeframes\hit\pepe molot anim0011.png')]
-MOVE_SPEED = 7
+MOVE_SPEED = 14
 WIDTH = 128
 HEIGHT = 128
 COLOR = "#888888"
-JUMP_POWER = 10
-GRAVITY = 0.35  # Сила, которая будет тянуть нас вниз
+JUMP_POWER = 20
+GRAVITY = 1.2  # Сила, которая будет тянуть нас вниз
 
 
 class Player(sprite.Sprite):
@@ -96,7 +96,7 @@ class Player(sprite.Sprite):
         self.image = Surface((WIDTH, HEIGHT))
         self.image.set_colorkey(Color(COLOR))
         self.image.fill(Color(COLOR))
-        self.rect = Rect(x, y, 82, 82)  # прямоугольный объект
+        self.rect = Rect(x, y, 64, 75)  # прямоугольный объект
         self.yvel = 0  # скорость вертикального перемещения
         self.onGround = False  # На земле ли я?
         self.previosly_move = "Right"
@@ -177,8 +177,6 @@ class Player(sprite.Sprite):
         self.boltAnimStayLeft = pyganim.PygAnimation(boltAnim)
         self.boltAnimStayLeft.play()
 
-
-
     def update(self, left, right, up, platforms, down, enemies, screen, hp, other_blocks):
         if up:
             if self.onGround:  # прыгаем, только когда можем оттолкнуться от земли
@@ -198,6 +196,7 @@ class Player(sprite.Sprite):
                 self.boltAnimJumpLeft.blit(self.image, (0, 0))
             else:
                 self.boltAnimLeft.blit(self.image, (0, 0))
+            self.image.set_colorkey(Color(COLOR))
             self.image.set_colorkey((255, 255, 255))
         if right:
             self.xvel = MOVE_SPEED  # Право = x + n
@@ -219,9 +218,9 @@ class Player(sprite.Sprite):
             if self.block == "ice":
                 while self.xvel == 0:
                     if self.previosly_move == "Left":
-                        self.xvel = -MOVE_SPEED - 5
+                        self.xvel = -MOVE_SPEED - 10
                     else:
-                        self.xvel = MOVE_SPEED + 5
+                        self.xvel = MOVE_SPEED + 10
             if not up:
                 self.image.fill(Color(COLOR))
                 exec(f"self.boltAnimStay{self.previosly_move}.blit(self.image, (0, 0))")
@@ -343,13 +342,6 @@ class Player(sprite.Sprite):
                 if type(ob) == Teleport:
                     return True
 
-    def take_boss_dmg(self, attack_type, hp):
-        if attack_type == "clap":
-            self.hp -= 100
-            hp.dmg += 1
-        elif attack_type == "stomp":
-            self.hp -= 50
-            hp.dmg += 5
 
 class HitPoints:
     def __init__(self):
