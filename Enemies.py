@@ -234,5 +234,9 @@ class Crackatoo(Enemy):
     def chasing(self, coords):
         if self.rect.x <= coords[0]:
             self.rect.x += self.xvel
+            self.image.fill(Color("Red"))
+            self.boltAnimCrackRight.blit(self.image, (0, 0))
         elif self.rect.x > coords[0]:
             self.rect.x -= self.xvel
+            self.image.fill(Color("Red"))
+            self.boltAnimCrackLeft.blit(self.image, (0, 0))
