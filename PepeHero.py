@@ -334,8 +334,6 @@ class Player(sprite.Sprite):
     def immortality(self):
         self.hit_take = False
 
-
-
     def check_portal(self, other_blocks):
         for ob in other_blocks:
             if sprite.collide_rect(self, ob):

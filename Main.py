@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
+# Импортируем все модули проекта
 
-# Импортируем библиотеку pygame
 from Background import *
 from PepeHero import *
 from Platforms import *
@@ -9,7 +8,7 @@ from Boss import *
 from Bullet import *
 import os
 
-# Объявляем переменные
+# Объявляем константы
 WIN_WIDTH = 800  # Ширина создаваемого окна
 WIN_HEIGHT = 640  # Высота
 DISPLAY = (WIN_WIDTH, WIN_HEIGHT)  # Группируем ширину и высоту в одну переменную
@@ -35,9 +34,9 @@ class Camera(object):
 
 
 def camera_configure(camera, target_rect):
-    x, y = target_rect[0], target_rect[1]
-    w, h = camera[2], camera[3]
-    x, y = -x + WIN_WIDTH / 2, -y + WIN_HEIGHT / 2
+    x, y = target_rect[0], target_rect[1]  # координаты игрока
+    w, h = camera[2], camera[3]  # размер окна
+    x, y = -x + WIN_WIDTH / 2, -y + WIN_HEIGHT / 2  # выравниваем камеру по центру
 
     x = min(0, x)  # Не движемся дальше левой границы
     x = max(-(camera.width - WIN_WIDTH), x)  # Не движемся дальше правой границы
@@ -61,8 +60,6 @@ def load_level(filename):
     return list(map(lambda x: x.ljust(max_width, ' '), level_map))
 
 
-
-
 def load_image(name, colorkey=-1):
     fullname = os.path.join('data', name)
     image = pygame.image.load(fullname).convert()
@@ -81,7 +78,7 @@ def main():
     screen = pygame.display.set_mode((0, 0), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.FULLSCREEN)
     w, h = pygame.display.get_surface().get_size()
     pygame.display.set_caption("Pepe the Frog")  # Пишем в шапку
-    BackGround = Background('data/Background.jpg', [0, 0], w, h)
+    background = Background('data/Background.jpg', [0, 0], w, h)
     # будем использовать как фон
     hero = Player(55, 555)
     hp = HitPoints()
@@ -300,7 +297,7 @@ def main():
             all_sprites.add(smash)
             hero.hit_done = True
         screen.fill([255, 255, 255])
-        screen.blit(BackGround.image, BackGround.rect)
+        screen.blit(background.image, background.rect)
 
         hero.update(left, right, up, platforms, down, enemies, screen, hp, other_blocks)  # передвижение
         camera.update(hero)
