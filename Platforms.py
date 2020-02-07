@@ -5,6 +5,8 @@ from pygame import *
 import pygame
 import pyganim
 
+from Animation import *
+
 PLATFORM_WIDTH = 32
 PLATFORM_HEIGHT = 32
 PLATFORM_COLOR = "#FF6262"
@@ -27,8 +29,8 @@ ANIMATION_TELEPORT = [('data\\framestiles\portal anim\\finish-portal anim0000.pn
 class Platform(sprite.Sprite):
     def __init__(self, x, y, filename, invisible = False):
         sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(image.load(filename), (64, 64))
-        self.rect = Rect(x, y, PLATFORM_WIDTH, PLATFORM_HEIGHT)
+        self.image = pygame.transform.scale(image.load(filename).convert_alpha(), (64, 64))
+        self.rect = Rect(x+16, y+16, PLATFORM_WIDTH, PLATFORM_HEIGHT)
         if invisible:
             self.image = Surface((32, 32))
             self.image.fill((50, 150, 255))

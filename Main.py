@@ -1,12 +1,14 @@
 # Импортируем все модули проекта
 
+import os
+
 from Background import *
 from PepeHero import *
 from Platforms import *
 from Enemies import *
 from Boss import *
 from Bullet import *
-import os
+from Animation import *
 
 # Объявляем константы
 WIN_WIDTH = 800  # Ширина создаваемого окна
@@ -75,7 +77,7 @@ def load_image(name, colorkey=-1):
 def main():
     global LEVEL
     pygame.init()  # Инициация PyGame, обязательная строчка
-    screen = pygame.display.set_mode((0, 0), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.FULLSCREEN)
+    screen = pygame.display.set_mode((1280, 720))
     w, h = pygame.display.get_surface().get_size()
     pygame.display.set_caption("Pepe the Frog")  # Пишем в шапку
     background = Background('data/Background.jpg', [0, 0], w, h)
@@ -310,7 +312,8 @@ def main():
         for i in all_sprites:
             screen.blit(i.image, camera.apply(i))
         hp.draw(screen)
-        pygame.display.update()  # обновление и вывод всех изменений на экран
+        pygame.draw.rect(screen, pygame.Color('red'), hero.rect)
+        pygame.display.flip()  # обновление и вывод всех изменений на экран
         timer.tick(60)
 
 

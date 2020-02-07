@@ -58,7 +58,7 @@ class Blast(sprite.Sprite):
         self.start_x = x
         self.start_y = y
         self.image = pygame.transform.scale(image.load("data\enemyframes\\fireball.png"), (sizex, sizey))
-        self.rect = Rect(x, y, 128, 128)
+        self.rect = Rect(x+60, y+60, 8, 8)
         self.dmg = 10
 
     def update(self, blanks, platforms, hero_coords, enemies, enemies_group, all_sprites):

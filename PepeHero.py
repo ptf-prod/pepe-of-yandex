@@ -1,84 +1,10 @@
+import pyganim
+
 from Main import *
 from Enemies import *
 from Bullet import *
-import pyganim
-
 
 ANIMATION_DELAY = 100
-ANIMATION_RIGHT = [('data\pepeframes\\running\\runnin anim0000.png'),
-                   ('data\pepeframes\\running\\runnin anim0001.png'),
-                   ('data\pepeframes\\running\\runnin anim0002.png'),
-                   ('data\pepeframes\\running\\runnin anim0003.png'),
-                   ('data\pepeframes\\running\\runnin anim0004.png'),
-                   ('data\pepeframes\\running\\runnin anim0005.png'),
-                   ('data\pepeframes\\running\\runnin anim0006.png'),
-                   ('data\pepeframes\\running\\runnin anim0007.png')]
-ANIMATION_LEFT = [('data\pepeframes\\running\\runnin anim0008.png'),
-                   ('data\pepeframes\\running\\runnin anim0009.png'),
-                   ('data\pepeframes\\running\\runnin anim0010.png'),
-                   ('data\pepeframes\\running\\runnin anim0011.png'),
-                   ('data\pepeframes\\running\\runnin anim0012.png'),
-                   ('data\pepeframes\\running\\runnin anim0013.png'),
-                   ('data\pepeframes\\running\\runnin anim0014.png'),
-                   ('data\pepeframes\\running\\runnin anim0015.png')]
-ANIMATION_JUMP_RIGHT = [('data\pepeframes\jump\jump-anim0000.png'),
-                   ('data\pepeframes\jump\jump-anim0001.png'),
-                   ('data\pepeframes\jump\jump-anim0002.png'),
-                   ('data\pepeframes\jump\jump-anim0003.png'),
-                   ('data\pepeframes\jump\jump-anim0004.png'),
-                   ('data\pepeframes\jump\jump-anim0005.png'),
-                   ('data\pepeframes\jump\jump-anim0006.png'),
-                   ('data\pepeframes\jump\jump-anim0007.png'),
-                   ('data\pepeframes\jump\jump-anim0008.png'),
-                   ('data\pepeframes\jump\jump-anim0009.png')]
-ANIMATION_JUMP_LEFT =  [('data\pepeframes\jump\jump-anim0010.png'),
-                   ('data\pepeframes\jump\jump-anim0011.png'),
-                   ('data\pepeframes\jump\jump-anim0012.png'),
-                   ('data\pepeframes\jump\jump-anim0013.png'),
-                   ('data\pepeframes\jump\jump-anim0014.png'),
-                   ('data\pepeframes\jump\jump-anim0015.png'),
-                   ('data\pepeframes\jump\jump-anim0016.png'),
-                   ('data\pepeframes\jump\jump-anim0017.png'),
-                   ('data\pepeframes\jump\jump-anim0018.png'),
-                   ('data\pepeframes\jump\jump-anim0019.png')]
-ANIMATION_STAY_RIGHT = [('data\pepeframes\idle\idle anim0000.png'),
-                   ('data\pepeframes\idle\idle anim0001.png'),
-                   ('data\pepeframes\idle\idle anim0002.png'),
-                   ('data\pepeframes\idle\idle anim0003.png'),
-                   ('data\pepeframes\idle\idle anim0004.png')]
-ANIMATION_STAY_LEFT = [('data\pepeframes\idle\idle anim0005.png'),
-                   ('data\pepeframes\idle\idle anim0006.png'),
-                   ('data\pepeframes\idle\idle anim0007.png'),
-                   ('data\pepeframes\idle\idle anim0008.png'),
-                   ('data\pepeframes\idle\idle anim0009.png')]
-ANIMATION_GUN_RIGHT = [('data\pepeframes\gun\gun0000.png'),
-                   ('data\pepeframes\gun\gun0001.png'),
-                   ('data\pepeframes\gun\gun0002.png'),
-                   ('data\pepeframes\gun\gun0003.png')]
-ANIMATION_GUN_LEFT = [('data\pepeframes\gun\gun0004.png'),
-                   ('data\pepeframes\gun\gun0005.png'),
-                   ('data\pepeframes\gun\gun0006.png'),
-                   ('data\pepeframes\gun\gun0007.png')]
-ANIMATION_SHOOT_RIGHT = [('data\pepeframes\shoot\pepe shoot0000.png'),
-                   ('data\pepeframes\shoot\pepe shoot0001.png'),
-                   ('data\pepeframes\shoot\pepe shoot0002.png'),
-                   ('data\pepeframes\shoot\pepe shoot0003.png')]
-ANIMATION_SHOOT_LEFT = [('data\pepeframes\shoot\pepe shoot0004.png'),
-                   ('data\pepeframes\shoot\pepe shoot0005.png'),
-                   ('data\pepeframes\shoot\pepe shoot0006.png'),
-                   ('data\pepeframes\shoot\pepe shoot0007.png')]
-ANIMATION_HIT_RIGHT = [('data\pepeframes\hit\pepe molot anim0000.png'),
-                   ('data\pepeframes\hit\pepe molot anim0001.png'),
-                   ('data\pepeframes\hit\pepe molot anim0002.png'),
-                   ('data\pepeframes\hit\pepe molot anim0003.png'),
-                   ('data\pepeframes\hit\pepe molot anim0004.png'),
-                       ('data\pepeframes\hit\pepe molot anim0005.png')]
-ANIMATION_HIT_LEFT = [('data\pepeframes\hit\pepe molot anim0006.png'),
-                   ('data\pepeframes\hit\pepe molot anim0007.png'),
-                   ('data\pepeframes\hit\pepe molot anim0008.png'),
-                   ('data\pepeframes\hit\pepe molot anim0009.png'),
-                   ('data\pepeframes\hit\pepe molot anim0010.png'),
-                      ('data\pepeframes\hit\pepe molot anim0011.png')]
 MOVE_SPEED = 14
 WIDTH = 128
 HEIGHT = 128
@@ -96,7 +22,7 @@ class Player(sprite.Sprite):
         self.image = Surface((WIDTH, HEIGHT))
         self.image.set_colorkey(Color(COLOR))
         self.image.fill(Color(COLOR))
-        self.rect = Rect(x, y, 64, 75)  # прямоугольный объект
+        self.rect = Rect(x+48, y+32, 32, 64)  # прямоугольный объект
         self.yvel = 0  # скорость вертикального перемещения
         self.onGround = False  # На земле ли я?
         self.previosly_move = "Right"
@@ -108,74 +34,44 @@ class Player(sprite.Sprite):
         self.reload_time = 0
         self.hit_delay_time = 0
         self.burn_time = 0
-        self.previosly_block = ""
+        self.previous_block = ""
         self.block = ""
-        boltAnim = []
-        for anim in ANIMATION_RIGHT:
-            boltAnim.append((pygame.transform.scale(image.load(anim), (128, 128)), ANIMATION_DELAY))
-        self.boltAnimRight = pyganim.PygAnimation(boltAnim)
-        self.boltAnimRight.play()
-        boltAnim = []
-        for anim in ANIMATION_LEFT:
-            boltAnim.append((pygame.transform.scale(image.load(anim), (128, 128)), ANIMATION_DELAY))
-        self.boltAnimLeft = pyganim.PygAnimation(boltAnim)
-        self.boltAnimLeft.play()
+        self.boltAnimRight = load_animation(0, 8, ANIMATION_DELAY, 'data', 'pepeframes', 'running',
+                                            'runnin anim{:04d}.png')
 
-        boltAnim = []
-        for anim in ANIMATION_JUMP_RIGHT:
-            boltAnim.append((pygame.transform.scale(image.load(anim), (128, 128)), ANIMATION_DELAY * 1.1))
-        self.boltAnimJumpRight = pyganim.PygAnimation(boltAnim)
-        self.boltAnimJumpRight.play()
-        boltAnim = []
-        for anim in ANIMATION_JUMP_LEFT:
-            boltAnim.append((pygame.transform.scale(image.load(anim), (128, 128)), ANIMATION_DELAY * 1.1))
-        self.boltAnimJumpLeft = pyganim.PygAnimation(boltAnim)
-        self.boltAnimJumpLeft.play()
+        self.boltAnimLeft = load_animation(8, 16, ANIMATION_DELAY, 'data', 'pepeframes', 'running',
+                                           'runnin anim{:04d}.png')
 
-        boltAnim = []
-        for anim in ANIMATION_GUN_LEFT:
-            boltAnim.append((pygame.transform.scale(image.load(anim), (128, 128)), ANIMATION_DELAY))
-        self.boltAnimGunLeft = pyganim.PygAnimation(boltAnim)
-        self.boltAnimGunLeft.play()
-        boltAnim = []
-        for anim in ANIMATION_GUN_RIGHT:
-            boltAnim.append((pygame.transform.scale(image.load(anim), (128, 128)), ANIMATION_DELAY))
-        self.boltAnimGunRight = pyganim.PygAnimation(boltAnim)
-        self.boltAnimGunRight.play()
+        self.boltAnimJumpRight = load_animation(0, 10, ANIMATION_DELAY, 'data', 'pepeframes', 'jump',
+                                                'jump-anim{:04d}.png')
 
-        boltAnim = []
-        for anim in ANIMATION_HIT_RIGHT:
-            boltAnim.append((pygame.transform.scale(image.load(anim), (128, 128)), ANIMATION_DELAY))
-        self.boltAnimHitRight = pyganim.PygAnimation(boltAnim)
-        self.boltAnimHitRight.play()
-        boltAnim = []
-        for anim in ANIMATION_HIT_LEFT:
-            boltAnim.append((pygame.transform.scale(image.load(anim), (128, 128)), ANIMATION_DELAY))
-        self.boltAnimHitLeft = pyganim.PygAnimation(boltAnim)
-        self.boltAnimHitLeft.play()
+        self.boltAnimJumpLeft = load_animation(10, 20, ANIMATION_DELAY, 'data', 'pepeframes', 'jump',
+                                               'jump-anim{:04d}.png')
 
-        boltAnim = []
-        for anim in ANIMATION_SHOOT_RIGHT:
-            boltAnim.append((pygame.transform.scale(image.load(anim), (128, 128)), ANIMATION_DELAY))
-        self.boltAnimShootRight = pyganim.PygAnimation(boltAnim)
-        self.boltAnimShootRight.play()
-        boltAnim = []
-        for anim in ANIMATION_SHOOT_LEFT:
-            boltAnim.append((pygame.transform.scale(image.load(anim), (128, 128)), ANIMATION_DELAY))
-        self.boltAnimShootLeft = pyganim.PygAnimation(boltAnim)
-        self.boltAnimShootLeft.play()
+        self.boltAnimGunLeft = load_animation(4, 8, ANIMATION_DELAY, 'data', 'pepeframes', 'gun',
+                                              'gun{:04d}.png')
 
-        boltAnim = []
-        for anim in ANIMATION_STAY_RIGHT:
-            boltAnim.append((pygame.transform.scale(image.load(anim), (128, 128)), ANIMATION_DELAY * 10))
-        self.boltAnimStayRight = pyganim.PygAnimation(boltAnim)
-        self.boltAnimStayRight.play()
+        self.boltAnimGunRight = load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'gun',
+                                               'gun{:04d}.png')
+
+        self.boltAnimHitRight = load_animation(0, 6, ANIMATION_DELAY, 'data', 'pepeframes', 'hit',
+                                               'pepe molot anim{:04d}.png')
+
+        self.boltAnimHitLeft = load_animation(6, 12, ANIMATION_DELAY, 'data', 'pepeframes', 'hit',
+                                              'pepe molot anim{:04d}.png')
+
+        self.boltAnimShootRight = load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'shoot',
+                                                 'pepe shoot{:04d}.png')
+
+        self.boltAnimShootLeft = load_animation(4, 8, ANIMATION_DELAY, 'data', 'pepeframes', 'shoot',
+                                                'pepe shoot{:04d}.png')
+
+        self.boltAnimStayRight = load_animation(0, 5, ANIMATION_DELAY, 'data', 'pepeframes', 'idle',
+                                                'idle anim{:04d}.png')
         self.boltAnimStayRight.blit(self.image, (0, 0))  # По-умолчанию, стоим
-        boltAnim = []
-        for anim in ANIMATION_STAY_LEFT:
-            boltAnim.append((pygame.transform.scale(image.load(anim), (128, 128)), ANIMATION_DELAY * 10))
-        self.boltAnimStayLeft = pyganim.PygAnimation(boltAnim)
-        self.boltAnimStayLeft.play()
+
+        self.boltAnimStayLeft = load_animation(5, 10, ANIMATION_DELAY, 'data', 'pepeframes', 'idle',
+                                               'idle anim{:04d}.png')
 
     def update(self, left, right, up, platforms, down, enemies, screen, hp, other_blocks):
         if up:
@@ -256,13 +152,13 @@ class Player(sprite.Sprite):
                 self.hit_done = False
                 self.hit_delay_time = 0
 
-        if self.previosly_block == "lava" and self.block != "lava":
+        if self.previous_block == "lava" and self.block != "lava":
             self.hp -= 0.1
             hp.dmg += 0.1
             self.burn_time += 1
             if self.burn_time == 200 and self.block != "lava":
                 self.burn_time = 0
-                self.previosly_block = ""
+                self.previous_block = ""
 
     def collide(self, xvel, yvel, platforms, enemies, hp, other_blocks):
         for p in platforms:
@@ -283,7 +179,7 @@ class Player(sprite.Sprite):
                     self.rect.top = p.rect.bottom  # то не движется вверх
                     self.yvel = 0  # и энергия прыжка пропадает
                 if type(p) == Ice:
-                    self.previosly_block = self.block
+                    self.previous_block = self.block
                     self.block = "ice"
 
         if self.hit_take is True:
@@ -316,7 +212,7 @@ class Player(sprite.Sprite):
         elif type(enemy) == Lava:
             self.hp -= 0.05
             hp.dmg += 0.05
-            self.previosly_block = "lava"
+            self.previous_block = "lava"
             self.block = "lava"
         elif type(enemy) == Spikes:
             self.hp -= 15
