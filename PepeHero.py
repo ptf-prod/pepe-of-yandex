@@ -39,17 +39,17 @@ class Player(sprite.Sprite):
         self.boltAnimRight = load_animation(0, 8, ANIMATION_DELAY, 'data', 'pepeframes', 'running',
                                             'runnin anim{:04d}.png')
 
-        self.boltAnimLeft = load_animation(8, 16, ANIMATION_DELAY, 'data', 'pepeframes', 'running',
-                                           'runnin anim{:04d}.png')
+        self.boltAnimLeft = load_animation(0, 8, ANIMATION_DELAY, 'data', 'pepeframes', 'running',
+                                           'runnin anim{:04d}.png', flip=True)
 
         self.boltAnimJumpRight = load_animation(0, 10, ANIMATION_DELAY, 'data', 'pepeframes', 'jump',
                                                 'jump-anim{:04d}.png')
 
-        self.boltAnimJumpLeft = load_animation(10, 20, ANIMATION_DELAY, 'data', 'pepeframes', 'jump',
-                                               'jump-anim{:04d}.png')
+        self.boltAnimJumpLeft = load_animation(0, 10, ANIMATION_DELAY, 'data', 'pepeframes', 'jump',
+                                               'jump-anim{:04d}.png', flip=True)
 
-        self.boltAnimGunLeft = load_animation(4, 8, ANIMATION_DELAY, 'data', 'pepeframes', 'gun',
-                                              'gun{:04d}.png')
+        self.boltAnimGunLeft = load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'gun',
+                                              'gun{:04d}.png', flip=True)
 
         self.boltAnimGunRight = load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'gun',
                                                'gun{:04d}.png')
@@ -57,21 +57,22 @@ class Player(sprite.Sprite):
         self.boltAnimHitRight = load_animation(0, 6, ANIMATION_DELAY, 'data', 'pepeframes', 'hit',
                                                'pepe molot anim{:04d}.png')
 
-        self.boltAnimHitLeft = load_animation(6, 12, ANIMATION_DELAY, 'data', 'pepeframes', 'hit',
-                                              'pepe molot anim{:04d}.png')
+        self.boltAnimHitLeft = load_animation(0, 6, ANIMATION_DELAY, 'data', 'pepeframes', 'hit',
+                                              'pepe molot anim{:04d}.png', flip=True)
 
         self.boltAnimShootRight = load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'shoot',
                                                  'pepe shoot{:04d}.png')
 
-        self.boltAnimShootLeft = load_animation(4, 8, ANIMATION_DELAY, 'data', 'pepeframes', 'shoot',
-                                                'pepe shoot{:04d}.png')
+        self.boltAnimShootLeft = load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'shoot',
+                                                'pepe shoot{:04d}.png', flip=True)
 
         self.boltAnimStayRight = load_animation(0, 5, ANIMATION_DELAY, 'data', 'pepeframes', 'idle',
                                                 'idle anim{:04d}.png')
+
         self.boltAnimStayRight.blit(self.image, (0, 0))  # По-умолчанию, стоим
 
-        self.boltAnimStayLeft = load_animation(5, 10, ANIMATION_DELAY, 'data', 'pepeframes', 'idle',
-                                               'idle anim{:04d}.png')
+        self.boltAnimStayLeft = load_animation(0, 5, ANIMATION_DELAY, 'data', 'pepeframes', 'idle',
+                                               'idle anim{:04d}.png', flip=True)
 
     def update(self, left, right, up, platforms, down, enemies, screen, hp, other_blocks):
         if up:
@@ -93,7 +94,6 @@ class Player(sprite.Sprite):
             else:
                 self.boltAnimLeft.blit(self.image, (0, 0))
             self.image.set_colorkey(Color(COLOR))
-            self.image.set_colorkey((255, 255, 255))
         if right:
             self.xvel = MOVE_SPEED  # Право = x + n
             self.previosly_move = "Right"
