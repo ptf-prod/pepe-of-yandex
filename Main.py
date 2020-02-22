@@ -111,7 +111,7 @@ def main():
                 platforms.append(plat)
                 all_sprites.add(plat)
             if col == "*":
-                plat = Platform(x, y, "data/framestiles/tiles/up.png", True)
+                plat = Platform(x, y, None)
                 platforms.append(plat)
                 all_sprites.add(plat)
             elif col == "/":

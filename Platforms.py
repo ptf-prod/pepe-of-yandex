@@ -12,38 +12,43 @@ PLATFORM_HEIGHT = 32
 PLATFORM_COLOR = "#FF6262"
 ANIMATION_DELAY = 100
 ANIMATION_LAVA = [('data\\framestiles\lava anim\lava anim0000.png'),
-                   ('data\\framestiles\lava anim\lava anim0001.png'),
-                   ('data\\framestiles\lava anim\lava anim0002.png'),
-                   ('data\\framestiles\lava anim\lava anim0003.png'),
-                   ('data\\framestiles\lava anim\lava anim0004.png')]
-
+                  ('data\\framestiles\lava anim\lava anim0001.png'),
+                  ('data\\framestiles\lava anim\lava anim0002.png'),
+                  ('data\\framestiles\lava anim\lava anim0003.png'),
+                  ('data\\framestiles\lava anim\lava anim0004.png')]
 
 ANIMATION_TELEPORT = [('data\\framestiles\portal anim\\finish-portal anim0000.png'),
-                    ('data\\framestiles\portal anim\\finish-portal anim0001.png'),
-                    ('data\\framestiles\portal anim\\finish-portal anim0002.png'),
-                    ('data\\framestiles\portal anim\\finish-portal anim0003.png'),
-                    ('data\\framestiles\portal anim\\finish-portal anim0004.png'),
-                    ('data\\framestiles\portal anim\\finish-portal anim0005.png'),
-                    ('data\\framestiles\portal anim\\finish-portal anim0006.png')]
- 
+                      ('data\\framestiles\portal anim\\finish-portal anim0001.png'),
+                      ('data\\framestiles\portal anim\\finish-portal anim0002.png'),
+                      ('data\\framestiles\portal anim\\finish-portal anim0003.png'),
+                      ('data\\framestiles\portal anim\\finish-portal anim0004.png'),
+                      ('data\\framestiles\portal anim\\finish-portal anim0005.png'),
+                      ('data\\framestiles\portal anim\\finish-portal anim0006.png')]
+
+
 class Platform(sprite.Sprite):
-    def __init__(self, x, y, filename, invisible = False):
+    WIDTH = 32
+    HEIGHT = 32
+    WIDTH_2 = WIDTH // 2
+    HEIGHT_4 = HEIGHT // 4
+
+    def __init__(self, x, y, filename):
         sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(image.load(filename).convert_alpha(), (64, 64))
-        self.rect = Rect(x+16, y+16, PLATFORM_WIDTH, PLATFORM_HEIGHT)
-        if invisible:
-            self.image = Surface((32, 32))
-            self.image.fill((50, 150, 255))
+        if filename is not None:
+            self.image = pygame.transform.scale(image.load(filename).convert_alpha(), (64, 64))
+        else:
+            self.image = Surface((Platform.WIDTH, Platform.HEIGHT))
+            # self.image.fill((50, 150, 255))
             self.image.set_alpha(0)
+        self.rect = Rect(x, y, Platform.WIDTH * 2, Platform.HEIGHT * 2)
+        self.hitbox = pygame.Rect(x + PLATFORM_WIDTH // 2, y + PLATFORM_HEIGHT // 2,
+                                  PLATFORM_WIDTH, PLATFORM_HEIGHT)
 
 
-class Blank(sprite.Sprite):
+class Blank(Platform):
     def __init__(self, x, y):
-        sprite.Sprite.__init__(self)
-        self.image = Surface((32, 32))
-        self.image.fill((50, 150, 255))
-        self.image.set_alpha(0)
-        self.rect = Rect(x, y, PLATFORM_WIDTH, PLATFORM_HEIGHT)
+        super().__init__(x, y, None)
+
 
 class Lava(sprite.Sprite):
     def __init__(self, x, y):
@@ -62,6 +67,7 @@ class Lava(sprite.Sprite):
     def update(self, *args):
         self.image.fill(Color("White"))
         self.boltAnimLava.blit(self.image, (0, 0))
+
 
 class Spikes(Platform):
     def __init__(self, x, y, filename):

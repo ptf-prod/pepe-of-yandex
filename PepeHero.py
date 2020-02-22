@@ -22,7 +22,7 @@ class Player(sprite.Sprite):
         self.image = Surface((WIDTH, HEIGHT))
         self.image.set_colorkey(Color(COLOR))
         self.image.fill(Color(COLOR))
-        self.rect = Rect(x+48, y+32, 32, 64)  # прямоугольный объект
+        self.rect = Rect(x, y, WIDTH, HEIGHT)  # прямоугольный объект
         self.yvel = 0  # скорость вертикального перемещения
         self.onGround = False  # На земле ли я?
         self.previosly_move = "Right"
@@ -73,6 +73,9 @@ class Player(sprite.Sprite):
 
         self.boltAnimStayLeft = load_animation(0, 5, ANIMATION_DELAY, 'data', 'pepeframes', 'idle',
                                                'idle anim{:04d}.png', flip=True)
+
+        self.hitbox = pygame.Rect(x + WIDTH * 3 // 8, y + HEIGHT * 7 // 32,
+                                  WIDTH // 4, HEIGHT // 2)
 
     def update(self, left, right, up, platforms, down, enemies, screen, hp, other_blocks):
         if up:
@@ -125,9 +128,11 @@ class Player(sprite.Sprite):
 
         self.onGround = False
         self.rect.y += self.yvel
+        self.hitbox.y += self.yvel
         self.collide(0, self.yvel, platforms, enemies, hp, other_blocks)
 
         self.rect.x += self.xvel  # переносим свои положение на xvel
+        self.hitbox.x += self.xvel  # переносим свои положение на xvel
         self.collide(self.xvel, 0, platforms, enemies, hp, other_blocks)
 
         if self.hit_take is False:
@@ -162,21 +167,29 @@ class Player(sprite.Sprite):
 
     def collide(self, xvel, yvel, platforms, enemies, hp, other_blocks):
         for p in platforms:
-            if sprite.collide_rect(self, p):  # если есть пересечение платформы с игроком
+            if self.hitbox.colliderect(p.hitbox):  # если есть пересечение платформы с игроком
                 self.block = "platform"
                 if xvel > 0:  # если движется вправо
-                    self.rect.right = p.rect.left  # то не движется вправо
+                    t = self.hitbox.x
+                    self.hitbox.right = p.hitbox.left  # то не движется вправо
+                    self.rect.x += self.hitbox.x - t
 
                 if xvel < 0:  # если движется влево
-                    self.rect.left = p.rect.right  # то не движется влево
+                    t = self.hitbox.x
+                    self.hitbox.left = p.hitbox.right  # то не движется вправо
+                    self.rect.x += self.hitbox.x - t
 
                 if yvel > 0:  # если падает вниз
-                    self.rect.bottom = p.rect.top  # то не падает вниз
+                    t = self.hitbox.y
+                    self.hitbox.bottom = p.hitbox.top  # то не падает вниз
+                    self.rect.y += self.hitbox.y - t
                     self.onGround = True  # и становится на что-то твердое
                     self.yvel = 0  # и энергия падения пропадает
 
                 if yvel < 0:  # если движется вверх
-                    self.rect.top = p.rect.bottom  # то не движется вверх
+                    t = self.hitbox.y
+                    self.hitbox.top = p.hitbox.bottom  # то не движется вверх
+                    self.rect.y += self.hitbox.y - t
                     self.yvel = 0  # и энергия прыжка пропадает
                 if type(p) == Ice:
                     self.previous_block = self.block
@@ -235,6 +248,8 @@ class Player(sprite.Sprite):
             if sprite.collide_rect(self, ob):
                 if type(ob) == Teleport:
                     return True
+
+
 
 
 class HitPoints:
