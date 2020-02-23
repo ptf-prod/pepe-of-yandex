@@ -25,6 +25,7 @@ ANIMATION_TELEPORT = [('data\\framestiles\portal anim\\finish-portal anim0000.pn
                       ('data\\framestiles\portal anim\\finish-portal anim0005.png'),
                       ('data\\framestiles\portal anim\\finish-portal anim0006.png')]
 
+tiles_textures = {}
 
 class Platform(sprite.Sprite):
     WIDTH = 32
@@ -35,10 +36,12 @@ class Platform(sprite.Sprite):
     def __init__(self, x, y, filename):
         sprite.Sprite.__init__(self)
         if filename is not None:
-            self.image = pygame.transform.scale(image.load(filename).convert_alpha(), (64, 64))
+            if filename not in tiles_textures:
+                tiles_textures[filename] = \
+                    pygame.transform.scale(image.load(filename).convert_alpha(), (64, 64))
+            self.image = tiles_textures[filename]
         else:
             self.image = Surface((Platform.WIDTH, Platform.HEIGHT))
-            # self.image.fill((50, 150, 255))
             self.image.set_alpha(0)
         self.rect = Rect(x, y, Platform.WIDTH * 2, Platform.HEIGHT * 2)
         self.hitbox = pygame.Rect(x + PLATFORM_WIDTH // 2, y + PLATFORM_HEIGHT // 2,
