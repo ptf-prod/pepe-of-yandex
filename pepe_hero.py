@@ -1,8 +1,8 @@
 import pyganim
 
-from Main import *
-from Enemies import *
-from Bullet import *
+from main import *
+from enemies import *
+from bullet import *
 
 ANIMATION_DELAY = 100
 MOVE_SPEED = 14

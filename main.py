@@ -2,13 +2,13 @@
 
 import os
 
-from Background import *
-from PepeHero import *
-from Platforms import *
-from Enemies import *
-from Boss import *
-from Bullet import *
-from Animation import *
+from background import *
+from pepe_hero import *
+from platforms import *
+from enemies import *
+from boss import *
+from bullet import *
+from animation import *
 
 draw_hitboxes = True
 draw_rects = False

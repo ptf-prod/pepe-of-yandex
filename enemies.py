@@ -1,7 +1,7 @@
 from pygame import *
 import pygame
-from Platforms import *
-from Bullet import *
+from platforms import *
+from bullet import *
 
 ANIMATION_UKA_RUN = [('data\enemyframes\monkeyrunning\manky runnin0000.png'),
                      ('data\enemyframes\monkeyrunning\manky runnin0001.png'),

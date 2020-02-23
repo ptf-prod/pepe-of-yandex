@@ -1,7 +1,7 @@
 from pygame import *
 import pygame
-from Platforms import *
-import Bullet
+from platforms import *
+import bullet
 
 ANIMATION_DELAY = 100
 
@@ -237,7 +237,7 @@ class BossHit(sprite.Sprite):
             self.image = Surface((64, 64))
             self.rect = Rect(x + 64, y + 256, 256, 64)  # прямоугольный объект
             for r in range(10):
-                boss_blast = Bullet.Blast(self.rect.x, self.rect.y - 64, 256, 256)
+                boss_blast = bullet.Blast(self.rect.x, self.rect.y - 64, 256, 256)
                 enemies.append(boss_blast)
                 enemies_group.add(boss_blast)
                 all_sprites.add(boss_blast)

@@ -5,7 +5,7 @@ from pygame import *
 import pygame
 import pyganim
 
-from Animation import *
+from animation import *
 
 PLATFORM_WIDTH = 32
 PLATFORM_HEIGHT = 32
