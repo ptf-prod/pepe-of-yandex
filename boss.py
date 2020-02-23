@@ -5,40 +5,40 @@ import bullet
 
 ANIMATION_DELAY = 100
 
-ANIMATION_CLAP = [('data\\bossframes\\bossattack3\\boss attack30000.png'),
-                     ('data\\bossframes\\bossattack3\\boss attack30001.png'),
-                     ('data\\bossframes\\bossattack3\\boss attack30002.png'),
-                     ('data\\bossframes\\bossattack3\\boss attack30003.png'),
-                     ('data\\bossframes\\bossattack3\\boss attack30004.png'),
-                     ('data\\bossframes\\bossattack3\\boss attack30005.png'),
-                     ('data\\bossframes\\bossattack3\\boss attack30006.png')]
+ANIMATION_CLAP = ['data/bossframes/bossattack3/boss attack30000.png',
+                  'data/bossframes/bossattack3/boss attack30001.png',
+                  'data/bossframes/bossattack3/boss attack30002.png',
+                  'data/bossframes/bossattack3/boss attack30003.png',
+                  'data/bossframes/bossattack3/boss attack30004.png',
+                  'data/bossframes/bossattack3/boss attack30005.png',
+                  'data/bossframes/bossattack3/boss attack30006.png']
 
-ANIMATION_STOMP = [('data\\bossframes\\bossattack2\\boss attack20000.png'),
-                     ('data\\bossframes\\bossattack2\\boss attack20001.png'),
-                     ('data\\bossframes\\bossattack2\\boss attack20002.png'),
-                     ('data\\bossframes\\bossattack2\\boss attack20003.png'),
-                     ('data\\bossframes\\bossattack2\\boss attack20004.png'),
-                     ('data\\bossframes\\bossattack2\\boss attack20005.png'),
-                     ('data\\bossframes\\bossattack2\\boss attack20006.png'),
-                     ('data\\bossframes\\bossattack2\\boss attack20007.png'),
-                     ('data\\bossframes\\bossattack2\\boss attack20008.png')]
+ANIMATION_STOMP = ['data/bossframes/bossattack2/boss attack20000.png',
+                   'data/bossframes/bossattack2/boss attack20001.png',
+                   'data/bossframes/bossattack2/boss attack20002.png',
+                   'data/bossframes/bossattack2/boss attack20003.png',
+                   'data/bossframes/bossattack2/boss attack20004.png',
+                   'data/bossframes/bossattack2/boss attack20005.png',
+                   'data/bossframes/bossattack2/boss attack20006.png',
+                   'data/bossframes/bossattack2/boss attack20007.png',
+                   'data/bossframes/bossattack2/boss attack20008.png']
 
-ANIMATION_BLAST = [('data\\bossframes\\bossattack1\\boss attack10000.png'),
-                     ('data\\bossframes\\bossattack1\\boss attack10001.png'),
-                     ('data\\bossframes\\bossattack1\\boss attack10002.png'),
-                     ('data\\bossframes\\bossattack1\\boss attack10003.png'),
-                     ('data\\bossframes\\bossattack1\\boss attack10004.png'),
-                     ('data\\bossframes\\bossattack1\\boss attack10005.png'),
-                     ('data\\bossframes\\bossattack1\\boss attack10006.png')]
+ANIMATION_BLAST = ['data/bossframes/bossattack1/boss attack10000.png',
+                   'data/bossframes/bossattack1/boss attack10001.png',
+                   'data/bossframes/bossattack1/boss attack10002.png',
+                   'data/bossframes/bossattack1/boss attack10003.png',
+                   'data/bossframes/bossattack1/boss attack10004.png',
+                   'data/bossframes/bossattack1/boss attack10005.png',
+                   'data/bossframes/bossattack1/boss attack10006.png']
 
-ANIMATION_WALK = [('data\\bossframes\\bosswalk\\boss walk0000.png'),
-                     ('data\\bossframes\\bosswalk\\boss walk0001.png'),
-                     ('data\\bossframes\\bosswalk\\boss walk0002.png'),
-                     ('data\\bossframes\\bosswalk\\boss walk0003.png'),
-                     ('data\\bossframes\\bosswalk\\boss walk0004.png'),
-                     ('data\\bossframes\\bosswalk\\boss walk0005.png'),
-                     ('data\\bossframes\\bosswalk\\boss walk0006.png'),
-                     ('data\\bossframes\\bosswalk\\boss walk0007.png')]
+ANIMATION_WALK = ['data/bossframes/bosswalk/boss walk0000.png',
+                  'data/bossframes/bosswalk/boss walk0001.png',
+                  'data/bossframes/bosswalk/boss walk0002.png',
+                  'data/bossframes/bosswalk/boss walk0003.png',
+                  'data/bossframes/bosswalk/boss walk0004.png',
+                  'data/bossframes/bosswalk/boss walk0005.png',
+                  'data/bossframes/bosswalk/boss walk0006.png',
+                  'data/bossframes/bosswalk/boss walk0007.png']
 
 
 class Boss(sprite.Sprite):
@@ -60,64 +60,73 @@ class Boss(sprite.Sprite):
         self.clap = False
         self.stomp = False
         self.blast = False
-        boltAnim = []
+        bolt_anim = []
         for anim in ANIMATION_WALK:
-            boltAnim.append((pygame.transform.flip(pygame.transform.scale(image.load(anim), (512, 512)), True, False),
+            bolt_anim.append((pygame.transform.flip(
+                pygame.transform.scale(image.load(anim), (512, 512)), True, False),
                              ANIMATION_DELAY))
-        self.boltAnimWalkRight = pyganim.PygAnimation(boltAnim)
+        self.boltAnimWalkRight = pyganim.PygAnimation(bolt_anim)
         self.boltAnimWalkRight.play()
 
-        boltAnim = []
+        bolt_anim = []
         for anim in ANIMATION_WALK:
-            boltAnim.append((pygame.transform.scale(image.load(anim), (512, 512)), ANIMATION_DELAY))
-        self.boltAnimWalkLeft = pyganim.PygAnimation(boltAnim)
+            bolt_anim.append((pygame.transform.scale(image.load(anim), (512, 512)), ANIMATION_DELAY))
+        self.boltAnimWalkLeft = pyganim.PygAnimation(bolt_anim)
         self.boltAnimWalkLeft.play()
         self.boltAnimWalkLeft.blit(self.image, (0, 0))
 
-        boltAnim = []
+        bolt_anim = []
         for anim in ANIMATION_CLAP:
-            boltAnim.append((pygame.transform.flip(pygame.transform.scale(image.load(anim), (512, 512)), True, False),
+            bolt_anim.append((pygame.transform.flip(
+                pygame.transform.scale(image.load(anim), (512, 512)), True, False),
                              ANIMATION_DELAY))
-        self.boltAnimClapRight = pyganim.PygAnimation(boltAnim)
+        self.boltAnimClapRight = pyganim.PygAnimation(bolt_anim)
         self.boltAnimClapRight.play()
 
-        boltAnim = []
+        bolt_anim = []
         for anim in ANIMATION_CLAP:
-            boltAnim.append((pygame.transform.scale(image.load(anim), (512, 512)), ANIMATION_DELAY))
-        self.boltAnimClapLeft = pyganim.PygAnimation(boltAnim)
+            bolt_anim.append((pygame.transform.scale(image.load(anim), (512, 512)),
+                              ANIMATION_DELAY))
+        self.boltAnimClapLeft = pyganim.PygAnimation(bolt_anim)
         self.boltAnimClapLeft.play()
 
-        boltAnim = []
+        bolt_anim = []
         for anim in ANIMATION_STOMP:
-            boltAnim.append((pygame.transform.flip(pygame.transform.scale(image.load(anim), (512, 512)), True, False),
+            bolt_anim.append((pygame.transform.flip(
+                pygame.transform.scale(image.load(anim), (512, 512)), True, False),
                              ANIMATION_DELAY))
-        self.boltAnimStompRight = pyganim.PygAnimation(boltAnim)
+        self.boltAnimStompRight = pyganim.PygAnimation(bolt_anim)
         self.boltAnimStompRight.play()
 
-        boltAnim = []
+        bolt_anim = []
         for anim in ANIMATION_STOMP:
-            boltAnim.append((pygame.transform.scale(image.load(anim), (512, 512)), ANIMATION_DELAY))
-        self.boltAnimStompLeft = pyganim.PygAnimation(boltAnim)
+            bolt_anim.append((pygame.transform.scale(image.load(anim), (512, 512)),
+                              ANIMATION_DELAY))
+        self.boltAnimStompLeft = pyganim.PygAnimation(bolt_anim)
         self.boltAnimStompLeft.play()
 
-        boltAnim = []
+        bolt_anim = []
         for anim in ANIMATION_BLAST:
-            boltAnim.append((pygame.transform.flip(pygame.transform.scale(image.load(anim), (512, 512)), True, False),
+            bolt_anim.append((pygame.transform.flip(
+                pygame.transform.scale(image.load(anim), (512, 512)), True, False),
                              ANIMATION_DELAY))
-        self.boltAnimBlastRight = pyganim.PygAnimation(boltAnim)
+        self.boltAnimBlastRight = pyganim.PygAnimation(bolt_anim)
         self.boltAnimBlastRight.play()
 
-        boltAnim = []
+        bolt_anim = []
         for anim in ANIMATION_BLAST:
-            boltAnim.append((pygame.transform.scale(image.load(anim), (512, 512)), ANIMATION_DELAY))
-        self.boltAnimBlastLeft = pyganim.PygAnimation(boltAnim)
+            bolt_anim.append((pygame.transform.scale(image.load(anim), (512, 512)),
+                              ANIMATION_DELAY))
+        self.boltAnimBlastLeft = pyganim.PygAnimation(bolt_anim)
         self.boltAnimBlastLeft.play()
 
-    def update(self, hero, hp, enemies, boss_attacks_group, boss_attacks, all_sprites, enemies_group):
+    def update(self, hero, hp, enemies, boss_attacks_group, boss_attacks, all_sprites,
+               enemies_group):
         if self.attack:
             if self.rect.x - 64 <= hero.rect.x:
                 print('clapLeft')
-                clap = BossHit(self.rect.x, self.rect.y, self, "clap", enemies, enemies_group, all_sprites)
+                clap = BossHit(self.rect.x, self.rect.y, self, "clap", enemies, enemies_group,
+                               all_sprites)
                 all_sprites.add(clap)
                 boss_attacks.append(clap)
                 boss_attacks_group.add(clap)
@@ -126,7 +135,8 @@ class Boss(sprite.Sprite):
                 self.clap = True
             elif self.rect.x + 160 >= hero.rect.x:
                 print('clapRight')
-                clap = BossHit(self.rect.x, self.rect.y, self, "clap", enemies, enemies_group, all_sprites)
+                clap = BossHit(self.rect.x, self.rect.y, self, "clap", enemies, enemies_group,
+                               all_sprites)
                 all_sprites.add(clap)
                 boss_attacks.append(clap)
                 boss_attacks_group.add(clap)
@@ -135,7 +145,8 @@ class Boss(sprite.Sprite):
                 self.clap = True
             elif self.rect.x - 512 >= hero.rect.x >= self.rect.x + 640 and hero.rect.y <= self.rect.y + 300:
                 print('stomp')
-                stomp = BossHit(self.rect.x, self.rect.y, self, "stomp", enemies, enemies_group, all_sprites)
+                stomp = BossHit(self.rect.x, self.rect.y, self, "stomp", enemies, enemies_group,
+                                all_sprites)
                 all_sprites.add(stomp)
                 boss_attacks.append(stomp)
                 boss_attacks_group.add(stomp)
@@ -144,7 +155,8 @@ class Boss(sprite.Sprite):
                 self.stomp = True
             elif self.rect.x - 512 <= hero.rect.x <= self.rect.x + 640:
                 print('blast')
-                blast = BossHit(self.rect.x, self.rect.y, self, "blast", enemies, enemies_group, all_sprites)
+                blast = BossHit(self.rect.x, self.rect.y, self, "blast", enemies, enemies_group,
+                                all_sprites)
                 all_sprites.add(blast)
                 boss_attacks.append(blast)
                 boss_attacks_group.add(blast)
@@ -164,7 +176,8 @@ class Boss(sprite.Sprite):
             self.attack_delay += 1
             if self.attack_delay == 300:
                 print("blast")
-                blast = BossHit(self.rect.x, self.rect.y, self, "blast", enemies, enemies_group, all_sprites)
+                blast = BossHit(self.rect.x, self.rect.y, self, "blast", enemies, enemies_group,
+                                all_sprites)
                 all_sprites.add(blast)
                 boss_attacks.append(blast)
                 boss_attacks_group.add(blast)
@@ -206,6 +219,7 @@ class Boss(sprite.Sprite):
             if self.stand_time == 30:
                 self.walk = True
                 self.stand_time = 0
+
 
 class BossHit(sprite.Sprite):
     def __init__(self, x, y, boss, type, enemies, enemies_group, all_sprites):
@@ -263,7 +277,6 @@ class BossHit(sprite.Sprite):
                 hp.dmg += 49
                 self.kill()
 
-
     def check_range(self, boss_bullets):
         if self.type == "clap":
             if self.rect.x >= self.start_x + 128 or self.rect.x <= self.start_x - 128:
@@ -271,7 +284,7 @@ class BossHit(sprite.Sprite):
                 self.kill()
                 del boss_bullets[boss_bullets.index(self)]
         elif self.type == "stomp":
-            if self.rect.x >= self.start_x + 512 or self.rect.x <= self.start_x -  512:
+            if self.rect.x >= self.start_x + 512 or self.rect.x <= self.start_x - 512:
                 print("kill")
                 self.kill()
                 del boss_bullets[boss_bullets.index(self)]

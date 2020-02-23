@@ -11,7 +11,7 @@ from bullet import *
 from animation import *
 
 draw_hitboxes = True
-draw_rects = False
+draw_rects = True
 show_fps = True
 
 # Объявляем константы
@@ -148,7 +148,8 @@ def main():
                 all_sprites.add(plat)
             elif col == "%":
                 plat = Platform(x, y, "data/framestiles/tiles/outcline.png")
-                plat.image = pygame.transform.flip("data/framestiles/tiles/incline.png", True, False)
+                plat.image = pygame.transform.flip("data/framestiles/tiles/incline.png",
+                                                   True, False)
                 platforms.append(plat)
                 all_sprites.add(plat)
             elif col == ".":
@@ -275,28 +276,31 @@ def main():
                     blast = pressed
         if hero.shot_done is False and blast is True and not left and not right and not up:
             print("bullet")
-            bullet = Bullet(hero.rect.x + 75, hero.rect.y + 54, hero.previosly_move)
+            bullet = Bullet(hero.rect.x + 75, hero.rect.y + 54, hero.previous_move)
             bullets.append(bullet)
             bullets_group.add(bullet)
             all_sprites.add(bullet)
             hero.shot_done = True
         if hero.hit_done is False and hit is True and not left and not right and not up:
             print("hit")
-            smash = Hit(hero.rect.x + 32, hero.rect.y + 24, hero.previosly_move)
+            smash = Hit(hero.rect.x + 32, hero.rect.y + 24, hero.previous_move)
             bullets.append(smash)
             bullets_group.add(smash)
             all_sprites.add(smash)
             hero.hit_done = True
         screen.fill([255, 255, 255])
         screen.blit(background.image, background.rect)
-
-        hero.update(left, right, up, platforms, down, enemies, screen, hp, other_blocks)  # передвижение
+        # передвижение
+        hero.update(left, right, up, platforms, down, enemies, screen, hp, other_blocks)
         camera.update(hero)
         lava_group.update()
         tp.update()
-        boss_group.update(hero, hp, enemies, boss_attacks_group, boss_attacks, all_sprites, enemies_group)
-        boss_attacks_group.update(enemies, hero, boss_attacks, hp, enemies_group, all_sprites)
-        enemies_group.update(blanks, platforms, [hero.rect.x, hero.rect.y], enemies, enemies_group, all_sprites)
+        boss_group.update(hero, hp, enemies, boss_attacks_group,
+                          boss_attacks, all_sprites, enemies_group)
+        boss_attacks_group.update(enemies, hero, boss_attacks,
+                                  hp, enemies_group, all_sprites)
+        enemies_group.update(blanks, platforms, [hero.rect.x, hero.rect.y],
+                             enemies, enemies_group, all_sprites)
         bullets_group.update(enemies, platforms, bullets)
         for i in all_sprites:
             if camera.state.colliderect(i.rect):

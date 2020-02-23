@@ -2,8 +2,6 @@ from pygame import *
 from boss import *
 import random
 
-COLORS = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', "A", 'B', "C", 'D', 'E', 'F')
-
 
 class Bullet(sprite.Sprite):
     def __init__(self, x, y, direction):
@@ -15,8 +13,8 @@ class Bullet(sprite.Sprite):
         self.start_x = x
         self.start_y = y
         self.image = Surface((6, 4))
-        self.color = f"#{random.choice(COLORS)}{random.choice(COLORS)}{random.choice(COLORS)}{random.choice(COLORS)}{random.choice(COLORS)}{random.choice(COLORS)}"
-        self.image.fill(Color(self.color))
+        self.color = random.sample(range(0, 256), 3)
+        self.image.fill(self.color)
         self.rect = Rect(x, y, 6, 4)  # прямоугольный объект
         self.kill_delay = False
 
@@ -57,8 +55,9 @@ class Blast(sprite.Sprite):
         sprite.Sprite.__init__(self)
         self.start_x = x
         self.start_y = y
-        self.image = pygame.transform.scale(image.load("data\enemyframes\\fireball.png"), (sizex, sizey))
-        self.rect = Rect(x+60, y+60, 8, 8)
+        self.image = pygame.transform.scale(image.load("data/enemyframes/fireball.png"),
+                                            (sizex, sizey))
+        self.rect = Rect(x + 60, y + 60, 8, 8)
         self.dmg = 10
 
     def update(self, blanks, platforms, hero_coords, enemies, enemies_group, all_sprites):
@@ -97,7 +96,6 @@ class Hit(sprite.Sprite):
         self.rect.x += self.xvel  # переносим положение на xvel
         self.collide(enemies)
         self.check_range(bullets)
-
 
     def collide(self, enemies):
         for e in enemies:

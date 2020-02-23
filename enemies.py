@@ -3,26 +3,26 @@ import pygame
 from platforms import *
 from bullet import *
 
-ANIMATION_UKA_RUN = [('data\enemyframes\monkeyrunning\manky runnin0000.png'),
-                     ('data\enemyframes\monkeyrunning\manky runnin0001.png'),
-                     ('data\enemyframes\monkeyrunning\manky runnin0002.png'),
-                     ('data\enemyframes\monkeyrunning\manky runnin0003.png'),
-                     ('data\enemyframes\monkeyrunning\manky runnin0004.png'),
-                     ('data\enemyframes\monkeyrunning\manky runnin0005.png')]
+ANIMATION_UKA_RUN = ['data/enemyframes/monkeyrunning/monkey running0000.png',
+                     'data/enemyframes/monkeyrunning/monkey running0001.png',
+                     'data/enemyframes/monkeyrunning/monkey running0002.png',
+                     'data/enemyframes/monkeyrunning/monkey running0003.png',
+                     'data/enemyframes/monkeyrunning/monkey running0004.png',
+                     'data/enemyframes/monkeyrunning/monkey running0005.png']
 
-ANIMATION_CRACKATOO_RUN = [('data\enemyframes\chickenrunning\chicken runnin0000.png'),
-                     ('data\enemyframes\chickenrunning\chicken runnin0001.png'),
-                     ('data\enemyframes\chickenrunning\chicken runnin0002.png'),
-                     ('data\enemyframes\chickenrunning\chicken runnin0003.png')]
+ANIMATION_CRACKATOO_RUN = ['data/enemyframes/chickenrunning/chicken running0000.png',
+                           'data/enemyframes/chickenrunning/chicken running0001.png',
+                           'data/enemyframes/chickenrunning/chicken running0002.png',
+                           'data/enemyframes/chickenrunning/chicken running0003.png']
 
-ANIMATION_FLYLING_FLY = [('data\enemyframes\headflying\head flying0000.png'),
-                         ('data\enemyframes\headflying\head flying0001.png'),
-                         ('data\enemyframes\headflying\head flying0002.png'),
-                         ('data\enemyframes\headflying\head flying0003.png')]
-ANIMATION_FLYLING_FIRE = [('data\enemyframes\headfire\head fireball0000.png'),
-                         ('data\enemyframes\headfire\head fireball0001.png'),
-                         ('data\enemyframes\headfire\head fireball0002.png'),
-                         ('data\enemyframes\headfire\head fireball0003.png')]
+ANIMATION_FLYLING_FLY = ['data/enemyframes/headflying/head flying0000.png',
+                         'data/enemyframes/headflying/head flying0001.png',
+                         'data/enemyframes/headflying/head flying0002.png',
+                         'data/enemyframes/headflying/head flying0003.png']
+ANIMATION_FLYLING_FIRE = ['data/enemyframes/headfire/head fireball0000.png',
+                          'data/enemyframes/headfire/head fireball0001.png',
+                          'data/enemyframes/headfire/head fireball0002.png',
+                          'data/enemyframes/headfire/head fireball0003.png']
 
 MOVE_SPEED = 4
 WIDTH = 64

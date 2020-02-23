@@ -25,8 +25,8 @@ class Player(sprite.Sprite):
         self.rect = Rect(x, y, WIDTH, HEIGHT)  # прямоугольный объект
         self.yvel = 0  # скорость вертикального перемещения
         self.onGround = False  # На земле ли я?
-        self.previosly_move = "Right"
-        self.hp = 100
+        self.previous_move = "Right"
+        self.hp = 1000
         self.hit_take = True
         self.immortal_time = 0
         self.shot_done = False
@@ -71,15 +71,15 @@ class Player(sprite.Sprite):
             if self.onGround:  # прыгаем, только когда можем оттолкнуться от земли
                 self.yvel = -JUMP_POWER
                 if self.block == "ice":
-                    if self.previosly_move == "Left":
+                    if self.previous_move == "Left":
                         self.xvel = -MOVE_SPEED
                     else:
                         self.xvel = MOVE_SPEED
             self.image.fill(Color(COLOR))
-            exec(f"self.boltAnimJump{self.previosly_move}.blit(self.image, (0, 0))")
+            exec(f"self.boltAnimJump{self.previous_move}.blit(self.image, (0, 0))")
         if left:
             self.xvel = -MOVE_SPEED  # Лево = x - n
-            self.previosly_move = "Left"
+            self.previous_move = "Left"
             self.image.fill(Color(COLOR))
             if up:  # для прыжка влево есть отдельная анимация
                 self.boltAnimJumpLeft.blit(self.image, (0, 0))
@@ -88,7 +88,7 @@ class Player(sprite.Sprite):
             self.image.set_colorkey(Color(COLOR))
         if right:
             self.xvel = MOVE_SPEED  # Право = x + n
-            self.previosly_move = "Right"
+            self.previous_move = "Right"
             self.image.fill(Color(COLOR))
             if up:
                 self.boltAnimJumpRight.blit(self.image, (0, 0))
@@ -105,13 +105,13 @@ class Player(sprite.Sprite):
             self.xvel = 0
             if self.block == "ice":
                 while self.xvel == 0:
-                    if self.previosly_move == "Left":
+                    if self.previous_move == "Left":
                         self.xvel = -MOVE_SPEED - 10
                     else:
                         self.xvel = MOVE_SPEED + 10
             if not up:
                 self.image.fill(Color(COLOR))
-                exec(f"self.boltAnimStay{self.previosly_move}.blit(self.image, (0, 0))")
+                exec(f"self.boltAnimStay{self.previous_move}.blit(self.image, (0, 0))")
         if not self.onGround:
             self.yvel += GRAVITY
 
@@ -132,7 +132,7 @@ class Player(sprite.Sprite):
 
         if self.shot_done is True:
             self.image.fill(Color(COLOR))
-            exec(f"self.boltAnimShoot{self.previosly_move}.blit(self.image, (0, 0))")
+            exec(f"self.boltAnimShoot{self.previous_move}.blit(self.image, (0, 0))")
             self.reload_time += 1
             if self.reload_time == 30:
                 self.shot_done = False
@@ -140,7 +140,7 @@ class Player(sprite.Sprite):
 
         if self.hit_done is True:
             self.image.fill(Color(COLOR))
-            exec(f"self.boltAnimHit{self.previosly_move}.blit(self.image, (0, 0))")
+            exec(f"self.boltAnimHit{self.previous_move}.blit(self.image, (0, 0))")
             self.hit_delay_time += 1
             if self.hit_delay_time == 45:
                 self.hit_done = False
