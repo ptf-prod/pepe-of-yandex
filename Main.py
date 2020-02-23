@@ -10,9 +10,13 @@ from Boss import *
 from Bullet import *
 from Animation import *
 
+draw_hitboxes = True
+draw_rects = False
+show_fps = True
+
 # Объявляем константы
-WIN_WIDTH = 800  # Ширина создаваемого окна
-WIN_HEIGHT = 640  # Высота
+WIN_WIDTH = 1280  # Ширина создаваемого окна
+WIN_HEIGHT = 720  # Высота
 DISPLAY = (WIN_WIDTH, WIN_HEIGHT)  # Группируем ширину и высоту в одну переменную
 BACKGROUND_COLOR = (50, 150, 255)
 PLATFORM_WIDTH = 32
@@ -24,27 +28,20 @@ MAX_HEIGHT = 0
 
 
 class Camera(object):
-    def __init__(self, camera_func, width, height):
-        self.camera_func = camera_func
+    def __init__(self, width, height):
         self.state = Rect(0, 0, width, height)
 
-    def apply(self, target):
-        return target.rect.move(self.state.topleft)
+    def apply(self, rect):
+        return rect.x - self.state.x, rect.y - self.state.y
 
     def update(self, target):
-        self.state = self.camera_func(self.state, target.rect)
-
-
-def camera_configure(camera, target_rect):
-    x, y = target_rect[0], target_rect[1]  # координаты игрока
-    w, h = camera[2], camera[3]  # размер окна
-    x, y = -x + WIN_WIDTH / 2, -y + WIN_HEIGHT / 2  # выравниваем камеру по центру
-
-    x = min(0, x)  # Не движемся дальше левой границы
-    x = max(-(camera.width - WIN_WIDTH), x)  # Не движемся дальше правой границы
-    y = max(-(camera.height - WIN_HEIGHT), y)  # Не движемся дальше нижней границы
-    y = min(0, y)  # Не движемся дальше верхней границы
-    return Rect(x, y, w, h)
+        x = target.rect.x - WIN_WIDTH // 2 + WIDTH // 2
+        y = target.rect.y - WIN_HEIGHT // 2 + HEIGHT // 2  # выравниваем камеру по центру
+        x = max(PLATFORM_WIDTH // 2, x)  # Не движемся дальше левой границы
+        # x = max(-(camera.width - WIN_WIDTH), x)  # Не движемся дальше правой границы
+        # y = max(-(camera.height - WIN_HEIGHT), y)  # Не движемся дальше нижней границы
+        y = max(PLATFORM_HEIGHT // 2, y)  # Не движемся дальше верхней границы
+        self.state.topleft = (x, y)
 
 
 def load_level(filename):
@@ -77,10 +74,9 @@ def load_image(name, colorkey=-1):
 def main():
     global LEVEL
     pygame.init()  # Инициация PyGame, обязательная строчка
-    screen = pygame.display.set_mode((1280, 720))
-    w, h = pygame.display.get_surface().get_size()
+    screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
     pygame.display.set_caption("Pepe the Frog")  # Пишем в шапку
-    background = Background('data/Background.jpg', [0, 0], w, h)
+    background = Background('data/Background.jpg', [0, 0], WIN_WIDTH, WIN_HEIGHT)
     # будем использовать как фон
     hero = Player(55, 555)
     hp = HitPoints()
@@ -252,38 +248,31 @@ def main():
     total_level_width = len(level[0]) * PLATFORM_WIDTH  # Высчитываем фактическую ширину уровня
     total_level_height = len(level) * PLATFORM_HEIGHT  # высоту
 
-    camera = Camera(camera_configure, total_level_width, total_level_height)
+    camera = Camera(WIN_WIDTH, WIN_HEIGHT)
+    import time as timetime
+    prev_time = timetime.time()
 
-    while 1:  # Основной цикл программы
+    while True:  # Основной цикл программы
         for event in pygame.event.get():  # Обрабатываем события
             if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
                 raise SystemExit("QUIT")
-            if event.type == KEYDOWN and event.key == K_LEFT:
-                left = True
-            elif event.type == KEYUP and event.key == K_LEFT:
-                left = False
-            if event.type == KEYDOWN and event.key == K_RIGHT:
-                right = True
-            elif event.type == KEYUP and event.key == K_RIGHT:
-                right = False
-            if event.type == KEYDOWN and event.key == K_UP:
-                up = True
-            elif event.type == KEYUP and event.key == K_UP:
-                up = False
-            if event.type == KEYDOWN and event.key == K_DOWN:
-                down = True
-            elif event.type == KEYUP and event.key == K_DOWN:
-                down = False
-            if event.type == KEYDOWN and event.key == K_c:
-                print("c")
-                hit = True
-                print(hero.hit_done, hit, left, right, up)
-            if event.type == KEYUP and event.key == K_c:
-                hit = False
-            if event.type == KEYDOWN and event.key == K_z:
-                blast = True
-            elif event.type == KEYUP and event.key == K_z:
-                blast = False
+            if event.type in (KEYUP, KEYDOWN):
+                pressed = event.type == KEYDOWN
+                if event.key == K_LEFT:
+                    left = pressed
+                elif event.key == K_RIGHT:
+                    right = pressed
+                elif event.key == K_UP:
+                    up = pressed
+                elif event.key == K_DOWN:
+                    down = pressed
+                elif event.key == K_c:
+                    hit = pressed
+                    if pressed:
+                        print("c")
+                        print(hero.hit_done, hit, left, right, up)
+                elif event.key == K_z:
+                    blast = pressed
         if hero.shot_done is False and blast is True and not left and not right and not up:
             print("bullet")
             bullet = Bullet(hero.rect.x + 75, hero.rect.y + 54, hero.previosly_move)
@@ -310,11 +299,31 @@ def main():
         enemies_group.update(blanks, platforms, [hero.rect.x, hero.rect.y], enemies, enemies_group, all_sprites)
         bullets_group.update(enemies, platforms, bullets)
         for i in all_sprites:
-            screen.blit(i.image, camera.apply(i))
+            if camera.state.colliderect(i.rect):
+                coordi = camera.apply(i.rect)
+                screen.blit(i.image, coordi)
+                if draw_rects:
+                    pygame.draw.rect(screen, pygame.Color('blue'),
+                                     coordi + (i.rect.width, i.rect.height), 1)
+                if draw_hitboxes:
+                    if isinstance(i, Blank):
+                        border_color = 'red4'
+                    else:
+                        border_color = 'red'
+                    try:
+                        pygame.draw.rect(screen, pygame.Color(border_color),
+                                         camera.apply(i.hitbox) + (i.hitbox.width, i.hitbox.height),
+                                         1)
+                    except AttributeError:
+                        pygame.draw.rect(screen, pygame.Color('purple4'),
+                                         coordi + (i.rect.width, i.rect.height), 1)
+
         hp.draw(screen)
-        pygame.draw.rect(screen, pygame.Color('red'), hero.rect)
         pygame.display.flip()  # обновление и вывод всех изменений на экран
-        timer.tick(60)
+        # timer.tick(60)
+        if show_fps:
+            print('fps:', 1 / (timetime.time() - prev_time))
+            prev_time = timetime.time()
 
 
 if __name__ == "__main__":

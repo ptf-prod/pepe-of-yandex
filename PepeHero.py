@@ -36,44 +36,33 @@ class Player(sprite.Sprite):
         self.burn_time = 0
         self.previous_block = ""
         self.block = ""
+
         self.boltAnimRight = load_animation(0, 8, ANIMATION_DELAY, 'data', 'pepeframes', 'running',
                                             'runnin anim{:04d}.png')
-
         self.boltAnimLeft = load_animation(0, 8, ANIMATION_DELAY, 'data', 'pepeframes', 'running',
                                            'runnin anim{:04d}.png', flip=True)
-
-        self.boltAnimJumpRight = load_animation(0, 10, ANIMATION_DELAY, 'data', 'pepeframes', 'jump',
-                                                'jump-anim{:04d}.png')
-
+        self.boltAnimJumpRight = load_animation(0, 10, ANIMATION_DELAY, 'data', 'pepeframes',
+                                                'jump', 'jump-anim{:04d}.png')
         self.boltAnimJumpLeft = load_animation(0, 10, ANIMATION_DELAY, 'data', 'pepeframes', 'jump',
                                                'jump-anim{:04d}.png', flip=True)
-
         self.boltAnimGunLeft = load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'gun',
                                               'gun{:04d}.png', flip=True)
-
         self.boltAnimGunRight = load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'gun',
                                                'gun{:04d}.png')
-
         self.boltAnimHitRight = load_animation(0, 6, ANIMATION_DELAY, 'data', 'pepeframes', 'hit',
                                                'pepe molot anim{:04d}.png')
-
         self.boltAnimHitLeft = load_animation(0, 6, ANIMATION_DELAY, 'data', 'pepeframes', 'hit',
                                               'pepe molot anim{:04d}.png', flip=True)
-
-        self.boltAnimShootRight = load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'shoot',
-                                                 'pepe shoot{:04d}.png')
-
-        self.boltAnimShootLeft = load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'shoot',
-                                                'pepe shoot{:04d}.png', flip=True)
-
-        self.boltAnimStayRight = load_animation(0, 5, ANIMATION_DELAY, 'data', 'pepeframes', 'idle',
-                                                'idle anim{:04d}.png')
+        self.boltAnimShootRight = load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes',
+                                                 'shoot', 'pepe shoot{:04d}.png')
+        self.boltAnimShootLeft = load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes',
+                                                'shoot', 'pepe shoot{:04d}.png', flip=True)
+        self.boltAnimStayRight = load_animation(0, 5, ANIMATION_DELAY * 8, 'data', 'pepeframes',
+                                                'idle', 'idle anim{:04d}.png')
+        self.boltAnimStayLeft = load_animation(0, 5, ANIMATION_DELAY * 8, 'data', 'pepeframes',
+                                               'idle', 'idle anim{:04d}.png', flip=True)
 
         self.boltAnimStayRight.blit(self.image, (0, 0))  # По-умолчанию, стоим
-
-        self.boltAnimStayLeft = load_animation(0, 5, ANIMATION_DELAY, 'data', 'pepeframes', 'idle',
-                                               'idle anim{:04d}.png', flip=True)
-
         self.hitbox = pygame.Rect(x + WIDTH * 3 // 8, y + HEIGHT * 7 // 32,
                                   WIDTH // 4, HEIGHT // 2)
 
@@ -250,8 +239,6 @@ class Player(sprite.Sprite):
                     return True
 
 
-
-
 class HitPoints:
     def __init__(self):
         self.x = 50
@@ -263,5 +250,5 @@ class HitPoints:
     def draw(self, screen):
         pygame.draw.rect(screen, Color("Red"), (self.x, self.y, self.width, self.hight))
         if self.dmg < 100:
-            pygame.draw.rect(screen, Color("Green"), (self.x, self.y, self.width - self.dmg * 2, self.hight))
-
+            pygame.draw.rect(screen, Color("Green"),
+                             (self.x, self.y, self.width - self.dmg * 2, self.hight))
