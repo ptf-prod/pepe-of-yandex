@@ -26,7 +26,7 @@ class Player(sprite.Sprite):
         self.yvel = 0  # скорость вертикального перемещения
         self.onGround = False  # На земле ли я?
         self.previous_move = "Right"
-        self.hp = 1000
+        self.hp = 100
         self.hit_take = True
         self.immortal_time = 0
         self.shot_done = False
