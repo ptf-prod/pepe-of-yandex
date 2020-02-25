@@ -13,5 +13,5 @@ def load_animation(start, end, delay, *args, flip=False):
             pygame.transform.flip(pygame.image.load(p).convert_alpha(),
                                   flip, 0), (128, 128)), delay))
     anim = pyganim.PygAnimation(anim)
-    anim.play()
+    anim.pause()
     return anim

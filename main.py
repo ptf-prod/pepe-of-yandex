@@ -276,14 +276,14 @@ def main():
                     blast = pressed
         if hero.shot_done is False and blast is True and not left and not right and not up:
             print("bullet")
-            bullet = Bullet(hero.rect.x + 75, hero.rect.y + 54, hero.previous_move)
+            bullet = Bullet(hero.rect.x + 75, hero.rect.y + 54, ('Left', 'Right')[hero.right])
             bullets.append(bullet)
             bullets_group.add(bullet)
             all_sprites.add(bullet)
             hero.shot_done = True
         if hero.hit_done is False and hit is True and not left and not right and not up:
             print("hit")
-            smash = Hit(hero.rect.x + 32, hero.rect.y + 24, hero.previous_move)
+            smash = Hit(hero.rect.x + 32, hero.rect.y + 24, ('Left', 'Right')[hero.right])
             bullets.append(smash)
             bullets_group.add(smash)
             all_sprites.add(smash)

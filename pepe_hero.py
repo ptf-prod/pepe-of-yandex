@@ -25,7 +25,7 @@ class Player(sprite.Sprite):
         self.rect = Rect(x, y, WIDTH, HEIGHT)  # прямоугольный объект
         self.yvel = 0  # скорость вертикального перемещения
         self.onGround = False  # На земле ли я?
-        self.previous_move = "Right"
+        self.right = True
         self.hp = 100
         self.hit_take = True
         self.immortal_time = 0
@@ -37,81 +37,75 @@ class Player(sprite.Sprite):
         self.previous_block = ""
         self.block = ""
 
-        self.boltAnimRight = load_animation(0, 8, ANIMATION_DELAY, 'data', 'pepeframes', 'running',
-                                            'runnin anim{:04d}.png')
-        self.boltAnimLeft = load_animation(0, 8, ANIMATION_DELAY, 'data', 'pepeframes', 'running',
-                                           'runnin anim{:04d}.png', flip=True)
-        self.boltAnimJumpRight = load_animation(0, 10, ANIMATION_DELAY, 'data', 'pepeframes',
-                                                'jump', 'jump-anim{:04d}.png')
-        self.boltAnimJumpLeft = load_animation(0, 10, ANIMATION_DELAY, 'data', 'pepeframes', 'jump',
-                                               'jump-anim{:04d}.png', flip=True)
-        self.boltAnimGunLeft = load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'gun',
-                                              'gun{:04d}.png', flip=True)
-        self.boltAnimGunRight = load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'gun',
-                                               'gun{:04d}.png')
-        self.boltAnimHitRight = load_animation(0, 6, ANIMATION_DELAY, 'data', 'pepeframes', 'hit',
-                                               'pepe molot anim{:04d}.png')
-        self.boltAnimHitLeft = load_animation(0, 6, ANIMATION_DELAY, 'data', 'pepeframes', 'hit',
-                                              'pepe molot anim{:04d}.png', flip=True)
-        self.boltAnimShootRight = load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes',
-                                                 'shoot', 'pepe shoot{:04d}.png')
-        self.boltAnimShootLeft = load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes',
-                                                'shoot', 'pepe shoot{:04d}.png', flip=True)
-        self.boltAnimStayRight = load_animation(0, 5, ANIMATION_DELAY * 8, 'data', 'pepeframes',
-                                                'idle', 'idle anim{:04d}.png')
-        self.boltAnimStayLeft = load_animation(0, 5, ANIMATION_DELAY * 8, 'data', 'pepeframes',
-                                               'idle', 'idle anim{:04d}.png', flip=True)
+        self.boltAnimRun = (load_animation(0, 8, ANIMATION_DELAY, 'data', 'pepeframes', 'running', 
+                                           'runnin anim{:04d}.png', flip=True),
+                            load_animation(0, 8, ANIMATION_DELAY, 'data', 'pepeframes', 'running',
+                                           'runnin anim{:04d}.png')) 
+        self.boltAnimJump = (load_animation(0, 10, ANIMATION_DELAY, 'data', 'pepeframes', 'jump',
+                                            'jump-anim{:04d}.png', flip=True),
+                             load_animation(0, 10, ANIMATION_DELAY, 'data', 'pepeframes', 
+                                            'jump', 'jump-anim{:04d}.png'))
+        self.boltAnimGun = (load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'gun', 
+                                           'gun{:04d}.png', flip=True),
+                            load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'gun', 
+                                           'gun{:04d}.png'))
+        self.boltAnimHit = (load_animation(0, 6, ANIMATION_DELAY, 'data', 'pepeframes', 'hit', 
+                                           'pepe molot anim{:04d}.png', flip=True),
+                            load_animation(0, 6, ANIMATION_DELAY, 'data', 'pepeframes', 'hit',
+                                           'pepe molot anim{:04d}.png'))
+        self.boltAnimShoot = (load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'shoot', 
+                                             'pepe shoot{:04d}.png', flip=True), 
+                              load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'shoot',
+                                             'pepe shoot{:04d}.png'))
+        self.boltAnimStay = (load_animation(0, 5, ANIMATION_DELAY * 8, 'data', 'pepeframes', 
+                                            'idle', 'idle anim{:04d}.png', flip=True), 
+                             load_animation(0, 5, ANIMATION_DELAY * 8, 'data', 'pepeframes', 
+                                            'idle', 'idle anim{:04d}.png'))
 
-        self.boltAnimStayRight.blit(self.image, (0, 0))  # По-умолчанию, стоим
+        self.cur_anim = self.boltAnimStay
         self.hitbox = pygame.Rect(x + WIDTH * 3 // 8, y + HEIGHT * 7 // 32,
                                   WIDTH // 4, HEIGHT // 2)
 
     def update(self, left, right, up, platforms, down, enemies, screen, hp, other_blocks):
-        if up:
-            if self.onGround:  # прыгаем, только когда можем оттолкнуться от земли
-                self.yvel = -JUMP_POWER
-                if self.block == "ice":
-                    if self.previous_move == "Left":
-                        self.xvel = -MOVE_SPEED
-                    else:
-                        self.xvel = MOVE_SPEED
-            self.image.fill(Color(COLOR))
-            exec(f"self.boltAnimJump{self.previous_move}.blit(self.image, (0, 0))")
-        if left:
+        self.cur_anim[self.right].pause()
+        self.cur_anim = self.boltAnimRun
+        if left and not right:
+            self.right = False
             self.xvel = -MOVE_SPEED  # Лево = x - n
-            self.previous_move = "Left"
-            self.image.fill(Color(COLOR))
-            if up:  # для прыжка влево есть отдельная анимация
-                self.boltAnimJumpLeft.blit(self.image, (0, 0))
-            else:
-                self.boltAnimLeft.blit(self.image, (0, 0))
-            self.image.set_colorkey(Color(COLOR))
-        if right:
+        elif right and not left:
+            self.right = True
             self.xvel = MOVE_SPEED  # Право = x + n
-            self.previous_move = "Right"
-            self.image.fill(Color(COLOR))
-            if up:
-                self.boltAnimJumpRight.blit(self.image, (0, 0))
-            else:
-                self.boltAnimRight.blit(self.image, (0, 0))
-            self.image.set_colorkey(Color(COLOR))
+        elif not right and not left:
+            self.cur_anim = self.boltAnimStay
+            self.xvel = 0
+            # if self.block == "ice":
+            #     while self.xvel == 0:
+            #         if not self.right:
+            #             self.xvel = -MOVE_SPEED - 10
+            #         else:
+            #             self.xvel = MOVE_SPEED + 10
+            if not up:
+                self.image.fill(Color(COLOR))
+        elif self.right:
+            self.xvel = MOVE_SPEED  # Право = x + n
+        else:
+            self.xvel = -MOVE_SPEED  # Лево = x - n
 
         if down and not up:
             if not self.onGround:
                 self.yvel += JUMP_POWER // 2
                 self.xvel = 0
-
-        if not (left or right):  # стоим, когда нет указаний идти
-            self.xvel = 0
-            if self.block == "ice":
-                while self.xvel == 0:
-                    if self.previous_move == "Left":
-                        self.xvel = -MOVE_SPEED - 10
+        elif up:
+            if self.onGround:  # прыгаем, только когда можем оттолкнуться от земли
+                self.yvel = -JUMP_POWER
+                if self.block == "ice":
+                    if not self.right:
+                        self.xvel = -MOVE_SPEED
                     else:
-                        self.xvel = MOVE_SPEED + 10
-            if not up:
-                self.image.fill(Color(COLOR))
-                exec(f"self.boltAnimStay{self.previous_move}.blit(self.image, (0, 0))")
+                        self.xvel = MOVE_SPEED
+            self.image.fill(Color(COLOR))
+            self.cur_anim = self.boltAnimJump
+
         if not self.onGround:
             self.yvel += GRAVITY
 
@@ -132,15 +126,14 @@ class Player(sprite.Sprite):
 
         if self.shot_done is True:
             self.image.fill(Color(COLOR))
-            exec(f"self.boltAnimShoot{self.previous_move}.blit(self.image, (0, 0))")
+            self.cur_anim = self.boltAnimShoot
             self.reload_time += 1
             if self.reload_time == 30:
                 self.shot_done = False
                 self.reload_time = 0
 
         if self.hit_done is True:
-            self.image.fill(Color(COLOR))
-            exec(f"self.boltAnimHit{self.previous_move}.blit(self.image, (0, 0))")
+            self.cur_anim = self.boltAnimHit
             self.hit_delay_time += 1
             if self.hit_delay_time == 45:
                 self.hit_done = False
@@ -153,6 +146,10 @@ class Player(sprite.Sprite):
             if self.burn_time == 200 and self.block != "lava":
                 self.burn_time = 0
                 self.previous_block = ""
+
+        self.image.fill(Color(COLOR))
+        self.cur_anim[self.right].play()
+        self.cur_anim[self.right].blit(self.image, (0, 0))
 
     def collide(self, xvel, yvel, platforms, enemies, hp, other_blocks):
         for p in platforms:
