@@ -60,13 +60,13 @@ class Blast(sprite.Sprite):
         self.hitbox = Rect(0, 0, 8, 8)
 
     def update(self, blanks, platforms, hero_coords, enemies_group, all_sprites):
-        if self.hitbox.x > hero_coords[0]:
+        if self.hitbox.x > hero_coords[0] + 16:
             self.rect.x -= 3
-        elif self.hitbox.x < hero_coords[0]:
+        elif self.hitbox.x < hero_coords[0] + 16:
             self.rect.x += 3
-        if self.hitbox.y > hero_coords[1]:
+        if self.hitbox.y > hero_coords[1] + 32:
             self.rect.y -= 3
-        elif self.hitbox.y < hero_coords[1]:
+        elif self.hitbox.y < hero_coords[1] + 32:
             self.rect.y += 3
         self.hitbox.x = self.rect.x + 60
         self.hitbox.y = self.rect.y + 60
