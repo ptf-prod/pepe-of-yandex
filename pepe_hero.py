@@ -5,12 +5,12 @@ from enemies import *
 from bullet import *
 
 ANIMATION_DELAY = 100
-MOVE_SPEED = 14
+MOVE_SPEED = 220
 WIDTH = 128
 HEIGHT = 128
 COLOR = "#888888"
-JUMP_POWER = 20
-GRAVITY = 1.2  # Сила, которая будет тянуть нас вниз
+JUMP_POWER = 355
+GRAVITY = 400  # Сила, которая будет тянуть нас вниз
 
 
 class Player(sprite.Sprite):
@@ -66,7 +66,7 @@ class Player(sprite.Sprite):
         self.hitbox = pygame.Rect(x + WIDTH * 3 // 8, y + HEIGHT * 7 // 32,
                                   WIDTH // 4, HEIGHT // 2)
 
-    def update(self, left, right, up, platforms, down, enemies, other_blocks):
+    def update(self, t, left, right, up, platforms, down, enemies, other_blocks):
         self.cur_anim[self.right].pause()
         self.cur_anim = self.boltAnimRun
         if left and not right:
@@ -108,15 +108,15 @@ class Player(sprite.Sprite):
             self.cur_anim = self.boltAnimJump
 
         if not self.onGround:
-            self.yvel += GRAVITY
+            self.yvel += GRAVITY * t
 
         self.onGround = False
-        self.rect.y += self.yvel
-        self.hitbox.y += self.yvel
+        self.rect.y += self.yvel * t
+        self.hitbox.y += self.yvel * t
         self.collide(0, self.yvel, platforms, enemies)
 
-        self.rect.x += self.xvel  # переносим свои положение на xvel
-        self.hitbox.x += self.xvel  # переносим свои положение на xvel
+        self.rect.x += self.xvel * t  # переносим свои положение на xvel
+        self.hitbox.x += self.xvel * t  # переносим свои положение на xvel
         self.collide(self.xvel, 0, platforms, enemies)
 
         if self.hit_take is False:

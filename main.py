@@ -11,7 +11,7 @@ from bullet import *
 from animation import *
 
 draw_hitboxes = True
-draw_rects = True
+draw_rects = False
 show_fps = True
 
 # Объявляем константы
@@ -92,7 +92,7 @@ def main():
     blanks_group = pygame.sprite.Group()
     lava_group = pygame.sprite.Group()
     other_blocks = []
-    timer = pygame.time.Clock()
+    clock = pygame.time.Clock()
     level = load_level("level_1.txt")
 
     x = y = 0  # координаты
@@ -198,6 +198,7 @@ def main():
     prev_time = timetime.time()
 
     while True:  # Основной цикл программы
+        t = clock.tick() / 1000
         for event in pygame.event.get():  # Обрабатываем события
             if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
                 raise SystemExit("QUIT")
@@ -238,9 +239,9 @@ def main():
 
         screen.blit(background.image, background.rect)
         # передвижение
-        hero.update(left, right, up, on_screen, down, enemies_group, other_blocks)
+        hero.update(t, left, right, up, on_screen, down, enemies_group, other_blocks)
         camera.update(hero)
-        lava.update()
+        lava_group.update()
         tp.update()
         # boss_group.update(hero, hp, enemies_group, boss_attacks_group,
         #                   boss_attacks, all_sprites, enemies_group)
