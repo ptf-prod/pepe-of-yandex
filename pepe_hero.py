@@ -37,36 +37,36 @@ class Player(sprite.Sprite):
         self.previous_block = ""
         self.block = ""
 
-        self.boltAnimRun = (load_animation(0, 8, ANIMATION_DELAY, 'data', 'pepeframes', 'running', 
+        self.boltAnimRun = (load_animation(0, 8, ANIMATION_DELAY, 'data', 'pepeframes', 'running',
                                            'runnin anim{:04d}.png', flip=True),
                             load_animation(0, 8, ANIMATION_DELAY, 'data', 'pepeframes', 'running',
-                                           'runnin anim{:04d}.png')) 
+                                           'runnin anim{:04d}.png'))
         self.boltAnimJump = (load_animation(0, 10, ANIMATION_DELAY, 'data', 'pepeframes', 'jump',
                                             'jump-anim{:04d}.png', flip=True),
-                             load_animation(0, 10, ANIMATION_DELAY, 'data', 'pepeframes', 
+                             load_animation(0, 10, ANIMATION_DELAY, 'data', 'pepeframes',
                                             'jump', 'jump-anim{:04d}.png'))
-        self.boltAnimGun = (load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'gun', 
+        self.boltAnimGun = (load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'gun',
                                            'gun{:04d}.png', flip=True),
-                            load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'gun', 
+                            load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'gun',
                                            'gun{:04d}.png'))
-        self.boltAnimHit = (load_animation(0, 6, ANIMATION_DELAY, 'data', 'pepeframes', 'hit', 
+        self.boltAnimHit = (load_animation(0, 6, ANIMATION_DELAY, 'data', 'pepeframes', 'hit',
                                            'pepe molot anim{:04d}.png', flip=True),
                             load_animation(0, 6, ANIMATION_DELAY, 'data', 'pepeframes', 'hit',
                                            'pepe molot anim{:04d}.png'))
-        self.boltAnimShoot = (load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'shoot', 
-                                             'pepe shoot{:04d}.png', flip=True), 
+        self.boltAnimShoot = (load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'shoot',
+                                             'pepe shoot{:04d}.png', flip=True),
                               load_animation(0, 4, ANIMATION_DELAY, 'data', 'pepeframes', 'shoot',
                                              'pepe shoot{:04d}.png'))
-        self.boltAnimStay = (load_animation(0, 5, ANIMATION_DELAY * 8, 'data', 'pepeframes', 
-                                            'idle', 'idle anim{:04d}.png', flip=True), 
-                             load_animation(0, 5, ANIMATION_DELAY * 8, 'data', 'pepeframes', 
+        self.boltAnimStay = (load_animation(0, 5, ANIMATION_DELAY * 8, 'data', 'pepeframes',
+                                            'idle', 'idle anim{:04d}.png', flip=True),
+                             load_animation(0, 5, ANIMATION_DELAY * 8, 'data', 'pepeframes',
                                             'idle', 'idle anim{:04d}.png'))
 
         self.cur_anim = self.boltAnimStay
         self.hitbox = pygame.Rect(x + WIDTH * 3 // 8, y + HEIGHT * 7 // 32,
                                   WIDTH // 4, HEIGHT // 2)
 
-    def update(self, left, right, up, platforms, down, enemies, screen, hp, other_blocks):
+    def update(self, left, right, up, platforms, down, enemies, other_blocks):
         self.cur_anim[self.right].pause()
         self.cur_anim = self.boltAnimRun
         if left and not right:
@@ -91,6 +91,8 @@ class Player(sprite.Sprite):
         else:
             self.xvel = -MOVE_SPEED  # Лево = x - n
 
+        # if self.onGround:  # прыгаем, только когда можем оттолкнуться от земли
+        #     print('on ground')
         if down and not up:
             if not self.onGround:
                 self.yvel += JUMP_POWER // 2
@@ -103,7 +105,6 @@ class Player(sprite.Sprite):
                         self.xvel = -MOVE_SPEED
                     else:
                         self.xvel = MOVE_SPEED
-            self.image.fill(Color(COLOR))
             self.cur_anim = self.boltAnimJump
 
         if not self.onGround:
@@ -112,11 +113,11 @@ class Player(sprite.Sprite):
         self.onGround = False
         self.rect.y += self.yvel
         self.hitbox.y += self.yvel
-        self.collide(0, self.yvel, platforms, enemies, hp, other_blocks)
+        self.collide(0, self.yvel, platforms, enemies)
 
         self.rect.x += self.xvel  # переносим свои положение на xvel
         self.hitbox.x += self.xvel  # переносим свои положение на xvel
-        self.collide(self.xvel, 0, platforms, enemies, hp, other_blocks)
+        self.collide(self.xvel, 0, platforms, enemies)
 
         if self.hit_take is False:
             self.immortal_time += 1
@@ -141,7 +142,6 @@ class Player(sprite.Sprite):
 
         if self.previous_block == "lava" and self.block != "lava":
             self.hp -= 0.1
-            hp.dmg += 0.1
             self.burn_time += 1
             if self.burn_time == 200 and self.block != "lava":
                 self.burn_time = 0
@@ -151,7 +151,7 @@ class Player(sprite.Sprite):
         self.cur_anim[self.right].play()
         self.cur_anim[self.right].blit(self.image, (0, 0))
 
-    def collide(self, xvel, yvel, platforms, enemies, hp, other_blocks):
+    def collide(self, xvel, yvel, platforms, enemies):
         for p in platforms:
             if self.hitbox.colliderect(p.hitbox):  # если есть пересечение платформы с игроком
                 self.block = "platform"
@@ -180,53 +180,43 @@ class Player(sprite.Sprite):
                 if type(p) == Ice:
                     self.previous_block = self.block
                     self.block = "ice"
+                if p.hurts and sprite.collide_rect(self, p):
+                    self.take_dmg(p)
+                    self.block = f"{p}"
 
         if self.hit_take is True:
             for e in enemies:
                 try:
                     if self.hitbox.colliderect(e.hitbox):
-                        self.take_dmg(e, hp)
+                        self.take_dmg(e)
                         if type(e) == Blast:
                             e.kill()
-                            del enemies[enemies.index(e)]
                 except AttributeError:
                     if self.hitbox.colliderect(e.rect):
-                        self.take_dmg(e, hp)
+                        self.take_dmg(e)
                         if type(e) == Blast:
                             e.kill()
-                            del enemies[enemies.index(e)]
 
-            for ob in other_blocks:
-                if sprite.collide_rect(self, ob):
-                    if type(ob) == Lava or Spikes:
-                        self.take_dmg(ob, hp)
-                        self.block = f"{ob}"
-
-    def take_dmg(self, enemy, hp):
+    def take_dmg(self, enemy):
+        print(type(enemy).__name__)
         if type(enemy) == Uka:
             self.hp -= 10
-            hp.dmg += 10
             self.immortality()
         elif type(enemy) == Flyling:
             self.hp -= 15
-            hp.dmg += 15
             self.immortality()
         elif type(enemy) == Crackatoo:
             self.hp -= 20
-            hp.dmg += 20
             self.immortality()
         elif type(enemy) == Lava:
             self.hp -= 0.05
-            hp.dmg += 0.05
             self.previous_block = "lava"
             self.block = "lava"
         elif type(enemy) == Spikes:
             self.hp -= 15
-            hp.dmg += 15
             self.immortality()
         elif type(enemy) == Blast:
             self.hp -= enemy.dmg
-            hp.dmg += enemy.dmg
         if self.hp <= 0:
             self.die()
 
@@ -244,15 +234,16 @@ class Player(sprite.Sprite):
 
 
 class HitPoints:
-    def __init__(self):
+    def __init__(self, max_h):
         self.x = 50
         self.y = 50
         self.width = 200
-        self.hight = 25
+        self.max = max_h
+        self.height = 25
         self.dmg = 0
 
-    def draw(self, screen):
-        pygame.draw.rect(screen, Color("Red"), (self.x, self.y, self.width, self.hight))
-        if self.dmg < 100:
+    def draw(self, screen, value):
+        pygame.draw.rect(screen, Color("Red"), (self.x, self.y, self.width, self.height))
+        if value > 0:
             pygame.draw.rect(screen, Color("Green"),
-                             (self.x, self.y, self.width - self.dmg * 2, self.hight))
+                             (self.x, self.y, value * self.width / self.max, self.height))

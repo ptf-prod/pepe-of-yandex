@@ -35,6 +35,7 @@ class Platform(sprite.Sprite):
     HEIGHT_4 = HEIGHT // 4
 
     def __init__(self, x, y, filename):
+        self.hurts = False
         sprite.Sprite.__init__(self)
         if filename is not None:
             if filename not in tiles_textures:
@@ -54,9 +55,10 @@ class Blank(Platform):
         super().__init__(x, y, None)
 
 
-class Lava(sprite.Sprite):
+class Lava(Platform):
     def __init__(self, x, y):
-        sprite.Sprite.__init__(self)
+        super().__init__(x, y, None)
+        self.hurts = True
         self.image = Surface((128, 128))
         self.image.fill(Color("White"))
         self.image.set_colorkey(Color("White"))
@@ -73,20 +75,21 @@ class Lava(sprite.Sprite):
         self.image.fill(Color("White"))
         self.boltAnimLava.blit(self.image, (0, 0))
 
-
 class Spikes(Platform):
     def __init__(self, x, y, filename):
         super().__init__(x, y, filename)
+        self.hurts = True
 
 
 class Ice(Platform):
     def __init__(self, x, y, filename):
         super().__init__(x, y, filename)
+        self.hurts = True
 
 
-class Teleport(sprite.Sprite):
+class Teleport(Platform):
     def __init__(self, x, y):
-        sprite.Sprite.__init__(self)
+        super().__init__(x, y, None)
         self.rect = Rect(x - 256, y - 348, PLATFORM_WIDTH, PLATFORM_HEIGHT)
         self.image = Surface((512, 512))
         self.image.fill(Color("White"))

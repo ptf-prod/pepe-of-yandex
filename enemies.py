@@ -46,7 +46,7 @@ class Enemy(sprite.Sprite):
         self.onGround = False
         self.target_detected = False
 
-    def update(self, blanks, platforms, target_coords, enemies, enemies_group, all_sprites):
+    def update(self, blanks, platforms, target_coords, enemies_group, all_sprites):
         if self.target_detected is False:
             self.rect.x += self.xvel  # переносим положение на xvel
         if type(self) == Crackatoo:
@@ -101,7 +101,7 @@ class Uka(Enemy):
         self.boltAnimUkaRunLeft = pyganim.PygAnimation(boltAnim)
         self.boltAnimUkaRunLeft.play()
 
-    def update(self, blanks, platforms, target_coords, enemies, enemies_group, all_sprites):
+    def update(self, blanks, platforms, target_coords, enemies_group, all_sprites):
         if self.target_detected is False:
             self.rect.x += self.xvel  # переносим положение на xvel
         if type(self) == Crackatoo:
@@ -159,21 +159,21 @@ class Flyling(Enemy):
         self.boltAnimFlylingFireLeft = pyganim.PygAnimation(boltAnim)
         self.boltAnimFlylingFireLeft.play()
 
-    def update(self, blanks, platforms, coords, enemies, enemies_group, all_sprites):
+    def update(self, blanks, platforms, target_coords, enemies_group, all_sprites):
         self.rect.x += self.xvel  # переносим положение на xvel
         self.collide(blanks, platforms)
         self.check_time()
         self.flytime += 1
         if self.blast_done is False:
-            if self.rect.x - 512 <= coords[0] <= self.rect.x + 512 and self.rect.y - 512 <= coords[1] <= self.rect.x + 512:
-                if self.rect.x < coords[0]:
+            if self.rect.x - 512 <= target_coords[0] <= self.rect.x + 512 and \
+                    self.rect.y - 512 <= target_coords[1] <= self.rect.x + 512:
+                if self.rect.x < target_coords[0]:
                     self.image.fill(Color("Red"))
                     self.boltAnimFlylingFireLeft.blit(self.image, (0, 0))  # По-умолчанию, стоим
                 else:
                     self.image.fill(Color("Red"))
                     self.boltAnimFlylingFireRight.blit(self.image, (0, 0))  # По-умолчанию, стоим
                 blast = Blast(self.rect.x, self.rect.y + 14, 128, 128)
-                enemies.append(blast)
                 enemies_group.add(blast)
                 all_sprites.add(blast)
                 self.blast_done = True

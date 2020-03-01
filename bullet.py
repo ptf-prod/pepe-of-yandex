@@ -26,7 +26,6 @@ class Bullet(sprite.Sprite):
         if self.kill_delay:
             self.kill_delay = False
             self.kill()
-            del bullets[bullets.index(self)]
 
     def collide(self, enemies, platforms):
         for e in enemies:
@@ -34,7 +33,6 @@ class Bullet(sprite.Sprite):
                 if type(e) != Boss:
                     e.kill()
                     self.kill_delay = True
-                    del enemies[enemies.index(e)]
                 else:
                     e.hp -= 1
                     print(e.hp)
@@ -61,7 +59,7 @@ class Blast(sprite.Sprite):
         self.dmg = 10
         self.hitbox = Rect(0, 0, 8, 8)
 
-    def update(self, blanks, platforms, hero_coords, enemies, enemies_group, all_sprites):
+    def update(self, blanks, platforms, hero_coords, enemies_group, all_sprites):
         if self.hitbox.x > hero_coords[0]:
             self.rect.x -= 3
         elif self.hitbox.x < hero_coords[0]:

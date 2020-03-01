@@ -79,168 +79,112 @@ def main():
     background = Background('data/Background.jpg', [0, 0], WIN_WIDTH, WIN_HEIGHT)
     # будем использовать как фон
     hero = Player(55, 555)
-    hp = HitPoints()
+    hp = HitPoints(hero.hp)
 
     # создаем героя по (x,y) координатам
     left = right = up = down = blast = hit = False  # по умолчанию — стоим
     enemies_group = pygame.sprite.Group()
-    lava_group = pygame.sprite.Group()
     bullets_group = pygame.sprite.Group()
     all_sprites = pygame.sprite.Group()
+    platforms_group = pygame.sprite.Group()
     all_sprites.add(hero)
     boss_group = pygame.sprite.Group()
-    boss_attacks_group = pygame.sprite.Group()
-    platforms = []  # то, во что мы будем врезаться или опираться
-    enemies = []  # Враги
-    blanks = []
-    boss_attacks = []
+    blanks_group = pygame.sprite.Group()
+    lava_group = pygame.sprite.Group()
     other_blocks = []
-    bullets = []
     timer = pygame.time.Clock()
     level = load_level("level_1.txt")
 
     x = y = 0  # координаты
+    platforms_legend = {
+        'G': 'up',
+        '/': 'upleft',
+        '\\': 'upright',
+        'R': 'centre',
+        '<': 'left',
+        '>': 'right',
+        '_': 'down',
+        '-': 'downleft',
+        '+': 'downright',
+        '=': 'incline',
+        '%': 'outcline',
+        '.': 'alonecentre',
+        '{': 'aloneleft',
+        '}': 'aloneright',
+        '^': 'alone',
+        '?': 'aloneconnectleft',
+        '!': 'connectleft',
+        '#': 'aloneconnectright',
+        '@': 'connectright',
+    }
     for row in level:  # вся строка
-        for col in row:  # каждый символ
-            if col == "G":
-                plat = Platform(x, y, "data/framestiles/tiles/up.png")
-                platforms.append(plat)
-                all_sprites.add(plat)
-            if col == "*":
+        for sym in row:  # каждый символ
+            if sym == "*":
                 plat = Platform(x, y, None)
-                platforms.append(plat)
+                platforms_group.add(plat)
                 all_sprites.add(plat)
-            elif col == "/":
-                plat = Platform(x, y, "data/framestiles/tiles/upleft.png")
-                platforms.append(plat)
+            elif sym in platforms_legend.keys():
+                plat = Platform(x, y, f"data/framestiles/tiles/{platforms_legend[sym]}.png")
+                platforms_group.add(plat)
                 all_sprites.add(plat)
-            elif col == "\\":
-                plat = Platform(x, y, "data/framestiles/tiles/upright.png")
-                platforms.append(plat)
-                all_sprites.add(plat)
-            elif col == "R":
-                plat = Platform(x, y, "data/framestiles/tiles/centre.png")
-                platforms.append(plat)
-                all_sprites.add(plat)
-            elif col == "<":
-                plat = Platform(x, y, "data/framestiles/tiles/left.png")
-                platforms.append(plat)
-                all_sprites.add(plat)
-            elif col == ">":
-                plat = Platform(x, y, "data/framestiles/tiles/right.png")
-                platforms.append(plat)
-                all_sprites.add(plat)
-            elif col == "_":
-                plat = Platform(x, y, "data/framestiles/tiles/down.png")
-                platforms.append(plat)
-                all_sprites.add(plat)
-            elif col == "-":
-                plat = Platform(x, y, "data/framestiles/tiles/downleft.png")
-                platforms.append(plat)
-                all_sprites.add(plat)
-            elif col == "+":
-                plat = Platform(x, y, "data/framestiles/tiles/downright.png")
-                platforms.append(plat)
-                all_sprites.add(plat)
-            elif col == "=":
-                plat = Platform(x, y, "data/framestiles/tiles/incline.png")
-                platforms.append(plat)
-                all_sprites.add(plat)
-            elif col == "%":
-                plat = Platform(x, y, "data/framestiles/tiles/outcline.png")
-                plat.image = pygame.transform.flip("data/framestiles/tiles/incline.png",
-                                                   True, False)
-                platforms.append(plat)
-                all_sprites.add(plat)
-            elif col == ".":
-                plat = Platform(x, y, "data/framestiles/tiles/alonecentre.png")
-                platforms.append(plat)
-                all_sprites.add(plat)
-            elif col == "{":
-                plat = Platform(x, y, "data/framestiles/tiles/aloneleft.png")
-                platforms.append(plat)
-                all_sprites.add(plat)
-            elif col == "}":
-                plat = Platform(x, y, "data/framestiles/tiles/aloneright.png")
-                platforms.append(plat)
-                all_sprites.add(plat)
-            elif col == "^":
-                plat = Platform(x, y, "data/framestiles/tiles/alone.png")
-                platforms.append(plat)
-                all_sprites.add(plat)
-            elif col == "?":
-                plat = Platform(x, y, "data/framestiles/tiles/aloneconnectleft.png")
-                platforms.append(plat)
-                all_sprites.add(plat)
-            elif col == "!":
-                plat = Platform(x, y, "data/framestiles/tiles/connectleft.png")
-                platforms.append(plat)
-                all_sprites.add(plat)
-            elif col == "#":
-                plat = Platform(x, y, "data/framestiles/tiles/aloneconnectright.png")
-                platforms.append(plat)
-                all_sprites.add(plat)
-            elif col == "@":
-                plat = Platform(x, y, "data/framestiles/tiles/connectright.png")
-                platforms.append(plat)
-                all_sprites.add(plat)
-            elif col == "U":
+            elif sym == "U":
                 uka = Uka(x, y)
-                enemies.append(uka)
                 enemies_group.add(uka)
                 all_sprites.add(uka)
-            elif col == "b":
+            elif sym == "b":
                 blank = Blank(x, y)
-                blanks.append(blank)
+                blanks_group.add(blank)
                 all_sprites.add(blank)
-            elif col == "F":
+            elif sym == "F":
                 flyling = Flyling(x, y)
-                enemies.append(flyling)
                 enemies_group.add(flyling)
                 all_sprites.add(flyling)
-            elif col == "L":
+            elif sym == "L":
                 lava = Lava(x, y)
                 other_blocks.append(lava)
                 all_sprites.add(lava)
                 lava_group.add(lava)
-            elif col == "[":
+            elif sym == "[":
                 lava = Platform(x, y, "data/framestiles/tiles/lavaleft.png")
                 other_blocks.append(lava)
                 all_sprites.add(lava)
-            elif col == "]":
+                platforms_group.add(lava)
+            elif sym == "]":
                 lava = Platform(x, y, "data/framestiles/tiles/lavaright.png")
                 other_blocks.append(lava)
                 all_sprites.add(lava)
-            elif col == "S":
+                platforms_group.add(lava)
+            elif sym == "S":
                 spikes = Spikes(x, y, "data/framestiles/tiles/spikes.png")
                 other_blocks.append(spikes)
                 all_sprites.add(spikes)
-            elif col == "T":
+                platforms_group.add(spikes)
+            elif sym == "T":
                 tp = Teleport(x, y)
                 other_blocks.append(tp)
                 all_sprites.add(tp)
-            elif col == "I":
+                platforms_group.add(tp)
+            elif sym == "I":
                 ice = Ice(x, y, "data/framestiles/tiles/icecenter.png")
-                platforms.append(ice)
                 all_sprites.add(ice)
-            elif col == "(":
+                platforms_group.add(ice)
+            elif sym == "(":
                 ice = Ice(x, y, "data/framestiles/tiles/iceleft.png")
-                platforms.append(ice)
                 all_sprites.add(ice)
-            elif col == ")":
+                platforms_group.add(ice)
+            elif sym == ")":
                 ice = Ice(x, y, "data/framestiles/tiles/iceright.png")
-                platforms.append(ice)
                 all_sprites.add(ice)
-            elif col == "C":
+                platforms_group.add(ice)
+            elif sym == "C":
                 crack = Crackatoo(x, y)
                 all_sprites.add(crack)
-                enemies.append(crack)
                 enemies_group.add(crack)
-            elif col == "B":
+            elif sym == "B":
                 boss = Boss(x, y)
                 all_sprites.add(boss)
-                enemies.append(boss)
                 boss_group.add(boss)
+
 
             x += PLATFORM_WIDTH   # блоки платформы ставятся на ширине блоков
         y += PLATFORM_HEIGHT  # то же самое и с высотой
@@ -277,31 +221,34 @@ def main():
         if hero.shot_done is False and blast is True and not left and not right and not up:
             print("bullet")
             bullet = Bullet(hero.rect.x + 75, hero.rect.y + 54, ('Left', 'Right')[hero.right])
-            bullets.append(bullet)
             bullets_group.add(bullet)
             all_sprites.add(bullet)
             hero.shot_done = True
         if hero.hit_done is False and hit is True and not left and not right and not up:
             print("hit")
             smash = Hit(hero.rect.x + 32, hero.rect.y + 24, ('Left', 'Right')[hero.right])
-            bullets.append(smash)
             bullets_group.add(smash)
             all_sprites.add(smash)
             hero.hit_done = True
-        screen.fill([255, 255, 255])
+
+        on_screen = pygame.sprite.Group()
+        for i in platforms_group:
+            if camera.state.colliderect(i.rect):
+                on_screen.add(i)
+
         screen.blit(background.image, background.rect)
         # передвижение
-        hero.update(left, right, up, platforms, down, enemies, screen, hp, other_blocks)
+        hero.update(left, right, up, on_screen, down, enemies_group, other_blocks)
         camera.update(hero)
-        lava_group.update()
+        lava.update()
         tp.update()
-        boss_group.update(hero, hp, enemies, boss_attacks_group,
-                          boss_attacks, all_sprites, enemies_group)
-        boss_attacks_group.update(enemies, hero, boss_attacks,
-                                  hp, enemies_group, all_sprites)
-        enemies_group.update(blanks, platforms, [hero.hitbox.x, hero.hitbox.y],
-                             enemies, enemies_group, all_sprites)
-        bullets_group.update(enemies, platforms, bullets)
+        # boss_group.update(hero, hp, enemies_group, boss_attacks_group,
+        #                   boss_attacks, all_sprites, enemies_group)
+        # boss_attacks_group.update(enemies_group, hero, boss_attacks,
+        #                           hp, enemies_group, all_sprites)
+        enemies_group.update(blanks_group, platforms_group, [hero.rect.x, hero.rect.y],
+                             enemies_group, all_sprites)
+        bullets_group.update(enemies_group, platforms_group, bullets_group)
         for i in all_sprites:
             if camera.state.colliderect(i.rect):
                 coordi = camera.apply(i.rect)
@@ -322,7 +269,7 @@ def main():
                         pygame.draw.rect(screen, pygame.Color('purple4'),
                                          coordi + (i.rect.width, i.rect.height), 1)
 
-        hp.draw(screen)
+        hp.draw(screen, hero.hp)
         pygame.display.flip()  # обновление и вывод всех изменений на экран
         # timer.tick(60)
         if show_fps:
