@@ -299,7 +299,7 @@ def main():
                           boss_attacks, all_sprites, enemies_group)
         boss_attacks_group.update(enemies, hero, boss_attacks,
                                   hp, enemies_group, all_sprites)
-        enemies_group.update(blanks, platforms, [hero.rect.x, hero.rect.y],
+        enemies_group.update(blanks, platforms, [hero.hitbox.x, hero.hitbox.y],
                              enemies, enemies_group, all_sprites)
         bullets_group.update(enemies, platforms, bullets)
         for i in all_sprites:

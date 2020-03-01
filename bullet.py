@@ -57,18 +57,21 @@ class Blast(sprite.Sprite):
         self.start_y = y
         self.image = pygame.transform.scale(image.load("data/enemyframes/fireball.png"),
                                             (sizex, sizey))
-        self.rect = Rect(x + 60, y + 60, 8, 8)
+        self.rect = Rect(x, y, 8, 8)
         self.dmg = 10
+        self.hitbox = Rect(0, 0, 8, 8)
 
     def update(self, blanks, platforms, hero_coords, enemies, enemies_group, all_sprites):
-        if self.rect.x > hero_coords[0] + 32:
+        if self.hitbox.x > hero_coords[0]:
             self.rect.x -= 3
-        elif self.rect.x < hero_coords[0] + 32:
+        elif self.hitbox.x < hero_coords[0]:
             self.rect.x += 3
-        if self.rect.y > hero_coords[1] - 64:
+        if self.hitbox.y > hero_coords[1]:
             self.rect.y -= 3
-        elif self.rect.y < hero_coords[1] - 64:
+        elif self.hitbox.y < hero_coords[1]:
             self.rect.y += 3
+        self.hitbox.x = self.rect.x + 60
+        self.hitbox.y = self.rect.y + 60
         self.collide(platforms)
 
     def collide(self, platforms):

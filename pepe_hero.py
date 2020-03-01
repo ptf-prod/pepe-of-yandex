@@ -183,11 +183,18 @@ class Player(sprite.Sprite):
 
         if self.hit_take is True:
             for e in enemies:
-                if sprite.collide_rect(self, e):
-                    self.take_dmg(e, hp)
-                    if type(e) == Blast:
-                        e.kill()
-                        del enemies[enemies.index(e)]
+                try:
+                    if self.hitbox.colliderect(e.hitbox):
+                        self.take_dmg(e, hp)
+                        if type(e) == Blast:
+                            e.kill()
+                            del enemies[enemies.index(e)]
+                except AttributeError:
+                    if self.hitbox.colliderect(e.rect):
+                        self.take_dmg(e, hp)
+                        if type(e) == Blast:
+                            e.kill()
+                            del enemies[enemies.index(e)]
 
             for ob in other_blocks:
                 if sprite.collide_rect(self, ob):
