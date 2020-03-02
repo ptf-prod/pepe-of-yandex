@@ -9,6 +9,7 @@ from enemies import *
 from boss import *
 from bullet import *
 from animation import *
+import time as timetime  # time is already defined with pygame
 
 PLATFORMS_LEGEND = {
     'G': 'up',
@@ -47,6 +48,16 @@ PLATFORM_HEIGHT = 32
 PLATFORM_COLOR = "#FF6262"
 MAX_WIDTH = 0
 MAX_HEIGHT = 0
+
+
+class Keys:
+    def __init__(self, left, right, up, down, shoot, hit):
+        self.left = left
+        self.right = right
+        self.up = up
+        self.down = down
+        self.shoot = shoot
+        self.hit = hit
 
 
 class Camera(object):
@@ -94,13 +105,13 @@ def load_image(name, colorkey=-1):
 
 
 def start_level(level_name):
-    global hero, hp, left, right, up, down, blast, hit, enemies_group, bullets_group
+    global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
     global all_sprites, platforms_group, boss_group, blanks_group, lava_group
     global other_blocks, level, camera
 
     hero = Player(55, 555)
     hp = HitPoints(hero.hp)
-    left = right = up = down = blast = hit = False  # по умолчанию — стоим
+    left = right = up = down = shoot = hit = False  # по умолчанию — стоим
     enemies_group = pygame.sprite.Group()
     bullets_group = pygame.sprite.Group()
     all_sprites = pygame.sprite.Group()
@@ -191,7 +202,7 @@ def start_level(level_name):
 
 
 def main():
-    global hero, hp, left, right, up, down, blast, hit, enemies_group, bullets_group
+    global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
     global all_sprites, platforms_group, boss_group, blanks_group, lava_group
     global other_blocks, level, camera
 
@@ -226,13 +237,15 @@ def main():
                         print("c")
                         print(hero.hit_done, hit, left, right, up)
                 elif event.key == K_z:
-                    blast = pressed
-        if hero.shot_done is False and blast is True and not left and not right and not up:
+                    shoot = pressed
+        keys = Keys(left, right, up, down, shoot, hit)
+        if timetime.time() - hero.shoot_start > 2 and shoot is True and hero.on_ground\
+                or timetime.time() - hero.shoot_start > 5 and shoot:
             print("bullet")
             bullet = Bullet(hero.rect.x + 75, hero.rect.y + 54, ('Left', 'Right')[hero.right])
             bullets_group.add(bullet)
             all_sprites.add(bullet)
-            hero.shot_done = True
+            hero.shoot_start = timetime.time()
         if hero.hit_done is False and hit is True and not left and not right and not up:
             print("hit")
             smash = Hit(hero.rect.x + 32, hero.rect.y + 24, ('Left', 'Right')[hero.right])
@@ -247,7 +260,7 @@ def main():
 
         screen.blit(background.image, background.rect)
         # передвижение
-        hero.update(t, left, right, up, on_screen, down, enemies_group, other_blocks)
+        hero.update(t, keys, on_screen, other_blocks, enemies_group)
         camera.update(hero)
         lava_group.update()
         # tp.update()
@@ -257,7 +270,7 @@ def main():
         #                           hp, enemies_group, all_sprites)
         enemies_group.update(blanks_group, platforms_group, [hero.hitbox.x, hero.hitbox.y],
                              enemies_group, all_sprites)
-        bullets_group.update(enemies_group, platforms_group, bullets_group)
+        bullets_group.update(t, enemies_group, platforms_group, bullets_group)
         for i in all_sprites:
             if camera.state.colliderect(i.rect):
                 coordi = camera.apply(i.rect)

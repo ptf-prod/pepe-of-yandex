@@ -7,9 +7,11 @@ class Bullet(sprite.Sprite):
     def __init__(self, x, y, direction):
         sprite.Sprite.__init__(self)
         if direction == "Right":
-            self.xvel = 10
+            self.xvel = 1000
         else:
-            self.xvel = -10
+            self.xvel = -1000
+        self.y = y
+        self.yvel = random.random() * 100 - 50
         self.start_x = x
         self.start_y = y
         self.image = Surface((6, 4))
@@ -18,14 +20,16 @@ class Bullet(sprite.Sprite):
         self.rect = Rect(x, y, 6, 4)  # прямоугольный объект
         self.kill_delay = False
 
-    def update(self, enemies, platforms, bullets):
+    def update(self, t, enemies, platforms, bullets):
 
-        self.rect.x += self.xvel  # переносим положение на xvel
+        self.rect.x += self.xvel * t  # переносим положение на xvel
+        self.rect.y = self.y = self.y + self.yvel * t
         self.collide(enemies, platforms)
         self.check_range()
         if self.kill_delay:
             self.kill_delay = False
             self.kill()
+        print(self.rect.y)
 
     def collide(self, enemies, platforms):
         for e in enemies:
@@ -43,7 +47,7 @@ class Bullet(sprite.Sprite):
                 self.kill()
 
     def check_range(self):
-        if self.rect.x >= self.start_x + 512 or self.rect.x <= self.start_x - 512:
+        if abs(self.rect.x - self.start_x) > 3000:
             print("kill")
             self.kill()
 
@@ -92,7 +96,7 @@ class Hit(sprite.Sprite):
         self.image.set_alpha(255)
         self.rect = Rect(x, y, 64, 64)  # прямоугольный объект
 
-    def update(self, enemies, platforms, bullets):
+    def update(self, t, enemies, platforms, bullets):
 
         self.rect.x += self.xvel  # переносим положение на xvel
         self.collide(enemies)
@@ -104,7 +108,6 @@ class Hit(sprite.Sprite):
                 if type(e) != Boss:
                     e.kill()
                     self.kill_delay = True
-                    del enemies[enemies.index(e)]
                 else:
                     e.hp -= 5
                     print(e.hp)
@@ -114,4 +117,3 @@ class Hit(sprite.Sprite):
         if self.rect.x >= self.start_x + 100 or self.rect.x <= self.start_x - 100:
             print("kill")
             self.kill()
-            del bullets[bullets.index(self)]
