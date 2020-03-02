@@ -1,6 +1,5 @@
 import pyganim
 
-from main import *
 from enemies import *
 from bullet import *
 

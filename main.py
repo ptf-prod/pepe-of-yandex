@@ -10,9 +10,32 @@ from boss import *
 from bullet import *
 from animation import *
 
-draw_hitboxes = True
-draw_rects = False
-show_fps = True
+PLATFORMS_LEGEND = {
+    'G': 'up',
+    '/': 'upleft',
+    '\\': 'upright',
+    'R': 'centre',
+    '<': 'left',
+    '>': 'right',
+    '_': 'down',
+    '-': 'downleft',
+    '+': 'downright',
+    '=': 'incline',
+    '%': 'outcline',
+    '.': 'alonecentre',
+    '{': 'aloneleft',
+    '}': 'aloneright',
+    '^': 'alone',
+    '?': 'aloneconnectleft',
+    '!': 'connectleft',
+    '#': 'aloneconnectright',
+    '@': 'connectright',
+}
+
+DRAW_HITBOXES = True
+DRAW_RECTS = False
+SHOW_FPS = True
+CURRENT_LEVEL = 'level_1.txt'
 
 # Объявляем константы
 WIN_WIDTH = 1280  # Ширина создаваемого окна
@@ -22,7 +45,6 @@ BACKGROUND_COLOR = (50, 150, 255)
 PLATFORM_WIDTH = 32
 PLATFORM_HEIGHT = 32
 PLATFORM_COLOR = "#FF6262"
-LEVEL = 1
 MAX_WIDTH = 0
 MAX_HEIGHT = 0
 
@@ -71,17 +93,13 @@ def load_image(name, colorkey=-1):
     return image
 
 
-def main():
-    global LEVEL
-    pygame.init()  # Инициация PyGame, обязательная строчка
-    screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
-    pygame.display.set_caption("Pepe the Frog")  # Пишем в шапку
-    background = Background('data/Background.jpg', [0, 0], WIN_WIDTH, WIN_HEIGHT)
-    # будем использовать как фон
+def start_level(level_name):
+    global hero, hp, left, right, up, down, blast, hit, enemies_group, bullets_group
+    global all_sprites, platforms_group, boss_group, blanks_group, lava_group
+    global other_blocks, level, camera
+
     hero = Player(55, 555)
     hp = HitPoints(hero.hp)
-
-    # создаем героя по (x,y) координатам
     left = right = up = down = blast = hit = False  # по умолчанию — стоим
     enemies_group = pygame.sprite.Group()
     bullets_group = pygame.sprite.Group()
@@ -92,39 +110,17 @@ def main():
     blanks_group = pygame.sprite.Group()
     lava_group = pygame.sprite.Group()
     other_blocks = []
-    clock = pygame.time.Clock()
     level = load_level("level_1.txt")
 
     x = y = 0  # координаты
-    platforms_legend = {
-        'G': 'up',
-        '/': 'upleft',
-        '\\': 'upright',
-        'R': 'centre',
-        '<': 'left',
-        '>': 'right',
-        '_': 'down',
-        '-': 'downleft',
-        '+': 'downright',
-        '=': 'incline',
-        '%': 'outcline',
-        '.': 'alonecentre',
-        '{': 'aloneleft',
-        '}': 'aloneright',
-        '^': 'alone',
-        '?': 'aloneconnectleft',
-        '!': 'connectleft',
-        '#': 'aloneconnectright',
-        '@': 'connectright',
-    }
     for row in level:  # вся строка
         for sym in row:  # каждый символ
             if sym == "*":
                 plat = Platform(x, y, None)
                 platforms_group.add(plat)
                 all_sprites.add(plat)
-            elif sym in platforms_legend.keys():
-                plat = Platform(x, y, f"data/framestiles/tiles/{platforms_legend[sym]}.png")
+            elif sym in PLATFORMS_LEGEND.keys():
+                plat = Platform(x, y, f"data/framestiles/tiles/{PLATFORMS_LEGEND[sym]}.png")
                 platforms_group.add(plat)
                 all_sprites.add(plat)
             elif sym == "U":
@@ -185,19 +181,31 @@ def main():
                 all_sprites.add(boss)
                 boss_group.add(boss)
 
-
-            x += PLATFORM_WIDTH   # блоки платформы ставятся на ширине блоков
+            x += PLATFORM_WIDTH  # блоки платформы ставятся на ширине блоков
         y += PLATFORM_HEIGHT  # то же самое и с высотой
         x = 0  # на каждой новой строчке начинаем с нуля
 
     total_level_width = len(level[0]) * PLATFORM_WIDTH  # Высчитываем фактическую ширину уровня
     total_level_height = len(level) * PLATFORM_HEIGHT  # высоту
-
     camera = Camera(WIN_WIDTH, WIN_HEIGHT)
-    import time as timetime
-    prev_time = timetime.time()
+
+
+def main():
+    global hero, hp, left, right, up, down, blast, hit, enemies_group, bullets_group
+    global all_sprites, platforms_group, boss_group, blanks_group, lava_group
+    global other_blocks, level, camera
+
+    pygame.init()  # Инициация PyGame, обязательная строчка
+    screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
+    pygame.display.set_caption("Pepe the Frog")  # Пишем в шапку
+    background = Background('data/Background.jpg', [0, 0], WIN_WIDTH, WIN_HEIGHT) # будем использовать как фон
+    clock = pygame.time.Clock()
+
+    start_level(CURRENT_LEVEL)
 
     while True:  # Основной цикл программы
+        if hero.hp <= 0:
+            start_level(CURRENT_LEVEL)
         t = clock.tick() / 1000
         for event in pygame.event.get():  # Обрабатываем события
             if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
@@ -242,7 +250,7 @@ def main():
         hero.update(t, left, right, up, on_screen, down, enemies_group, other_blocks)
         camera.update(hero)
         lava_group.update()
-        tp.update()
+        # tp.update()
         # boss_group.update(hero, hp, enemies_group, boss_attacks_group,
         #                   boss_attacks, all_sprites, enemies_group)
         # boss_attacks_group.update(enemies_group, hero, boss_attacks,
@@ -254,10 +262,10 @@ def main():
             if camera.state.colliderect(i.rect):
                 coordi = camera.apply(i.rect)
                 screen.blit(i.image, coordi)
-                if draw_rects:
+                if DRAW_RECTS:
                     pygame.draw.rect(screen, pygame.Color('blue'),
                                      coordi + (i.rect.width, i.rect.height), 1)
-                if draw_hitboxes:
+                if DRAW_HITBOXES:
                     if isinstance(i, Blank):
                         border_color = 'red4'
                     else:
@@ -272,10 +280,8 @@ def main():
 
         hp.draw(screen, hero.hp)
         pygame.display.flip()  # обновление и вывод всех изменений на экран
-        # timer.tick(60)
-        if show_fps:
-            print('fps:', 1 / (timetime.time() - prev_time))
-            prev_time = timetime.time()
+        if SHOW_FPS:
+            print('fps:', clock.get_fps())
 
 
 if __name__ == "__main__":
