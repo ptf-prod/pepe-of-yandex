@@ -29,7 +29,6 @@ class Bullet(sprite.Sprite):
         if self.kill_delay:
             self.kill_delay = False
             self.kill()
-        print(self.rect.y)
 
     def collide(self, enemies, platforms):
         for e in enemies:

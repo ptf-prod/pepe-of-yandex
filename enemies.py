@@ -33,23 +33,37 @@ GRAVITY = 0.7  # Сила, которая будет тянуть нас вни�
 
 
 class Enemy(sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, cur_anim=None, hb_shape=None):
         sprite.Sprite.__init__(self)
         self.xvel = 6  # скорость перемещения. 0 - стоять на месте
         self.yvel = 6
         self.start_x = x  # Начальная позиция Х, пригодится когда будем переигрывать уровень
         self.start_y = y
-        self.image = Surface((128, 128))
-        self.image.set_colorkey(Color("Red"))
-        self.image.fill(Color("Red"))
-        self.rect = Rect(x, y - 47, 100, 128)
-        self.onGround = False
+        self.hb_shape = [0, 0, 64, 64]
+        self.cur_anim = None
+        if cur_anim is not None:
+            self.hb_shape = hb_shape
+            self.cur_anim = cur_anim
+            self.image = cur_anim.getCurrentFrame()
+            self.rect = self.image.get_rect()
+            self.rect.topleft = (x, y)
+            self.hitbox = pygame.Rect(*hb_shape)
+            self.hitbox.x += x
+            self.hitbox.y += y
+        else:
+            self.image = Surface((128, 128))
+            self.image.set_colorkey(Color("Red"))
+            self.image.fill(Color("Red"))
+            self.rect = Rect(x, y - 47, 100, 128)
+            self.hitbox = self.rect
+        self.right = True
+        self.on_ground = False
         self.target_detected = False
 
     def update(self, blanks, platforms, target_coords, enemies_group, all_sprites):
-        if self.target_detected is False:
-            self.rect.x += self.xvel  # переносим положение на xvel
-        if type(self) == Crackatoo:
+        if not self.target_detected:
+            self.hitbox.x += self.xvel  # переносим положение на xvel
+        if type(self) == Crackatoo:  # Это надо переместить в клас курицы
             if self.xvel < 0:
                 self.image.fill(Color("Red"))
                 self.boltAnimCrackLeft.blit(self.image, (0, 0))
@@ -61,67 +75,51 @@ class Enemy(sprite.Sprite):
             else:
                 self.chasing(target_coords)
 
-        if self.onGround is False:
+        if not self.on_ground:
             self.yvel += GRAVITY
-        self.onGround = False
-        self.rect.y += self.yvel
+        self.on_ground = False
+        self.hitbox.y += self.yvel
         self.collide(blanks, platforms)
+        self.rect.x = self.hitbox.x - self.hb_shape[0]
+        self.rect.y = self.hitbox.y - self.hb_shape[1]
 
     def collide(self, blanks, platforms):
         for b in blanks:
-            if sprite.collide_rect(self, b):  # если есть пересечение врага с бланком
-                if type(self) == Crackatoo and self.target_detected is False or type(self) != Crackatoo:
+            if self.hitbox.colliderect(b.hitbox):  # если есть пересечение врага с бланком
+                if not self.target_detected:
                     self.xvel = -self.xvel
+                    self.right = not self.right
+                    break
         for p in platforms:
-            if sprite.collide_rect(self, p):  # если есть пересечение платформы с игроком
-                if p.rect.y == self.rect.y:
+            if self.hitbox.colliderect(p.hitbox):  # если есть пересечение платформы с врагом
+                if p.hitbox.y == self.hitbox.y:
                     self.xvel = -self.xvel
                 if self.yvel > 0:  # если падает вниз
-                    self.onGround = True  # и становится на что-то твердое
+                    self.on_ground = True  # и становится на что-то твердое
                     self.yvel = 0  # и энергия падения пропадает
-
+                self.hitbox.bottom = p.hitbox.top
+                self.rect.top = self.hitbox.top - self.hb_shape[1]
                 if self.yvel < 0:
                     self.yvel = 0  # и энергия прыжка пропадает
+                    self.hitbox.top = p.hitbox.bottom
+                    self.rect.top = self.hitbox.top - self.hb_shape[1]
 
 
 class Uka(Enemy):
     def __init__(self, x, y):
-        super().__init__(x, y)
-        boltAnim = []
-        for anim in ANIMATION_UKA_RUN:
-            boltAnim.append((pygame.transform.flip(pygame.transform.scale(image.load(anim), (128, 128)), True, False),
-                             ANIMATION_DELAY))
-        self.boltAnimUkaRunRight = pyganim.PygAnimation(boltAnim)
-        self.boltAnimUkaRunRight.play()
-        self.boltAnimUkaRunRight.blit(self.image, (0, 0))
-
-        boltAnim = []
-        for anim in ANIMATION_UKA_RUN:
-            boltAnim.append((pygame.transform.scale(image.load(anim), (128, 128)), ANIMATION_DELAY))
-        self.boltAnimUkaRunLeft = pyganim.PygAnimation(boltAnim)
-        self.boltAnimUkaRunLeft.play()
+        self.boltAnimRun = (load_animation(0, 6, ANIMATION_DELAY, 'data', 'enemyframes',
+                                           'monkeyrunning', 'monkey running{:04d}.png'),
+                            load_animation(0, 6, ANIMATION_DELAY, 'data', 'enemyframes',
+                                           'monkeyrunning', 'monkey running{:04d}.png', flip=True))
+        self.boltAnimRun[0].play()
+        self.boltAnimRun[1].play()
+        super().__init__(x, y - 32, self.boltAnimRun[1], [36, 46, 56, 46])
 
     def update(self, blanks, platforms, target_coords, enemies_group, all_sprites):
-        if self.target_detected is False:
-            self.rect.x += self.xvel  # переносим положение на xvel
-        if type(self) == Crackatoo:
-            if self.target_detected is False:
-                self.target_check(target_coords)
-            else:
-                self.chasing(target_coords)
+        super().update(blanks, platforms, target_coords, enemies_group, all_sprites)
+        self.image = self.boltAnimRun[self.right].getCurrentFrame()
 
-        if self.onGround is False:
-            self.yvel += GRAVITY
-        self.onGround = False
-        self.rect.y += self.yvel
-        self.collide(blanks, platforms)
 
-        if self.xvel < 0:
-            self.image.fill(Color("Red"))
-            self.boltAnimUkaRunLeft.blit(self.image, (0, 0))
-        else:
-            self.image.fill(Color("Red"))
-            self.boltAnimUkaRunRight.blit(self.image, (0, 0))
 
 
 class Flyling(Enemy):
