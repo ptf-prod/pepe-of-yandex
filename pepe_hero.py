@@ -111,12 +111,19 @@ class Player(sprite.Sprite):
             self.yvel += GRAVITY * t
 
         self.onGround = False
-        self.rect.y += self.yvel * t
-        self.hitbox.y += self.yvel * t
+        dy = self.yvel * t
+        dx = self.xvel * t
+
+        if self.yvel > 0:
+            self.hitbox.y += min(dy, PLATFORM_HEIGHT)
+        else:
+            self.hitbox.y -= min(-dy, PLATFORM_HEIGHT)
         self.collide(0, self.yvel, platforms, enemies)
 
-        self.rect.x += self.xvel * t  # переносим свои положение на xvel
-        self.hitbox.x += self.xvel * t  # переносим свои положение на xvel
+        if self.xvel > 0:
+            self.hitbox.x += min(dx, PLATFORM_WIDTH)
+        else:
+            self.hitbox.x -= min(-dx, PLATFORM_WIDTH)
         self.collide(self.xvel, 0, platforms, enemies)
 
         if self.hit_take is False:
@@ -147,6 +154,8 @@ class Player(sprite.Sprite):
                 self.burn_time = 0
                 self.previous_block = ""
 
+        self.rect.x = self.hitbox.x - WIDTH * 3 // 8
+        self.rect.y = self.hitbox.y - HEIGHT * 7 // 32
         self.image.fill(Color(COLOR))
         self.cur_anim[self.right].play()
         self.cur_anim[self.right].blit(self.image, (0, 0))
