@@ -20,7 +20,6 @@ class Player(sprite.Sprite):
         self.start_y = y
         self.image = Surface((WIDTH, HEIGHT))
         self.image.set_colorkey(Color(COLOR))
-        self.image.fill(Color(COLOR))
         self.rect = Rect(x, y, WIDTH, HEIGHT)  # прямоугольный объект
         self.yvel = 0  # скорость вертикального перемещения
         self.on_ground = False  # На земле ли я?
@@ -79,8 +78,6 @@ class Player(sprite.Sprite):
         elif not keys.right and not keys.left:
             self.cur_anim = self.boltAnimStay
             self.xvel = 0
-            if not keys.up:
-                self.image.fill(Color(COLOR))
         elif self.right:
             self.xvel = MOVE_SPEED  # Право = x + n
         else:
@@ -104,7 +101,6 @@ class Player(sprite.Sprite):
             self.yvel += GRAVITY * t
 
         if keys.shoot or self.shoot_start + 0.5 > timetime.time():
-            self.image.fill(Color(COLOR))
             self.cur_anim = self.boltAnimShoot
             self.xvel /= 1.5  # При стрельбе медленнее бежим
             if self.on_ground:
@@ -148,9 +144,8 @@ class Player(sprite.Sprite):
 
         self.rect.x = self.hitbox.x - WIDTH * 3 // 8
         self.rect.y = self.hitbox.y - HEIGHT * 7 // 32
-        self.image.fill(Color(COLOR))
         self.cur_anim[self.right].play()
-        self.cur_anim[self.right].blit(self.image, (0, 0))
+        self.image = self.cur_anim[self.right].getCurrentFrame()
 
     def collide(self, xvel, yvel, platforms, enemies):
         ok = False
