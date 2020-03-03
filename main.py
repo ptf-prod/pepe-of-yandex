@@ -33,7 +33,7 @@ PLATFORMS_LEGEND = {
     '@': 'connectright',
 }
 
-DRAW_HITBOXES = True
+DRAW_HITBOXES = False
 DRAW_RECTS = False
 SHOW_FPS = True
 CURRENT_LEVEL = 'level_1.txt'
