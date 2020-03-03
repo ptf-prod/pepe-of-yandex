@@ -41,6 +41,7 @@ class Enemy(sprite.Sprite):
         self.start_y = y
         self.hb_shape = [0, 0, 64, 64]
         self.cur_anim = None
+        self.dmg = 15
         if cur_anim is not None:
             self.hb_shape = hb_shape
             self.cur_anim = cur_anim
@@ -114,6 +115,7 @@ class Uka(Enemy):
         self.boltAnimRun[0].play()
         self.boltAnimRun[1].play()
         super().__init__(x, y - 32, self.boltAnimRun[1], [36, 46, 56, 46])
+        self.dmg = 10
 
     def update(self, blanks, platforms, target_coords, enemies_group, all_sprites):
         super().update(blanks, platforms, target_coords, enemies_group, all_sprites)

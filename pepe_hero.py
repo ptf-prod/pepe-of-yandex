@@ -2,6 +2,7 @@ import pyganim
 
 from enemies import *
 from bullet import *
+from main import DEBUG
 
 ANIMATION_DELAY = 100
 MOVE_SPEED = 220
@@ -200,25 +201,32 @@ class Player(sprite.Sprite):
                             e.kill()
 
     def take_dmg(self, enemy):
-        print(type(enemy).__name__)
-        if type(enemy) == Uka:
-            self.hp -= 10
-            self.immortality()
-        elif type(enemy) == Flyling:
-            self.hp -= 15
-            self.immortality()
-        elif type(enemy) == Crackatoo:
-            self.hp -= 20
-            self.immortality()
-        elif type(enemy) == Lava:
-            self.hp -= 0.05
-            self.previous_block = "lava"
-            self.block = "lava"
-        elif type(enemy) == Spikes:
-            self.hp -= 15
-            self.immortality()
-        elif type(enemy) == Blast:
+        if DEBUG:
+            print(type(enemy).__name__)
+        try:
             self.hp -= enemy.dmg
+            self.immortality()
+        except AttributeError:
+            if DEBUG:
+                print('No .dmg', type(enemy))
+            if type(enemy) == Uka:
+                self.hp -= 10
+                self.immortality()
+            elif type(enemy) == Flyling:
+                self.hp -= 15
+                self.immortality()
+            elif type(enemy) == Crackatoo:
+                self.hp -= 20
+                self.immortality()
+            elif type(enemy) == Lava:
+                self.hp -= 0.05
+                self.previous_block = "lava"
+                self.block = "lava"
+            elif type(enemy) == Spikes:
+                self.hp -= 15
+                self.immortality()
+            elif type(enemy) == Blast:
+                self.hp -= enemy.dmg
         if self.hp <= 0:
             self.die()
 
