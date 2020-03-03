@@ -2,6 +2,7 @@ import pyganim
 
 from enemies import *
 from bullet import *
+from main import DEBUG
 
 ANIMATION_DELAY = 100
 MOVE_SPEED = 220
@@ -200,7 +201,8 @@ class Player(sprite.Sprite):
                             e.kill()
 
     def take_dmg(self, enemy):
-        print(type(enemy).__name__)
+        if DEBUG:
+            print(type(enemy).__name__)
         if type(enemy) == Uka:
             self.hp -= 10
             self.immortality()

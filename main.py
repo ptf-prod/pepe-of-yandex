@@ -33,9 +33,10 @@ PLATFORMS_LEGEND = {
     '@': 'connectright',
 }
 
-DRAW_HITBOXES = False
-DRAW_RECTS = False
-SHOW_FPS = True
+DEBUG = False
+DRAW_HITBOXES = DEBUG and True
+DRAW_RECTS = DEBUG and False
+SHOW_FPS = DEBUG and True
 CURRENT_LEVEL = 'level_1.txt'
 
 # Объявляем константы
@@ -233,7 +234,7 @@ def main():
                     down = pressed
                 elif event.key == K_c:
                     hit = pressed
-                    if pressed:
+                    if pressed and DEBUG:
                         print("c")
                         print(hero.hit_done, hit, left, right, up)
                 elif event.key == K_z:
@@ -241,13 +242,15 @@ def main():
         keys = Keys(left, right, up, down, shoot, hit)
         if timetime.time() - hero.shoot_start > 2 and shoot is True and hero.on_ground\
                 or timetime.time() - hero.shoot_start > 5 and shoot:
-            print("bullet")
+            if DEBUG:
+                print("bullet")
             bullet = Bullet(hero.rect.x + 75, hero.rect.y + 54, ('Left', 'Right')[hero.right])
             bullets_group.add(bullet)
             all_sprites.add(bullet)
             hero.shoot_start = timetime.time()
         if hero.hit_done is False and hit is True and not left and not right and not up:
-            print("hit")
+            if DEBUG:
+                print("hit")
             smash = Hit(hero.rect.x + 32, hero.rect.y + 24, ('Left', 'Right')[hero.right])
             bullets_group.add(smash)
             all_sprites.add(smash)

@@ -2,6 +2,8 @@ from pygame import *
 from boss import *
 import random
 
+from main import DEBUG
+
 
 class Bullet(sprite.Sprite):
     def __init__(self, x, y, direction):
@@ -29,7 +31,8 @@ class Bullet(sprite.Sprite):
         if self.kill_delay:
             self.kill_delay = False
             self.kill()
-        print(self.rect.y)
+        if DEBUG:
+            print(self.rect.y)
 
     def collide(self, enemies, platforms):
         for e in enemies:
@@ -39,7 +42,8 @@ class Bullet(sprite.Sprite):
                     self.kill_delay = True
                 else:
                     e.hp -= 1
-                    print(e.hp)
+                    if DEBUG:
+                        print(e.hp)
                     self.kill_delay = True
 
         for p in platforms:
@@ -48,7 +52,8 @@ class Bullet(sprite.Sprite):
 
     def check_range(self):
         if abs(self.rect.x - self.start_x) > 3000:
-            print("kill")
+            if DEBUG:
+                print("kill")
             self.kill()
 
 
@@ -110,10 +115,12 @@ class Hit(sprite.Sprite):
                     self.kill_delay = True
                 else:
                     e.hp -= 5
-                    print(e.hp)
+                    if DEBUG:
+                        print(e.hp)
                     self.kill_delay = True
 
     def check_range(self, bullets):
         if self.rect.x >= self.start_x + 100 or self.rect.x <= self.start_x - 100:
-            print("kill")
+            if DEBUG:
+                print("kill")
             self.kill()
