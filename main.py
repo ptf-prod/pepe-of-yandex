@@ -2,6 +2,7 @@
 
 import os
 
+from constants import *
 from background import *
 from pepe_hero import *
 from platforms import *
@@ -11,48 +12,9 @@ from bullet import *
 from animation import *
 import time as timetime  # time is already defined with pygame
 
-PLATFORMS_LEGEND = {
-    'G': 'up',
-    '/': 'upleft',
-    '\\': 'upright',
-    'R': 'centre',
-    '<': 'left',
-    '>': 'right',
-    '_': 'down',
-    '-': 'downleft',
-    '+': 'downright',
-    '=': 'incline',
-    '%': 'outcline',
-    '.': 'alonecentre',
-    '{': 'aloneleft',
-    '}': 'aloneright',
-    '^': 'alone',
-    '?': 'aloneconnectleft',
-    '!': 'connectleft',
-    '#': 'aloneconnectright',
-    '@': 'connectright',
-}
-
-DEBUG = True
-DRAW_HITBOXES = DEBUG and True
-DRAW_RECTS = DEBUG and False
-SHOW_FPS = DEBUG and True
-CURRENT_LEVEL = 'level_1.txt'
-
-# Объявляем константы
-WIN_WIDTH = 1280  # Ширина создаваемого окна
-WIN_HEIGHT = 720  # Высота
-DISPLAY = (WIN_WIDTH, WIN_HEIGHT)  # Группируем ширину и высоту в одну переменную
-BACKGROUND_COLOR = (50, 150, 255)
-PLATFORM_WIDTH = 32
-PLATFORM_HEIGHT = 32
-PLATFORM_COLOR = "#FF6262"
-MAX_WIDTH = 0
-MAX_HEIGHT = 0
-
 
 class Keys:
-    def __init__(self, left, right, up, down, shoot, hit):
+    def __init__(self, left=False, right=False, up=False, down=False, shoot=False, hit=False):
         self.left = left
         self.right = right
         self.up = up
@@ -69,12 +31,12 @@ class Camera(object):
         return rect.x - self.state.x, rect.y - self.state.y
 
     def update(self, target):
-        x = target.rect.x - WIN_WIDTH // 2 + WIDTH // 2
-        y = target.rect.y - WIN_HEIGHT // 2 + HEIGHT // 2  # выравниваем камеру по центру
-        x = max(PLATFORM_WIDTH // 2, x)  # Не движемся дальше левой границы
+        x = target.rect.x - WIN_W // 2 + WIDTH // 2
+        y = target.rect.y - WIN_H // 2 + HEIGHT // 2  # выравниваем камеру по центру
+        x = max(PLAT_W // 2, x)  # Не движемся дальше левой границы
         # x = max(-(camera.width - WIN_WIDTH), x)  # Не движемся дальше правой границы
         # y = max(-(camera.height - WIN_HEIGHT), y)  # Не движемся дальше нижней границы
-        y = max(PLATFORM_HEIGHT // 2, y)  # Не движемся дальше верхней границы
+        y = max(PLAT_H // 2, y)  # Не движемся дальше верхней границы
         self.state.topleft = (x, y)
 
 
@@ -107,7 +69,7 @@ def load_image(name, colorkey=-1):
 
 def start_level(level_name):
     global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
-    global all_sprites, platforms_group, boss_group, blanks_group, lava_group
+    global all_sprites, platforms_group, boss_group, blanks_group, lava_group, player_group, entities_group
     global other_blocks, level, camera
 
     hero = Player(55, 555)
@@ -121,6 +83,9 @@ def start_level(level_name):
     boss_group = pygame.sprite.Group()
     blanks_group = pygame.sprite.Group()
     lava_group = pygame.sprite.Group()
+    player_group = pygame.sprite.Group()
+    player_group.add(hero)
+    entities_group = pygame.sprite.Group()
     other_blocks = []
     level = load_level("level_1.txt")
 
@@ -137,7 +102,8 @@ def start_level(level_name):
                 all_sprites.add(plat)
             elif sym == "U":
                 uka = Uka(x, y)
-                enemies_group.add(uka)
+                # enemies_group.add(uka)
+                entities_group.add(uka)
                 all_sprites.add(uka)
             elif sym == "b":
                 blank = Blank(x, y)
@@ -193,24 +159,25 @@ def start_level(level_name):
                 all_sprites.add(boss)
                 boss_group.add(boss)
 
-            x += PLATFORM_WIDTH  # блоки платформы ставятся на ширине блоков
-        y += PLATFORM_HEIGHT  # то же самое и с высотой
+            x += PLAT_W  # блоки платформы ставятся на ширине блоков
+        y += PLAT_H  # то же самое и с высотой
         x = 0  # на каждой новой строчке начинаем с нуля
 
-    total_level_width = len(level[0]) * PLATFORM_WIDTH  # Высчитываем фактическую ширину уровня
-    total_level_height = len(level) * PLATFORM_HEIGHT  # высоту
-    camera = Camera(WIN_WIDTH, WIN_HEIGHT)
+    total_level_width = len(level[0]) * PLAT_W  # Высчитываем фактическую ширину уровня
+    total_level_height = len(level) * PLAT_H  # высоту
+    camera = Camera(WIN_W, WIN_H)
 
 
 def main():
     global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
-    global all_sprites, platforms_group, boss_group, blanks_group, lava_group
+    global all_sprites, platforms_group, boss_group, blanks_group, lava_group, entities_group, player_group
     global other_blocks, level, camera
 
     pygame.init()  # Инициация PyGame, обязательная строчка
-    screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
+    screen = pygame.display.set_mode((WIN_W, WIN_H))
     pygame.display.set_caption("Pepe the Frog")  # Пишем в шапку
-    background = Background('data/Background.jpg', [0, 0], WIN_WIDTH, WIN_HEIGHT) # будем использовать как фон
+    background = Background('data/Background.jpg', [0, 0], WIN_W,
+                            WIN_H)  # будем использовать как фон
     clock = pygame.time.Clock()
 
     start_level(CURRENT_LEVEL)
@@ -239,8 +206,8 @@ def main():
                         print(hero.hit_done, hit, left, right, up)
                 elif event.key == K_z:
                     shoot = pressed
-        keys = Keys(left, right, up, down, shoot, hit)
-        if timetime.time() - hero.shoot_start > 2 and shoot is True and hero.on_ground\
+        hero.keys = Keys(left, right, up, down, shoot, hit)
+        if timetime.time() - hero.shoot_start > 2 and shoot is True and hero.on_ground \
                 or timetime.time() - hero.shoot_start > 5 and shoot:
             if DEBUG:
                 print("bullet")
@@ -263,7 +230,7 @@ def main():
 
         screen.blit(background.image, background.rect)
         # передвижение
-        hero.update(t, keys, on_screen, other_blocks, enemies_group)
+        hero.update(t, on_screen, blanks_group, enemies_group, player_group)
         camera.update(hero)
         lava_group.update()
         # tp.update()
@@ -273,15 +240,23 @@ def main():
         #                           hp, enemies_group, all_sprites)
         enemies_group.update(blanks_group, platforms_group, [hero.hitbox.x, hero.hitbox.y],
                              enemies_group, all_sprites)
+        entities_group.update(t, platforms_group, blanks_group, entities_group, player_group)
         bullets_group.update(t, enemies_group, platforms_group, bullets_group)
         for i in all_sprites:
             if camera.state.colliderect(i.rect):
                 coordi = camera.apply(i.rect)
                 screen.blit(i.image, coordi)
-                if DRAW_RECTS:
+
+        if DRAW_RECTS:
+            for i in all_sprites:
+                if camera.state.colliderect(i.rect):
+                    coordi = camera.apply(i.rect)
                     pygame.draw.rect(screen, pygame.Color('blue'),
-                                     coordi + (i.rect.width, i.rect.height), 1)
-                if DRAW_HITBOXES:
+                        coordi + (i.rect.width, i.rect.height), 1)
+        if DRAW_HITBOXES:
+            for i in all_sprites:
+                if camera.state.colliderect(i.rect):
+                    coordi = camera.apply(i.rect)
                     if isinstance(i, Blank):
                         border_color = 'red4'
                     else:

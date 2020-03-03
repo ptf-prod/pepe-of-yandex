@@ -6,10 +6,10 @@ import pygame
 import pyganim
 
 from animation import *
+from constants import *
 
-PLATFORM_WIDTH = 32
-PLATFORM_HEIGHT = 32
-PLATFORM_COLOR = "#FF6262"
+
+PLAT_COLOR = "#FF6262"
 ANIMATION_DELAY = 100
 ANIMATION_LAVA = ['data/framestiles/lava anim/lava anim0000.png',
                   'data/framestiles/lava anim/lava anim0001.png',
@@ -46,8 +46,8 @@ class Platform(sprite.Sprite):
             self.image = Surface((Platform.WIDTH, Platform.HEIGHT))
             self.image.set_alpha(0)
         self.rect = Rect(x, y, Platform.WIDTH * 2, Platform.HEIGHT * 2)
-        self.hitbox = pygame.Rect(x + PLATFORM_WIDTH // 2, y + PLATFORM_HEIGHT // 2,
-                                  PLATFORM_WIDTH, PLATFORM_HEIGHT)
+        self.hitbox = pygame.Rect(x + PLAT_W // 2, y + PLAT_H // 2,
+                                  PLAT_W, PLAT_H)
 
 
 class Blank(Platform):
@@ -90,7 +90,7 @@ class Ice(Platform):
 class Teleport(Platform):
     def __init__(self, x, y):
         super().__init__(x, y, None)
-        self.rect = Rect(x - 256, y - 348, PLATFORM_WIDTH, PLATFORM_HEIGHT)
+        self.rect = Rect(x - 256, y - 348, PLAT_W, PLAT_H)
         self.image = Surface((512, 512))
         self.image.fill(Color("White"))
         self.image.set_colorkey(Color("White"))

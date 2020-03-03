@@ -1,5 +1,7 @@
 from pygame import *
 import pygame
+
+from entity import Entity
 from platforms import *
 from bullet import *
 
@@ -24,7 +26,6 @@ ANIMATION_FLYLING_FIRE = ['data/enemyframes/headfire/head fireball0000.png',
                           'data/enemyframes/headfire/head fireball0002.png',
                           'data/enemyframes/headfire/head fireball0003.png']
 
-MOVE_SPEED = 4
 WIDTH = 64
 HEIGHT = 64
 COLOR = "RED"
@@ -32,7 +33,30 @@ JUMP_POWER = 20
 GRAVITY = 0.7  # Сила, которая будет тянуть нас вниз
 
 
-class Enemy(sprite.Sprite):
+class Enemy(Entity):
+    MOVE_SPEED = 150
+
+    def __init__(self, x, y, cur_anim=None, hb_shape=None):
+        self.cur_anim = None
+        self.dmg = 15
+        if cur_anim is None:
+            super().__init__(x, y, None, hb_shape)
+        else:
+            self.cur_anim = cur_anim
+            super().__init__(x, y, cur_anim.getCurrentFrame(), hb_shape)
+        self.xvel = Enemy.MOVE_SPEED  # скорость перемещения. 0 - стоять на месте
+        # self.xvel = 8  # скорость перемещения. 0 - стоять на месте
+        self.target_detected = False
+
+    def update(self, t, platforms, blanks, entities, player):
+        super().update(t, platforms, blanks, entities, player)
+        if self.collide_plat(self.xvel, 0, blanks):
+            self.xvel *= -1
+            self.right = not self.right
+
+
+
+class OldEnemy(sprite.Sprite):
     def __init__(self, x, y, cur_anim=None, hb_shape=None):
         sprite.Sprite.__init__(self)
         self.xvel = 6  # скорость перемещения. 0 - стоять на месте
@@ -117,14 +141,12 @@ class Uka(Enemy):
         super().__init__(x, y - 32, self.boltAnimRun[1], [36, 46, 56, 46])
         self.dmg = 10
 
-    def update(self, blanks, platforms, target_coords, enemies_group, all_sprites):
-        super().update(blanks, platforms, target_coords, enemies_group, all_sprites)
+    def update(self, t, platforms, blanks, entities, player):
+        super().update(t, platforms, blanks, entities, player)
         self.image = self.boltAnimRun[self.right].getCurrentFrame()
 
 
-
-
-class Flyling(Enemy):
+class Flyling(OldEnemy):
     def __init__(self, x, y):
         super().__init__(x, y)
         self.flytime = 0
@@ -134,7 +156,8 @@ class Flyling(Enemy):
         self.blast_row = 0
         boltAnim = []
         for anim in ANIMATION_FLYLING_FLY:
-            boltAnim.append((pygame.transform.flip(pygame.transform.scale(image.load(anim), (128, 128)), True, False),
+            boltAnim.append((pygame.transform.flip(
+                pygame.transform.scale(image.load(anim), (128, 128)), True, False),
                              ANIMATION_DELAY))
         self.boltAnimFlylingFlyRight = pyganim.PygAnimation(boltAnim)
         self.boltAnimFlylingFlyRight.play()
@@ -148,7 +171,8 @@ class Flyling(Enemy):
 
         boltAnim = []
         for anim in ANIMATION_FLYLING_FIRE:
-            boltAnim.append((pygame.transform.flip(pygame.transform.scale(image.load(anim), (128, 128)), True, False),
+            boltAnim.append((pygame.transform.flip(
+                pygame.transform.scale(image.load(anim), (128, 128)), True, False),
                              ANIMATION_DELAY))
         self.boltAnimFlylingFireRight = pyganim.PygAnimation(boltAnim)
         self.boltAnimFlylingFireRight.play()
@@ -206,7 +230,7 @@ class Flyling(Enemy):
             self.flytime = 0
 
 
-class Crackatoo(Enemy):
+class Crackatoo(OldEnemy):
     def __init__(self, x, y):
         super().__init__(x, y)
         self.hero_coords = ()
@@ -214,7 +238,8 @@ class Crackatoo(Enemy):
 
         boltAnim = []
         for anim in ANIMATION_CRACKATOO_RUN:
-            boltAnim.append((pygame.transform.flip(pygame.transform.scale(image.load(anim), (128, 128)), True, False),
+            boltAnim.append((pygame.transform.flip(
+                pygame.transform.scale(image.load(anim), (128, 128)), True, False),
                              ANIMATION_DELAY))
         self.boltAnimCrackRight = pyganim.PygAnimation(boltAnim)
         self.boltAnimCrackRight.play()
@@ -227,7 +252,8 @@ class Crackatoo(Enemy):
         self.boltAnimCrackLeft.play()
 
     def target_check(self, coords):
-        if self.rect.x - 256 <= coords[0] <= self.rect.x + 256 and self.rect.y - 256 <= coords[1] <= self.rect.x + 256:
+        if self.rect.x - 256 <= coords[0] <= self.rect.x + 256 and self.rect.y - 256 <= coords[
+            1] <= self.rect.x + 256:
             self.xvel = 15
             self.target_detected = True
 
