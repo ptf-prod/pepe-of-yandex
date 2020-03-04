@@ -102,15 +102,13 @@ class Hit(sprite.Sprite):
         self.start_x = x
         self.start_y = y
         self.image = Surface((64, 64))
-        self.image.fill(Color("White"))
-        self.image.set_alpha(255)
         self.rect = Rect(x, y, 64, 64)  # прямоугольный объект
 
-    def update(self, t, enemies, platforms, bullets):
+    def update(self, t, platforms, blanks, entities, player):
 
         self.rect.x += self.xvel  # переносим положение на xvel
-        self.collide(enemies)
-        self.check_range(bullets)
+        self.collide(entities)
+        self.check_range(entities)
 
     def collide(self, enemies):
         for e in enemies:

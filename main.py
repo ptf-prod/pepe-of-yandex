@@ -246,7 +246,7 @@ def main():
         enemies_group.update(blanks_group, platforms_group, [hero.hitbox.x, hero.hitbox.y],
                              enemies_group, all_sprites)
         entities_group.update(t, platforms_group, blanks_group, entities_group, player_group)
-        # bullets_group.update(t, platforms_group, blanks_group, entities_group, player_group)
+        bullets_group.update(t, platforms_group, blanks_group, entities_group, player_group)
         for i in all_sprites:
             if camera.state.colliderect(i.rect):
                 coordi = camera.apply(i.rect)
