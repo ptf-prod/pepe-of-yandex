@@ -2,57 +2,47 @@ from pygame import *
 from boss import *
 import random
 
+import enemies
+from entity import Entity
 from main import DEBUG
 
 
-class Bullet(sprite.Sprite):
-    def __init__(self, x, y, direction):
-        sprite.Sprite.__init__(self)
-        if direction == "Right":
-            self.xvel = 1000
+class Bullet(Entity):
+    def __init__(self, x, y, right):
+        image = Surface((6, 4))
+        image.fill(random.sample(range(0, 256), 3))
+        super().__init__(x, y, image)
+        if right:
+            self.xvel = 2500
         else:
-            self.xvel = -1000
-        self.y = y
+            self.xvel = -2500
         self.yvel = random.random() * 100 - 50
-        self.start_x = x
-        self.start_y = y
-        self.image = Surface((6, 4))
-        self.color = random.sample(range(0, 256), 3)
-        self.image.fill(self.color)
-        self.rect = Rect(x, y, 6, 4)  # прямоугольный объект
         self.kill_delay = False
 
-    def update(self, t, enemies, platforms, bullets):
-
-        self.rect.x += self.xvel * t  # переносим положение на xvel
-        self.rect.y = self.y = self.y + self.yvel * t
-        self.collide(enemies, platforms)
-        self.check_range()
-        if self.kill_delay:
-            self.kill_delay = False
-            self.kill()
-
-    def collide(self, enemies, platforms):
-        for e in enemies:
-            if sprite.collide_rect(self, e):
-                if type(e) != Boss:
-                    e.kill()
-                    self.kill_delay = True
-                else:
-                    e.hp -= 1
-                    if DEBUG:
-                        print(e.hp)
-                    self.kill_delay = True
-
+    def update(self, t, platforms, blanks, entities, player):
+        if not self.on_ground:
+            self.yvel += self.gravity * t
+        self.on_ground = False
+        dy = self.yvel * t
+        dx = self.xvel * t
+        if self.yvel > 0:
+            self.hitbox.y += min(dy, PLAT_H)
+        else:
+            self.hitbox.y -= min(-dy, PLAT_H)
+        self.hitbox.x += dx
+        for e in entities:
+            if isinstance(e, enemies.Enemy) and self.hitbox.colliderect(e.hitbox):
+                a = e.take_dmg(self, 40)
+                if a[0]:
+                    self.kill()
+                    return
         for p in platforms:
-            if sprite.collide_rect(self, p):
+            if self.hitbox.colliderect(p.hitbox):
                 self.kill()
-
-    def check_range(self):
-        if abs(self.rect.x - self.start_x) > 3000:
-            if DEBUG:
-                print("kill")
-            self.kill()
+                return
+        self.rect.topleft = self.hitbox.topleft
+        if DEBUG:
+            print(self.hitbox.x // PLAT_W, self.hitbox.y // PLAT_H)
 
 
 class Blast(sprite.Sprite):

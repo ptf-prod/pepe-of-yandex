@@ -211,8 +211,8 @@ def main():
                 or timetime.time() - hero.shoot_start > 5 and shoot:
             if DEBUG:
                 print("bullet")
-            bullet = Bullet(hero.rect.x + 75, hero.rect.y + 54, ('Left', 'Right')[hero.right])
-            bullets_group.add(bullet)
+            bullet = Bullet(hero.rect.x + 75, hero.rect.y + 54, hero.right)
+            entities_group.add(bullet)
             all_sprites.add(bullet)
             hero.shoot_start = timetime.time()
         if hero.hit_done is False and hit is True and not left and not right and not up:
@@ -241,7 +241,7 @@ def main():
         enemies_group.update(blanks_group, platforms_group, [hero.hitbox.x, hero.hitbox.y],
                              enemies_group, all_sprites)
         entities_group.update(t, platforms_group, blanks_group, entities_group, player_group)
-        bullets_group.update(t, enemies_group, platforms_group, bullets_group)
+        # bullets_group.update(t, platforms_group, blanks_group, entities_group, player_group)
         for i in all_sprites:
             if camera.state.colliderect(i.rect):
                 coordi = camera.apply(i.rect)
