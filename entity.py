@@ -33,16 +33,16 @@ class Entity(sprite.Sprite):
         self.on_ground = False
         dy = self.yvel * t
         dx = self.xvel * t
-        if self.yvel > 0:
-            self.hitbox.y += min(dy, PLAT_H)
-        else:
-            self.hitbox.y -= min(-dy, PLAT_H)
-        self.collide_plat(0, self.yvel, platforms)
-        if self.xvel > 0:
-            self.hitbox.x += min(dx, PLAT_W)
-        else:
-            self.hitbox.x -= min(-dx, PLAT_W)
-        self.collide_plat(self.xvel, 0, platforms)
+        n = int(max(abs(dy / self.hitbox.height), abs(dx / self.hitbox.width)) + 1)
+        dy /= n
+        dx /= n
+        for i in range(n):
+            self.hitbox.y += dy
+            a = self.collide_plat(0, dy, platforms)
+            self.hitbox.x += dx
+            a = self.collide_plat(dx, 0, platforms) or a
+            if a:
+                break
         self.rect.x = self.hitbox.x - self.hb_shape[0]
         self.rect.y = self.hitbox.y - self.hb_shape[1]
 
