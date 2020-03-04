@@ -207,11 +207,16 @@ def main():
                 elif event.key == K_z:
                     shoot = pressed
         hero.keys = Keys(left, right, up, down, shoot, hit)
-        if timetime.time() - hero.shoot_start > 2 and shoot is True and hero.on_ground \
+        if timetime.time() - hero.shoot_start > 1 and shoot is True and hero.on_ground \
                 or timetime.time() - hero.shoot_start > 5 and shoot:
             if DEBUG:
                 print("bullet")
-            bullet = Bullet(hero.rect.x + 75, hero.rect.y + 54, hero.right)
+            if hero.right:
+                bullet = Bullet(hero.hitbox.right, hero.hitbox.y + hero.hitbox.height // 8 * 3,
+                                True)
+            else:
+                bullet = Bullet(hero.hitbox.left - 10, hero.hitbox.y + hero.hitbox.height // 8 * 3,
+                                False)
             entities_group.add(bullet)
             all_sprites.add(bullet)
             hero.shoot_start = timetime.time()
