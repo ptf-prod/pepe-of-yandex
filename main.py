@@ -153,7 +153,7 @@ def start_level(level_name):
             elif sym == "C":
                 crack = Crackatoo(x, y)
                 all_sprites.add(crack)
-                enemies_group.add(crack)
+                entities_group.add(crack)
             elif sym == "B":
                 boss = Boss(x, y)
                 all_sprites.add(boss)

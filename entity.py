@@ -50,9 +50,9 @@ class Entity(sprite.Sprite):
     def check_collision(self, xvel, yvel, platforms, blanks, entities, player):
         return self.collide(xvel, yvel, platforms, True)
 
-    def collide(self, xvel, yvel, group, prevent=True):
+    def collide(self, xvel, yvel, group, prevent=True, filt=lambda x: True):
         for s in group:
-            if self.hitbox.colliderect(s.hitbox):  # если есть пересечение платформы с игроком
+            if filt(s) and self.hitbox.colliderect(s.hitbox) and s is not self:
                 if isinstance(s, Platform):
                     if self.yvel == 0:
                         self.block = (s, 1)
@@ -76,7 +76,7 @@ class Entity(sprite.Sprite):
                 # if type(s) == Ice:
                 #     self.previous_block = self.block
                 #     self.block = "ice"
-                if s.hurts:
+                if isinstance(s, Platform) and s.hurts:
                     self.take_dmg(s, s.hurts)
                 return s
         return False
