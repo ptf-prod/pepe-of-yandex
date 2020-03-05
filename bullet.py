@@ -83,7 +83,7 @@ class Blast(sprite.Sprite):
 
     def collide(self, platforms):
         for p in platforms:
-            if sprite.collide_rect(self, p):
+            if self.hitbox.colliderect(p.hitbox):
                 self.kill()
 
 

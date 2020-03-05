@@ -1,6 +1,9 @@
 # Импортируем все модули проекта
 
 import os
+import time as timetime
+
+import pygameMenu
 
 from background import *
 from pepe_hero import *
@@ -9,7 +12,6 @@ from enemies import *
 from boss import *
 from bullet import *
 from animation import *
-import time as timetime  # time is already defined with pygame
 
 PLATFORMS_LEGEND = {
     'G': 'up',
@@ -38,6 +40,8 @@ DRAW_HITBOXES = DEBUG and True
 DRAW_RECTS = DEBUG and False
 SHOW_FPS = DEBUG and True
 CURRENT_LEVEL = 'level_1.txt'
+MODE = 'MENU'
+FIRST_TIME = True
 
 # Объявляем константы
 WIN_WIDTH = 1280  # Ширина создаваемого окна
@@ -202,102 +206,149 @@ def start_level(level_name):
     camera = Camera(WIN_WIDTH, WIN_HEIGHT)
 
 
+def start_new_game():
+    global MODE, FIRST_TIME, menu, game_submenu
+    start_level(CURRENT_LEVEL)
+    MODE = 'GAME'
+    menu.disable()
+    if FIRST_TIME:
+        game_submenu.add_option('CONTINUE', continue_game, option_id='continue')
+        game_submenu.disable()
+        game_submenu.enable()
+        FIRST_TIME = False
+
+
+def continue_game():
+    global MODE, menu
+    MODE = 'GAME'
+    menu.disable()
+
+
+def game_cycle(events):
+    global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
+    global all_sprites, platforms_group, boss_group, blanks_group, lava_group
+    global other_blocks, level, camera, clock, background, screen, menu, MODE
+    if hero.hp <= 0:
+        start_level(CURRENT_LEVEL)
+    t = clock.tick() / 1000
+    for event in events:  # Обрабатываем события
+        if event.type == QUIT:
+            raise SystemExit("QUIT")
+        if event.type == KEYDOWN and event.key == K_ESCAPE:
+            MODE = 'MENU'
+            menu.enable()
+        if event.type in (KEYUP, KEYDOWN):
+            pressed = event.type == KEYDOWN
+            if event.key == K_LEFT:
+                left = pressed
+            elif event.key == K_RIGHT:
+                right = pressed
+            elif event.key == K_UP:
+                up = pressed
+            elif event.key == K_DOWN:
+                down = pressed
+            elif event.key == K_c:
+                hit = pressed
+                if pressed and DEBUG:
+                    print("c")
+                    print(hero.hit_done, hit, left, right, up)
+            elif event.key == K_z:
+                shoot = pressed
+    keys = Keys(left, right, up, down, shoot, hit)
+    if timetime.time() - hero.shoot_start > 2 and shoot is True and hero.on_ground \
+            or timetime.time() - hero.shoot_start > 5 and shoot:
+        if DEBUG:
+            print("bullet")
+        bullet = Bullet(hero.rect.x + 75, hero.rect.y + 54, ('Left', 'Right')[hero.right])
+        bullets_group.add(bullet)
+        all_sprites.add(bullet)
+        hero.shoot_start = timetime.time()
+    if hero.hit_done is False and hit is True and not left and not right and not up:
+        if DEBUG:
+            print("hit")
+        smash = Hit(hero.rect.x + 32, hero.rect.y + 24, ('Left', 'Right')[hero.right])
+        bullets_group.add(smash)
+        all_sprites.add(smash)
+        hero.hit_done = True
+
+    on_screen = pygame.sprite.Group()
+    for i in platforms_group:
+        if camera.state.colliderect(i.rect):
+            on_screen.add(i)
+
+    screen.blit(background.image, background.rect)
+    # передвижение
+    hero.update(t, keys, on_screen, other_blocks, enemies_group)
+    camera.update(hero)
+    lava_group.update()
+    # tp.update()
+    # boss_group.update(hero, hp, enemies_group, boss_attacks_group,
+    #                   boss_attacks, all_sprites, enemies_group)
+    # boss_attacks_group.update(enemies_group, hero, boss_attacks,
+    #                           hp, enemies_group, all_sprites)
+    enemies_group.update(blanks_group, platforms_group, [hero.hitbox.x, hero.hitbox.y],
+                         enemies_group, all_sprites)
+    bullets_group.update(t, enemies_group, platforms_group, bullets_group)
+    for i in all_sprites:
+        if camera.state.colliderect(i.rect):
+            coordi = camera.apply(i.rect)
+            screen.blit(i.image, coordi)
+            if DRAW_RECTS:
+                pygame.draw.rect(screen, pygame.Color('blue'),
+                                 coordi + (i.rect.width, i.rect.height), 1)
+            if DRAW_HITBOXES:
+                if isinstance(i, Blank):
+                    border_color = 'red4'
+                else:
+                    border_color = 'red'
+                try:
+                    pygame.draw.rect(screen, pygame.Color(border_color),
+                                     camera.apply(i.hitbox) + (i.hitbox.width, i.hitbox.height),
+                                     1)
+                except AttributeError:
+                    pygame.draw.rect(screen, pygame.Color('purple4'),
+                                     coordi + (i.rect.width, i.rect.height), 1)
+
+    hp.draw(screen, hero.hp)
+    pygame.display.flip()  # обновление и вывод всех изменений на экран
+    if SHOW_FPS:
+        print('fps:', clock.get_fps())
+
+
+def background_fun():
+    global screen
+    screen.fill((51, 153, 255))
+
+
 def main():
     global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
     global all_sprites, platforms_group, boss_group, blanks_group, lava_group
-    global other_blocks, level, camera
+    global other_blocks, level, camera, clock, background, screen, menu, game_submenu
 
     pygame.init()  # Инициация PyGame, обязательная строчка
     screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
-    pygame.display.set_caption("Pepe the Frog")  # Пишем в шапку
-    background = Background('data/Background.jpg', [0, 0], WIN_WIDTH, WIN_HEIGHT) # будем использовать как фон
+    pygame.display.set_caption("Pepe of Yandex")  # Пишем в шапку
+    background = Background('data/Background.jpg', [0, 0], WIN_WIDTH, WIN_HEIGHT)  # фон
     clock = pygame.time.Clock()
 
+    menu_font = pygameMenu.font.FONT_8BIT
+    menu = pygameMenu.Menu(screen, 1280, 720, menu_font, 'Pepe of Yandex',
+                           bgfun=background_fun, font_size_title=30,
+                           menu_alpha=70)
+    game_submenu = pygameMenu.Menu(screen, 1280, 720, menu_font, 'Game',
+                                   bgfun=background_fun, font_size_title=30,
+                                   menu_alpha=70)
+    game_submenu.add_option('START NEW GAME', start_new_game)
+    menu.add_option('GAME', game_submenu)
+    menu.add_option('QUIT', pygameMenu.events.EXIT)
     start_level(CURRENT_LEVEL)
 
     while True:  # Основной цикл программы
-        if hero.hp <= 0:
-            start_level(CURRENT_LEVEL)
-        t = clock.tick() / 1000
-        for event in pygame.event.get():  # Обрабатываем события
-            if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
-                raise SystemExit("QUIT")
-            if event.type in (KEYUP, KEYDOWN):
-                pressed = event.type == KEYDOWN
-                if event.key == K_LEFT:
-                    left = pressed
-                elif event.key == K_RIGHT:
-                    right = pressed
-                elif event.key == K_UP:
-                    up = pressed
-                elif event.key == K_DOWN:
-                    down = pressed
-                elif event.key == K_c:
-                    hit = pressed
-                    if pressed and DEBUG:
-                        print("c")
-                        print(hero.hit_done, hit, left, right, up)
-                elif event.key == K_z:
-                    shoot = pressed
-        keys = Keys(left, right, up, down, shoot, hit)
-        if timetime.time() - hero.shoot_start > 2 and shoot is True and hero.on_ground\
-                or timetime.time() - hero.shoot_start > 5 and shoot:
-            if DEBUG:
-                print("bullet")
-            bullet = Bullet(hero.rect.x + 75, hero.rect.y + 54, ('Left', 'Right')[hero.right])
-            bullets_group.add(bullet)
-            all_sprites.add(bullet)
-            hero.shoot_start = timetime.time()
-        if hero.hit_done is False and hit is True and not left and not right and not up:
-            if DEBUG:
-                print("hit")
-            smash = Hit(hero.rect.x + 32, hero.rect.y + 24, ('Left', 'Right')[hero.right])
-            bullets_group.add(smash)
-            all_sprites.add(smash)
-            hero.hit_done = True
-
-        on_screen = pygame.sprite.Group()
-        for i in platforms_group:
-            if camera.state.colliderect(i.rect):
-                on_screen.add(i)
-
-        screen.blit(background.image, background.rect)
-        # передвижение
-        hero.update(t, keys, on_screen, other_blocks, enemies_group)
-        camera.update(hero)
-        lava_group.update()
-        # tp.update()
-        # boss_group.update(hero, hp, enemies_group, boss_attacks_group,
-        #                   boss_attacks, all_sprites, enemies_group)
-        # boss_attacks_group.update(enemies_group, hero, boss_attacks,
-        #                           hp, enemies_group, all_sprites)
-        enemies_group.update(blanks_group, platforms_group, [hero.hitbox.x, hero.hitbox.y],
-                             enemies_group, all_sprites)
-        bullets_group.update(t, enemies_group, platforms_group, bullets_group)
-        for i in all_sprites:
-            if camera.state.colliderect(i.rect):
-                coordi = camera.apply(i.rect)
-                screen.blit(i.image, coordi)
-                if DRAW_RECTS:
-                    pygame.draw.rect(screen, pygame.Color('blue'),
-                                     coordi + (i.rect.width, i.rect.height), 1)
-                if DRAW_HITBOXES:
-                    if isinstance(i, Blank):
-                        border_color = 'red4'
-                    else:
-                        border_color = 'red'
-                    try:
-                        pygame.draw.rect(screen, pygame.Color(border_color),
-                                         camera.apply(i.hitbox) + (i.hitbox.width, i.hitbox.height),
-                                         1)
-                    except AttributeError:
-                        pygame.draw.rect(screen, pygame.Color('purple4'),
-                                         coordi + (i.rect.width, i.rect.height), 1)
-
-        hp.draw(screen, hero.hp)
-        pygame.display.flip()  # обновление и вывод всех изменений на экран
-        if SHOW_FPS:
-            print('fps:', clock.get_fps())
+        events = pygame.event.get()
+        if MODE == 'GAME':
+            game_cycle(events)
+        else:
+            menu.mainloop(events)
 
 
 if __name__ == "__main__":
