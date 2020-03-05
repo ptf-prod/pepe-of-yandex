@@ -207,6 +207,25 @@ def main():
                 elif event.key == K_z:
                     shoot = pressed
         hero.keys = Keys(left, right, up, down, shoot, hit)
+
+        on_screen = pygame.sprite.Group()
+        for i in platforms_group:
+            if camera.state.colliderect(i.rect):
+                on_screen.add(i)
+        # передвижение
+        hero.update(t, on_screen, blanks_group, enemies_group, player_group)
+        camera.update(hero)
+        lava_group.update()
+        # tp.update()
+        # boss_group.update(hero, hp, enemies_group, boss_attacks_group,
+        #                   boss_attacks, all_sprites, enemies_group)
+        # boss_attacks_group.update(enemies_group, hero, boss_attacks,
+        #                           hp, enemies_group, all_sprites)
+        enemies_group.update(blanks_group, platforms_group, [hero.hitbox.x, hero.hitbox.y],
+                             enemies_group, all_sprites)
+        entities_group.update(t, platforms_group, blanks_group, entities_group, player_group)
+        bullets_group.update(t, platforms_group, blanks_group, entities_group, player_group)
+
         if timetime.time() - hero.shoot_start > 1 and shoot is True and hero.on_ground \
                 or timetime.time() - hero.shoot_start > 5 and shoot:
             if DEBUG:
@@ -228,25 +247,7 @@ def main():
             all_sprites.add(smash)
             hero.hit_done = True
 
-        on_screen = pygame.sprite.Group()
-        for i in platforms_group:
-            if camera.state.colliderect(i.rect):
-                on_screen.add(i)
-
         screen.blit(background.image, background.rect)
-        # передвижение
-        hero.update(t, on_screen, blanks_group, enemies_group, player_group)
-        camera.update(hero)
-        lava_group.update()
-        # tp.update()
-        # boss_group.update(hero, hp, enemies_group, boss_attacks_group,
-        #                   boss_attacks, all_sprites, enemies_group)
-        # boss_attacks_group.update(enemies_group, hero, boss_attacks,
-        #                           hp, enemies_group, all_sprites)
-        enemies_group.update(blanks_group, platforms_group, [hero.hitbox.x, hero.hitbox.y],
-                             enemies_group, all_sprites)
-        entities_group.update(t, platforms_group, blanks_group, entities_group, player_group)
-        bullets_group.update(t, platforms_group, blanks_group, entities_group, player_group)
         for i in all_sprites:
             if camera.state.colliderect(i.rect):
                 coordi = camera.apply(i.rect)

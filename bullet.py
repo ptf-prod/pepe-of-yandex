@@ -49,7 +49,7 @@ class Bullet(Entity):
                         self.right and plat is not None and plat.hitbox.x < e.hitbox.x:
                     self.kill()
                     return
-            a = e.take_dmg(self, 40)
+            a = e.take_dmg(self, 10)
             if a[0]:
                 self.kill()
                 return

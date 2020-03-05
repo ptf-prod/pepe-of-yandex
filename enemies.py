@@ -1,5 +1,6 @@
 from pygame import *
 import pygame
+import time as timetime
 
 from entity import Entity
 from platforms import *
@@ -39,21 +40,36 @@ class Enemy(Entity):
     def __init__(self, x, y, cur_anim=None, hb_shape=None):
         self.cur_anim = None
         self.dmg = 15
+        self.hit_delay = 1
+        self.last_hit = 0
         if cur_anim is None:
             super().__init__(x, y, None, hb_shape)
         else:
             self.cur_anim = cur_anim
             super().__init__(x, y, cur_anim.getCurrentFrame(), hb_shape)
         self.xvel = Enemy.MOVE_SPEED  # скорость перемещения. 0 - стоять на месте
-        # self.xvel = 8  # скорость перемещения. 0 - стоять на месте
         self.target_detected = False
 
     def update(self, t, platforms, blanks, entities, player):
-        super().update(t, platforms, blanks, entities, player)
-        if self.collide_plat(self.xvel, 0, blanks):
-            self.xvel *= -1
-            self.right = not self.right
+        if not self.target_detected:
+            super().update(t, platforms, blanks, entities, player)
+            if timetime.time() - self.last_hit > self.hit_delay:
+                for p in player:
+                    if self.hitbox.colliderect(p.hitbox):
+                        if self.make_dmg(p)[0]:
+                            self.last_hit = timetime.time()
+                            break
+            if self.collide_plat(self.xvel, 0, blanks):
+                self.xvel *= -1
+                self.right = not self.right
+        else:
+            self.chase(t, platforms, blanks, entities, player)
 
+    def chase(self, t, platforms, blanks, entities, player):
+        pass
+
+    def make_dmg(self, who):
+        return who.take_dmg(self, self.dmg)
 
 
 class OldEnemy(sprite.Sprite):
@@ -140,6 +156,7 @@ class Uka(Enemy):
         self.boltAnimRun[1].play()
         super().__init__(x, y - 32, self.boltAnimRun[1], [36, 46, 56, 46])
         self.dmg = 10
+        self.hp = 30
 
     def update(self, t, platforms, blanks, entities, player):
         super().update(t, platforms, blanks, entities, player)

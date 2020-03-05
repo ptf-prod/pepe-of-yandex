@@ -88,7 +88,7 @@ class Entity(sprite.Sprite):
         :return: Получил ли урон (вдруг иммунитет), умер ли
         """
         self.hp -= dmg
-        if self.hp < 0:
+        if self.hp <= 0:
             self.kill()
             return True, True
         else:
