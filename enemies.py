@@ -49,6 +49,7 @@ class Enemy(Entity):
             super().__init__(x, y, cur_anim.getCurrentFrame(), hb_shape)
         self.xvel = Enemy.MOVE_SPEED  # скорость перемещения. 0 - стоять на месте
         self.target_detected = False
+        self.blank = None
 
     def update(self, t, platforms, blanks, entities, player):
         if not self.target_detected:
@@ -59,11 +60,25 @@ class Enemy(Entity):
                         if self.make_dmg(p)[0]:
                             self.last_hit = timetime.time()
                             break
-            if self.collide_plat(self.xvel, 0, blanks):
+            if self.collide(self.xvel, 0, blanks):
                 self.xvel *= -1
                 self.right = not self.right
         else:
             self.chase(t, platforms, blanks, entities, player)
+
+    def check_collision(self, xvel, yvel, platforms, blanks, entities, player):
+        if yvel:
+            self.collide(xvel, yvel, platforms, True)
+        else:
+            a = self.collide(xvel, yvel, blanks, True)
+            if a != self.blank:
+                self.blank = a
+                # Пменяйте что-нибудь здесь, если враги будут застревать в бланках
+            if not a:
+                a = self.collide(xvel, yvel, platforms, True)
+            if a:
+                self.xvel *= -1
+                self.right = not self.right
 
     def chase(self, t, platforms, blanks, entities, player):
         pass

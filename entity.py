@@ -2,7 +2,7 @@ import pygame
 from pygame import sprite
 import pyganim
 import time
-from platforms import Ice
+from platforms import Ice, Platform
 
 from constants import *
 
@@ -25,6 +25,7 @@ class Entity(sprite.Sprite):
         self.on_ground = False
         self.gravity = GRAVITY
         self.right = True
+        self.block = None
         self.hp = 1
 
     def update(self, t, platforms, blanks, entities, player):
@@ -38,48 +39,47 @@ class Entity(sprite.Sprite):
         dx /= n
         for i in range(n):
             self.hitbox.y += dy
-            a = self.collide_plat(0, dy, platforms)
+            a = self.check_collision(0, dy, platforms, blanks, entities, player)
             self.hitbox.x += dx
-            a = self.collide_plat(dx, 0, platforms) or a
+            a = self.check_collision(dx, 0, platforms, blanks, entities, player) or a
             if a:
                 break
         self.rect.x = self.hitbox.x - self.hb_shape[0]
         self.rect.y = self.hitbox.y - self.hb_shape[1]
 
-    def collide_plat(self, xvel, yvel, platforms):
-        colliding = False
-        ok = False
-        while not ok:
-            ok = True
-            for p in platforms:
-                if self.hitbox.colliderect(p.hitbox):  # если есть пересечение платформы с игроком
-                    self.block = "platform"
+    def check_collision(self, xvel, yvel, platforms, blanks, entities, player):
+        return self.collide(xvel, yvel, platforms, True)
+
+    def collide(self, xvel, yvel, group, prevent=True):
+        for s in group:
+            if self.hitbox.colliderect(s.hitbox):  # если есть пересечение платформы с игроком
+                if isinstance(s, Platform):
+                    if self.yvel == 0:
+                        self.block = (s, 1)
+                    else:
+                        self.block = (s, 0)
+                if prevent:
                     if xvel > 0:  # если движется вправо
-                        self.hitbox.right = p.hitbox.left  # то не движется вправо
+                        self.hitbox.right = s.hitbox.left  # то не движется вправо
 
                     elif xvel < 0:  # если движется влево
-                        self.hitbox.left = p.hitbox.right  # то не движется вправо
+                        self.hitbox.left = s.hitbox.right  # то не движется вправо
 
                     elif yvel > 0:  # если падает вниз
-                        self.hitbox.bottom = p.hitbox.top  # то не падает вниз
+                        self.hitbox.bottom = s.hitbox.top  # то не падает вниз
                         self.yvel = 0
                         self.on_ground = True  # и становится на что-то твердое
 
                     elif yvel < 0:  # если движется вверх
-                        self.hitbox.top = p.hitbox.bottom  # то не движется вверх
+                        self.hitbox.top = s.hitbox.bottom  # то не движется вверх
                         self.yvel = 0  # и энергия прыжка пропадает
-                    else:
-                        break
-                    if type(p) == Ice:
-                        self.previous_block = self.block
-                        self.block = "ice"
-                    if p.hurts and sprite.collide_rect(self, p):
-                        self.take_dmg(p, p.hurts)
-                        self.block = f"{p}"
-                    colliding = True
-                    ok = False
-                    break
-        return colliding
+                # if type(s) == Ice:
+                #     self.previous_block = self.block
+                #     self.block = "ice"
+                if s.hurts:
+                    self.take_dmg(s, s.hurts)
+                return s
+        return False
 
     def take_dmg(self, who, dmg):
         """
