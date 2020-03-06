@@ -55,9 +55,6 @@ class Enemy(Entity):
             if self.hitbox.colliderect(p.hitbox):
                 if self.make_dmg(p)[0]:
                     break
-        # if self.collide(self.xvel, 0, blanks):
-        #     self.xvel *= -1
-        #     self.right = not self.right
 
     def check_collision(self, xvel, yvel, platforms, blanks, entities, player):
         if yvel:
@@ -70,8 +67,7 @@ class Enemy(Entity):
             if not a:
                 a = self.collide(xvel, yvel, platforms, True)
             if a:
-                self.xvel *= -1
-                self.right = not self.right
+                self.reverse()
 
     def make_dmg(self, who):
         if timetime.time() - self.last_hit < self.hit_delay:
@@ -80,6 +76,10 @@ class Enemy(Entity):
         if a[0]:
             self.last_hit = timetime.time()
         return a
+
+    def reverse(self):
+        self.xvel *= -1
+        self.right = not self.right
 
 
 class OldEnemy(sprite.Sprite):
@@ -218,6 +218,15 @@ class Flyling(Enemy):
         else:
             self.image = self.boltAnimFly[self.right].getCurrentFrame()
 
+    def check_collision(self, xvel, yvel, platforms, blanks, entities, player):
+        # if xvel == 0 and yvel == 0:
+        #     return
+        # if self.collide(xvel, yvel, blanks, True):
+        #     self.reverse()
+        #     return
+        # if self.collide(xvel, yvel, platforms, True):
+        #     self.reverse()
+        return False
 
 
 class Crackatoo(Enemy):
@@ -272,8 +281,7 @@ class Crackatoo(Enemy):
         if not self.target_detected:
             x = self.collide(xvel, yvel, blanks, True)
             if x:
-                self.xvel *= -1
-                self.right = not self.right
+                self.reverse()
             return x
         else:
             self.collide(xvel, yvel, entities, True,
