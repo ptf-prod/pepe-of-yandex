@@ -48,6 +48,24 @@ class Enemy(Entity):
         self.xvel = 0  # скорость перемещения. 0 - стоять на месте
         self.target_detected = False
         self.blank = None
+        self.barriers = None
+
+    def get_barriers_x(self, platforms, blanks):
+        a = platforms.sprites() + blanks.sprites()
+        left = right = None
+        for i in a:
+            if self.hitbox.colliderect(Rect(self.hitbox.x, i.hitbox.top, 1, i.hitbox.height)):
+                if i.hitbox.right <= self.hitbox.left and \
+                        (left is None or i.hitbox.right > left.hitbox.right):
+                    left = i
+                elif i.hitbox.left >= self.hitbox.right and \
+                        (right is None or i.hitbox.right < right.hitbox.right):
+                    right = i
+        self.barriers = sprite.Group()
+        if left is not None:
+            self.barriers.add(left)
+        if right is not None:
+            self.barriers.add(right)
 
     def update(self, t, platforms, blanks, entities, player):
         super().update(t, platforms, blanks, entities, player)
@@ -60,6 +78,11 @@ class Enemy(Entity):
         if yvel:
             self.collide(xvel, yvel, platforms, True)
         else:
+            if self.barriers is not None:
+                a = self.collide(xvel, yvel, self.barriers, True)
+                if a:
+                    self.reverse()
+                return
             a = self.collide(xvel, yvel, blanks, True)
             if a != self.blank:
                 self.blank = a
@@ -158,12 +181,14 @@ class Uka(Enemy):
                                            'monkeyrunning', 'monkey running{:04d}.png', flip=True))
         self.boltAnimRun[0].play()
         self.boltAnimRun[1].play()
-        super().__init__(x, y - 32, self.boltAnimRun[0], [36, 46, 56, 46])
+        super().__init__(x, y - 44, self.boltAnimRun[0], [36, 46, 56, 46])
         self.dmg = 10
         self.hp = 30
         self.xvel = Uka.MOVE_SPEED
 
     def update(self, t, platforms, blanks, entities, player):
+        if self.barriers is None:
+            self.get_barriers_x(platforms, blanks)
         super().update(t, platforms, blanks, entities, player)
         self.image = self.boltAnimRun[self.right].getCurrentFrame()
 
@@ -190,24 +215,32 @@ class Flyling(Enemy):
         super().__init__(x, y, self.boltAnimFly[0], [44, 44, 22, 30])
         self.dmg = 10
         self.hp = 30
-        self.xvel = Flyling.MOVE_SPEED / 4
+        self.xvel = Flyling.MOVE_SPEED
         self.last_blast = 0
         self.blast_row = 0
         self.gravity = 0
 
     def update(self, t, platforms, blanks, entities, player):
+        if self.barriers is None:
+            self.get_barriers_x(platforms, blanks)
         target_coords = player.sprites()[0].hitbox.center
         super().update(t, platforms, blanks, entities, player)
         db = timetime.time() - self.last_blast
         if db > self.blast_delay and self.blast_row < 3 or db > self.blast_delay * 3:
             if self.blast_row >= 3:
                 self.blast_row = 0
-            if self.rect.x - 512 <= target_coords[0] <= self.rect.x + 512 and \
-                    self.rect.y - 512 <= target_coords[1] <= self.rect.x + 512:
+            d = abs(self.hitbox.centerx - target_coords[0]) + abs(
+                self.hitbox.centery - target_coords[1])
+            if d < 1000:
                 if self.rect.x < target_coords[0]:
-                    self.right = False
-                else:
                     self.right = True
+                    self.xvel = Flyling.MOVE_SPEED
+                else:
+                    self.right = False
+                    self.xvel = -Flyling.MOVE_SPEED
+            else:
+                self.xvel = 0
+            if d <= 600:
                 blast = Blast(self.rect.x, self.rect.y + 14, 128, 128)
                 self.eg.add(blast)
                 self.ass.add(blast)
@@ -219,13 +252,9 @@ class Flyling(Enemy):
             self.image = self.boltAnimFly[self.right].getCurrentFrame()
 
     def check_collision(self, xvel, yvel, platforms, blanks, entities, player):
-        # if xvel == 0 and yvel == 0:
-        #     return
-        # if self.collide(xvel, yvel, blanks, True):
-        #     self.reverse()
-        #     return
-        # if self.collide(xvel, yvel, platforms, True):
-        #     self.reverse()
+        if self.collide(xvel, yvel, self.barriers, True):
+            self.reverse()
+            return True
         return False
 
 

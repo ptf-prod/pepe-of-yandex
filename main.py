@@ -186,6 +186,7 @@ def main():
 
     start_level(CURRENT_LEVEL)
 
+    prev_fps = 0
     while True:  # Основной цикл программы
         if hero.hp <= 0:
             start_level(CURRENT_LEVEL)
@@ -282,7 +283,9 @@ def main():
         hp.draw(screen, hero.hp)
         pygame.display.flip()  # обновление и вывод всех изменений на экран
         if SHOW_FPS:
-            print('fps:', clock.get_fps())
+            if prev_fps != clock.get_fps():
+                prev_fps = clock.get_fps()
+                print('fps:', prev_fps)
 
 
 if __name__ == "__main__":
