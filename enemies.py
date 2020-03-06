@@ -168,88 +168,56 @@ class Uka(Enemy):
         self.image = self.boltAnimRun[self.right].getCurrentFrame()
 
 
-class Flyling(OldEnemy):
+class Flyling(Enemy):
+    MOVE_SPEED = 50
+
     def __init__(self, x, y):
-        super().__init__(x, y)
-        self.flytime = 0
-        self.rect = Rect(x, y - 47, 64, 64)
-        self.blast_done = False
-        self.blast_time = 0
+        self.blast_delay = 3
+        self.boltAnimFly = (load_animation(0, 4, ANIMATION_DELAY, 'data', 'enemyframes',
+                                           'headflying', 'head flying{:04d}.png'),
+                            load_animation(0, 4, ANIMATION_DELAY, 'data', 'enemyframes',
+                                           'headflying', 'head flying{:04d}.png', flip=True))
+        self.boltAnimFly[0].play()
+        self.boltAnimFly[1].play()
+
+        self.boltAnimFire = (load_animation(0, 4, ANIMATION_DELAY, 'data', 'enemyframes',
+                                            'headfire', 'head fireball{:04d}.png'),
+                             load_animation(0, 4, ANIMATION_DELAY, 'data', 'enemyframes',
+                                            'headfire', 'head fireball{:04d}.png', flip=True))
+        self.boltAnimFire[0].play()
+        self.boltAnimFire[1].play()
+
+        super().__init__(x, y, self.boltAnimFly[0], [44, 44, 22, 30])
+        self.dmg = 10
+        self.hp = 30
+        self.xvel = Flyling.MOVE_SPEED / 4
+        self.last_blast = 0
         self.blast_row = 0
-        boltAnim = []
-        for anim in ANIMATION_FLYLING_FLY:
-            boltAnim.append((pygame.transform.flip(
-                pygame.transform.scale(image.load(anim), (128, 128)), True, False),
-                             ANIMATION_DELAY))
-        self.boltAnimFlylingFlyRight = pyganim.PygAnimation(boltAnim)
-        self.boltAnimFlylingFlyRight.play()
-        self.boltAnimFlylingFlyRight.blit(self.image, (0, 0))
+        self.gravity = 0
 
-        boltAnim = []
-        for anim in ANIMATION_FLYLING_FLY:
-            boltAnim.append((pygame.transform.scale(image.load(anim), (128, 128)), ANIMATION_DELAY))
-        self.boltAnimFlylingFlyLeft = pyganim.PygAnimation(boltAnim)
-        self.boltAnimFlylingFlyLeft.play()
-
-        boltAnim = []
-        for anim in ANIMATION_FLYLING_FIRE:
-            boltAnim.append((pygame.transform.flip(
-                pygame.transform.scale(image.load(anim), (128, 128)), True, False),
-                             ANIMATION_DELAY))
-        self.boltAnimFlylingFireRight = pyganim.PygAnimation(boltAnim)
-        self.boltAnimFlylingFireRight.play()
-
-        boltAnim = []
-        for anim in ANIMATION_FLYLING_FIRE:
-            boltAnim.append((pygame.transform.scale(image.load(anim), (128, 128)), ANIMATION_DELAY))
-        self.boltAnimFlylingFireLeft = pyganim.PygAnimation(boltAnim)
-        self.boltAnimFlylingFireLeft.play()
-
-    def update(self, blanks, platforms, target_coords, enemies_group, all_sprites):
-        self.rect.x += self.xvel  # переносим положение на xvel
-        self.collide(blanks, platforms)
-        self.check_time()
-        self.flytime += 1
-        if self.blast_done is False:
+    def update(self, t, platforms, blanks, entities, player):
+        target_coords = player.sprites()[0].hitbox.center
+        super().update(t, platforms, blanks, entities, player)
+        db = timetime.time() - self.last_blast
+        if db > self.blast_delay and self.blast_row < 3 or db > self.blast_delay * 3:
+            if self.blast_row >= 3:
+                self.blast_row = 0
             if self.rect.x - 512 <= target_coords[0] <= self.rect.x + 512 and \
                     self.rect.y - 512 <= target_coords[1] <= self.rect.x + 512:
                 if self.rect.x < target_coords[0]:
-                    self.image.fill(Color("Red"))
-                    self.boltAnimFlylingFireLeft.blit(self.image, (0, 0))  # По-умолчанию, стоим
+                    self.right = False
                 else:
-                    self.image.fill(Color("Red"))
-                    self.boltAnimFlylingFireRight.blit(self.image, (0, 0))  # По-умолчанию, стоим
+                    self.right = True
                 blast = Blast(self.rect.x, self.rect.y + 14, 128, 128)
-                enemies_group.add(blast)
-                all_sprites.add(blast)
-                self.blast_done = True
-        else:
-            self.blast_time += 1
-            if self.blast_time == 15:
-                self.blast_time = 0
-                self.blast_done = False
+                self.eg.add(blast)
+                self.ass.add(blast)
+                self.last_blast = timetime.time()
                 self.blast_row += 1
-            if self.blast_row == 3:
-                self.blast_time = -150
-                self.blast_done = False
-                self.blast_row = 0
-        if self.xvel < 0:
-            self.image.fill(Color("Red"))
-            self.boltAnimFlylingFlyLeft.blit(self.image, (0, 0))  # По-умолчанию, стоим
+        if self.last_blast + 0.4 > timetime.time():
+            self.image = self.boltAnimFire[self.right].getCurrentFrame()
         else:
-            self.image.fill(Color("Red"))
-            self.boltAnimFlylingFlyRight.blit(self.image, (0, 0))  # По-умолчанию, стоим
+            self.image = self.boltAnimFly[self.right].getCurrentFrame()
 
-    def check_time(self):
-        if self.flytime >= 60:
-            self.xvel = -self.xvel
-            self.flytime = 0
-
-    def collide(self, blanks, platforms):
-        hits = pygame.sprite.spritecollide(self, platforms, False)
-        if hits:
-            self.xvel = -self.xvel
-            self.flytime = 0
 
 
 class Crackatoo(Enemy):

@@ -1,4 +1,6 @@
 # Импортируем все модули проекта
+enemies_group = None
+all_sprites = None
 
 import os
 
@@ -111,7 +113,9 @@ def start_level(level_name):
                 all_sprites.add(blank)
             elif sym == "F":
                 flyling = Flyling(x, y)
-                enemies_group.add(flyling)
+                flyling.eg = enemies_group
+                flyling.ass = all_sprites
+                entities_group.add(flyling)
                 all_sprites.add(flyling)
             elif sym == "L":
                 lava = Lava(x, y)
