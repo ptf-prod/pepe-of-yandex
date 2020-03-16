@@ -5,6 +5,7 @@ import time as timetime
 from entity import Entity
 from platforms import *
 from bullet import *
+import pyganim
 
 ANIMATION_UKA_RUN = ['data/enemyframes/monkeyrunning/monkey running0000.png',
                      'data/enemyframes/monkeyrunning/monkey running0001.png',
@@ -31,7 +32,6 @@ WIDTH = 64
 HEIGHT = 64
 COLOR = "RED"
 JUMP_POWER = 20
-GRAVITY = 0.7  # Сила, которая будет тянуть нас вниз
 
 
 class Enemy(Entity):
@@ -105,72 +105,6 @@ class Enemy(Entity):
         self.right = not self.right
 
 
-class OldEnemy(sprite.Sprite):
-    def __init__(self, x, y, cur_anim=None, hb_shape=None):
-        sprite.Sprite.__init__(self)
-        self.xvel = 6  # скорость перемещения. 0 - стоять на месте
-        self.yvel = 6
-        self.start_x = x  # Начальная позиция Х, пригодится когда будем переигрывать уровень
-        self.start_y = y
-        self.hb_shape = [0, 0, 64, 64]
-        self.cur_anim = None
-        self.dmg = 15
-        if cur_anim is not None:
-            self.hb_shape = hb_shape
-            self.cur_anim = cur_anim
-            self.image = cur_anim.getCurrentFrame()
-            self.rect = self.image.get_rect()
-            self.rect.topleft = (x, y)
-            self.hitbox = pygame.Rect(*hb_shape)
-            self.hitbox.x += x
-            self.hitbox.y += y
-        else:
-            self.image = Surface((128, 128))
-            self.image.set_colorkey(Color("Red"))
-            self.image.fill(Color("Red"))
-            self.rect = Rect(x, y - 47, 100, 128)
-            self.hitbox = self.rect
-        self.right = True
-        self.on_ground = False
-        self.target_detected = False
-
-    def update(self, t, platforms, blanks, entities, players):
-        self.target_check(players.sprites()[0].hitbox.topleft)
-        # if type(self) == Crackatoo:  # Это надо переместить в клас курицы
-        #     if self.xvel < 0:
-        #         self.image.fill(Color("Red"))
-        #         self.boltAnimCrackLeft.blit(self.image, (0, 0))
-        #     else:
-        #         self.image.fill(Color("Red"))
-        #         self.boltAnimCrackLeft.blit(self.image, (0, 0))
-        #     if self.target_detected is False:
-        #         self.target_check(target_coords)
-        #     else:
-        #         self.chasing(target_coords)
-        super().update(t, platforms, blanks, entities, players)
-
-    def collide(self, blanks, platforms):
-        for b in blanks:
-            if self.hitbox.colliderect(b.hitbox):  # если есть пересечение врага с бланком
-                if not self.target_detected:
-                    self.xvel = -self.xvel
-                    self.right = not self.right
-                    break
-        for p in platforms:
-            if self.hitbox.colliderect(p.hitbox):  # если есть пересечение платформы с врагом
-                if p.hitbox.y == self.hitbox.y:
-                    self.xvel = -self.xvel
-                if self.yvel > 0:  # если падает вниз
-                    self.on_ground = True  # и становится на что-то твердое
-                    self.yvel = 0  # и энергия падения пропадает
-                self.hitbox.bottom = p.hitbox.top
-                self.rect.top = self.hitbox.top - self.hb_shape[1]
-                if self.yvel < 0:
-                    self.yvel = 0  # и энергия прыжка пропадает
-                    self.hitbox.top = p.hitbox.bottom
-                    self.rect.top = self.hitbox.top - self.hb_shape[1]
-
-
 class Uka(Enemy):
     MOVE_SPEED = 120
 
@@ -241,7 +175,7 @@ class Flyling(Enemy):
             else:
                 self.xvel = 0
             if d <= 600:
-                blast = Blast(self.rect.x, self.rect.y + 14, 128, 128)
+                blast = Blast(self.rect.x, self.rect.y, 1)
                 self.eg.add(blast)
                 self.ass.add(blast)
                 self.last_blast = timetime.time()
@@ -320,3 +254,44 @@ class Crackatoo(Enemy):
                 self.make_dmg(a)
                 return a
             return a
+
+
+class Blast(Enemy):
+    def __init__(self, x, y, target, size_c=2):
+        self.target = target
+        im = pygame.transform.scale(image.load("data/enemyframes/fireball.png"),
+                                    (int(16 * size_c), int(16 * size_c)))
+        anim = [pyganim.PygAnimation([(im, 99999)]),
+                pyganim.PygAnimation([(pygame.transform.flip(im, True, False), 99999)])]
+        anim[0].play()
+        anim[1].play()
+        super().__init__(x, y, anim[0], [int(5 * size_c), int(6 * size_c),
+                                         int(5 * size_c), int(4 * size_c)])
+        self.dmg = 5
+        self.hero_coords = (0, 0)
+        self.gravity = GRAVITY / 4
+        self.xvel0 = 250
+        self.xvel = 250
+        self.yvel = 100
+
+    def check_collision(self, xvel, yvel, platforms, blanks, entities, player):
+        if self.collide(xvel, yvel, platforms, False):
+            self.kill()
+        if self.collide(xvel, yvel, player, False):
+            self.kill()
+        for i in entities:
+            if isinstance(i, Enemy) and self.collide(xvel, yvel, (i,), False):
+                if self.make_dmg(i):
+                    break
+
+    def update(self, t, platforms, blanks, entities, player):
+        if len(player) > 0:
+            if self.hitbox.right <= player.sprites()[0].hitbox.left:
+                self.right = True
+                self.xvel = self.xvel0
+            elif self.hitbox.left >= player.sprites()[0].hitbox.right:
+                self.right = False
+                self.xvel = -self.xvel0
+            else:
+                self.xvel = 0
+        super().update(t, platforms, blanks, entities, player)

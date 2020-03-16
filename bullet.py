@@ -62,36 +62,6 @@ class Bullet(Entity):
             print(self.hitbox.x, self.hitbox.y)
 
 
-class Blast(sprite.Sprite):
-    def __init__(self, x, y, sizex, sizey):
-        sprite.Sprite.__init__(self)
-        self.start_x = x
-        self.start_y = y
-        self.image = pygame.transform.scale(image.load("data/enemyframes/fireball.png"),
-                                            (sizex, sizey))
-        self.rect = Rect(x, y, 8, 8)
-        self.dmg = 10
-        self.hitbox = Rect(0, 0, 8, 8)
-
-    def update(self, blanks, platforms, hero_coords, enemies_group, all_sprites):
-        if self.hitbox.x > hero_coords[0] + 16:
-            self.rect.x -= 3
-        elif self.hitbox.x < hero_coords[0] + 16:
-            self.rect.x += 3
-        if self.hitbox.y > hero_coords[1] + 32:
-            self.rect.y -= 3
-        elif self.hitbox.y < hero_coords[1] + 32:
-            self.rect.y += 3
-        self.hitbox.x = self.rect.x + 60
-        self.hitbox.y = self.rect.y + 60
-        self.collide(platforms)
-
-    def collide(self, platforms):
-        for p in platforms:
-            if sprite.collide_rect(self, p):
-                self.kill()
-
-
 class Hit(sprite.Sprite):
     def __init__(self, x, y, direction):
         sprite.Sprite.__init__(self)

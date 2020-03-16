@@ -113,7 +113,7 @@ def start_level(level_name):
                 all_sprites.add(blank)
             elif sym == "F":
                 flyling = Flyling(x, y)
-                flyling.eg = enemies_group
+                flyling.eg = entities_group
                 flyling.ass = all_sprites
                 entities_group.add(flyling)
                 all_sprites.add(flyling)
