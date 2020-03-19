@@ -5,6 +5,7 @@ import time as timetime
 from entity import Entity
 from platforms import *
 from bullet import *
+from constants import *
 import pyganim
 
 ANIMATION_UKA_RUN = ['data/enemyframes/monkeyrunning/monkey running0000.png',
@@ -115,7 +116,9 @@ class Uka(Enemy):
                                            'monkeyrunning', 'monkey running{:04d}.png', flip=True))
         self.boltAnimRun[0].play()
         self.boltAnimRun[1].play()
-        super().__init__(x, y - 44, self.boltAnimRun[0], [36, 46, 56, 46])
+
+        super().__init__(x, y - PLAT_H * 44 // 32, self.boltAnimRun[0], [PLAT_W * 44 // 32, PLAT_H * 56 // 32,
+                                                                         PLAT_W * 44 // 32, PLAT_H * 36 // 32])
         self.dmg = 10
         self.hp = 30
         self.xvel = Uka.MOVE_SPEED
@@ -204,7 +207,8 @@ class Crackatoo(Enemy):
         self.boltAnimRun[0].play()
         self.boltAnimRun[1].play()
 
-        super().__init__(x, y, self.boltAnimRun[0], [48, 36, 32, 56])
+        super().__init__(x, y, self.boltAnimRun[0], [PLAT_W * 48 // 32, PLAT_H * 36 // 32,
+                                                     PLAT_W * 32 // 32, PLAT_H * 56 // 32])
         self.dmg = 15
         self.hp = 20
         self.hit_delay = 1.5
