@@ -29,10 +29,11 @@ class Entity(sprite.Sprite):
         self.hp = 1
 
     def update(self, t, platforms, blanks, entities, player):
+        old_yvel = self.yvel
         if not self.on_ground:
             self.yvel += self.gravity * t
         self.on_ground = False
-        dy = self.yvel * t
+        dy = (old_yvel + self.yvel) / 2 * t
         dx = self.xvel * t
         n = int(max(abs(dy / self.hitbox.height), abs(dx / self.hitbox.width)) + 1)
         dy /= n
