@@ -142,20 +142,21 @@ class Flyling(Enemy):
         self.boltAnimFly[0].play()
         self.boltAnimFly[1].play()
 
-        self.boltAnimFire = (load_animation(0, 4, ANIMATION_DELAY, 'data', 'enemyframes',
+        self.boltAnimFire = (load_animation(1, 4, ANIMATION_DELAY, 'data', 'enemyframes',
                                             'headfire', 'head fireball{:04d}.png'),
-                             load_animation(0, 4, ANIMATION_DELAY, 'data', 'enemyframes',
+                             load_animation(1, 4, ANIMATION_DELAY, 'data', 'enemyframes',
                                             'headfire', 'head fireball{:04d}.png', flip=True))
         self.boltAnimFire[0].play()
         self.boltAnimFire[1].play()
 
-        super().__init__(x, y, self.boltAnimFly[0], [44, 44, 22, 30])
+        super().__init__(x, y, self.boltAnimFly[0], [50, 42, 28, 24])
         self.dmg = 10
         self.hp = 30
         self.xvel = Flyling.MOVE_SPEED
         self.last_blast = 0
         self.blast_row = 0
         self.gravity = 0
+        self.blast_waiting = False
 
     def update(self, t, platforms, blanks, entities, player):
         if self.barriers is None:
@@ -178,12 +179,20 @@ class Flyling(Enemy):
             else:
                 self.xvel = 0
             if d <= 600:
-                blast = Blast(self.rect.x, self.rect.y, 1)
-                self.eg.add(blast)
-                self.ass.add(blast)
+                self.boltAnimFire[self.right].play(0)
                 self.last_blast = timetime.time()
                 self.blast_row += 1
-        if self.last_blast + 0.4 > timetime.time():
+                self.blast_waiting = True
+
+        if self.last_blast + 0.3 > timetime.time():
+            if self.last_blast + 0.2 < timetime.time() and self.blast_waiting:
+                if self.right:
+                    blast = Blast(self.hitbox.right, self.hitbox.top, 1)
+                else:
+                    blast = Blast(self.hitbox.left - PLAT_W, self.hitbox.top, 1)
+                self.eg.add(blast)
+                self.ass.add(blast)
+                self.blast_waiting = False
             self.image = self.boltAnimFire[self.right].getCurrentFrame()
         else:
             self.image = self.boltAnimFly[self.right].getCurrentFrame()
