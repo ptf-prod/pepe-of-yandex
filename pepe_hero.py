@@ -40,8 +40,8 @@ class Player(Entity):
 
         self.cur_anim = self.boltAnimStay[1]
         super().__init__(x, y, self.boltAnimStay[1].getCurrentFrame(),
-                         [Player.WIDTH * 3 // 8, Player.HEIGHT * 7 // 32,
-                          Player.WIDTH // 4, Player.HEIGHT // 2])
+                         [Player.WIDTH * 26 // 64, Player.HEIGHT * 7 // 32,
+                          Player.WIDTH * 12 // 64, Player.HEIGHT // 2])
         self.hp = 100
         self.hit_take = True
         self.immortal_time = 0
@@ -55,11 +55,10 @@ class Player(Entity):
         self.shoot_start = 0
         self.keys = Keys()
         self.cur_anim = self.boltAnimStay
-        self.hitbox = pygame.Rect(x + Player.WIDTH * 3 // 8, y + Player.HEIGHT * 7 // 32,
-                                  Player.WIDTH // 4, Player.HEIGHT // 2)
 
     def update(self, t, platforms, blanks, entities, player):
         import time as timetime
+        prev_anim = self.cur_anim
         self.cur_anim[self.right].pause()
         self.cur_anim = self.boltAnimRun
         if self.keys.left and not self.keys.right:
@@ -105,21 +104,14 @@ class Player(Entity):
 
         super().update(t, platforms, blanks, entities, player)
 
-        if self.hit_take is False:
-            self.immortal_time += 1
-            if self.immortal_time == 120:
-                self.hit_take = True
-                self.immortal_time = 0
-
         if self.previous_block == "lava" and self.block != "lava":
             self.hp -= 0.1
             self.burn_time += 1
             if self.burn_time == 200 and self.block != "lava":
                 self.burn_time = 0
                 self.previous_block = ""
-
-        self.rect.x = self.hitbox.x - Player.WIDTH * 3 // 8
-        self.rect.y = self.hitbox.y - Player.HEIGHT * 7 // 32
+        if self.cur_anim is not prev_anim:
+            self.cur_anim[self.right].stop()
         self.cur_anim[self.right].play()
         self.image = self.cur_anim[self.right].getCurrentFrame()
 
