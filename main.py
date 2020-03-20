@@ -71,7 +71,7 @@ def load_image(name, colorkey=-1):
 
 def start_level(level_name):
     global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
-    global all_sprites, platforms_group, boss_group, blanks_group, lava_group, player_group, entities_group
+    global all_sprites, platforms_group, boss_group, blanks_group, anim_plat_group, player_group, entities_group
     global other_blocks, level, camera
 
     hero = Player(55, 555)
@@ -84,7 +84,7 @@ def start_level(level_name):
     all_sprites.add(hero)
     boss_group = pygame.sprite.Group()
     blanks_group = pygame.sprite.Group()
-    lava_group = pygame.sprite.Group()
+    anim_plat_group = pygame.sprite.Group()
     player_group = pygame.sprite.Group()
     player_group.add(hero)
     entities_group = pygame.sprite.Group()
@@ -122,7 +122,7 @@ def start_level(level_name):
                 other_blocks.append(lava)
                 all_sprites.add(lava)
                 platforms_group.add(lava)
-                lava_group.add(lava)
+                anim_plat_group.add(lava)
             elif sym == "[":
                 lava = Platform(x, y, "data/framestiles/tiles/lavaleft.png")
                 other_blocks.append(lava)
@@ -141,8 +141,8 @@ def start_level(level_name):
             elif sym == "T":
                 tp = Teleport(x, y)
                 other_blocks.append(tp)
+                anim_plat_group.add(tp)
                 all_sprites.add(tp)
-                platforms_group.add(tp)
             elif sym == "I":
                 ice = Ice(x, y, "data/framestiles/tiles/icecenter.png")
                 all_sprites.add(ice)
@@ -175,7 +175,7 @@ def start_level(level_name):
 
 def main():
     global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
-    global all_sprites, platforms_group, boss_group, blanks_group, lava_group, entities_group, player_group
+    global all_sprites, platforms_group, boss_group, blanks_group, anim_plat_group, entities_group, player_group
     global other_blocks, level, camera
 
     pygame.init()  # Инициация PyGame, обязательная строчка
@@ -221,7 +221,7 @@ def main():
         # передвижение
         hero.update(t, on_screen, blanks_group, enemies_group, player_group)
         camera.update(hero)
-        lava_group.update()
+        anim_plat_group.update()
         # tp.update()
         # boss_group.update(hero, hp, enemies_group, boss_attacks_group,
         #                   boss_attacks, all_sprites, enemies_group)

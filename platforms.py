@@ -20,7 +20,7 @@ ANIMATION_LAVA = ['data/framestiles/lava anim/lava anim0000.png',
                   'data/framestiles/lava anim/lava anim0006.png']
 
 ANIMATION_TELEPORT = ['data/framestiles/portal anim/finish-portal anim0000.png',
-                      'data/framestiles/portal anim/finish-portal anim0001.png',
+                      # 'data/framestiles/portal anim/finish-portal anim0001.png',
                       'data/framestiles/portal anim/finish-portal anim0002.png',
                       'data/framestiles/portal anim/finish-portal anim0003.png',
                       'data/framestiles/portal anim/finish-portal anim0004.png',
@@ -57,23 +57,18 @@ class Lava(Platform):
     def __init__(self, x, y):
         super().__init__(x, y, None)
         self.dmg = True
-        self.image = Surface((128, 128))
-        self.image.fill(Color("White"))
-        self.image.set_colorkey(Color("White"))
-        self.rect = Rect(x, y, 64, 64)
-        self.hitbox.top = y + PLAT_H * 18 // 16
-        self.hitbox.height = PLAT_H * 6 // 16
         bolt_anim = []
         for anim in ANIMATION_LAVA:
-            bolt_anim.append((pygame.transform.scale(image.load(anim), (64, 64)),
+            bolt_anim.append((pygame.transform.scale(image.load(anim), (PLAT_W * 2, PLAT_H * 2)),
                               ANIMATION_DELAY))
         self.boltAnimLava = pyganim.PygAnimation(bolt_anim)
         self.boltAnimLava.play()
-        self.boltAnimLava.blit(self.image, (0, 0))
+        self.image = self.boltAnimLava.getCurrentFrame()
+        self.hitbox.top = y + PLAT_H * 18 // 16
+        self.hitbox.height = PLAT_H * 6 // 16
 
     def update(self, *args):
-        self.image.fill(Color("White"))
-        self.boltAnimLava.blit(self.image, (0, 0))
+        self.image = self.boltAnimLava.getCurrentFrame()
 
 
 class Spikes(Platform):
@@ -93,18 +88,16 @@ class Ice(Platform):
 class Teleport(Platform):
     def __init__(self, x, y):
         super().__init__(x, y, None)
-        self.rect = Rect(x - 256, y - 348, PLAT_W, PLAT_H)
-        self.image = Surface((512, 512))
-        self.image.fill(Color("White"))
-        self.image.set_colorkey(Color("White"))
         bolt_anim = []
         for anim in ANIMATION_TELEPORT:
-            bolt_anim.append((pygame.transform.scale(image.load(anim), (512, 512)),
+            bolt_anim.append((pygame.transform.scale(image.load(anim), (PLAT_W * 16, PLAT_H * 16)),
                               ANIMATION_DELAY))
         self.boltAnimTeleport = pyganim.PygAnimation(bolt_anim)
         self.boltAnimTeleport.play()
-        self.boltAnimTeleport.blit(self.image, (0, 0))
+        self.image = self.boltAnimTeleport.getCurrentFrame()
+        self.rect = Rect(x - PLAT_W * 7, y - PLAT_H * 21 // 2, PLAT_W * 16, PLAT_H * 16)
+        self.hitbox.top -= PLAT_H * 6
+        self.hitbox.height = PLAT_H * 6
 
     def update(self, *args):
-        self.image.fill(Color("White"))
-        self.boltAnimTeleport.blit(self.image, (0, 0))
+        self.image = self.boltAnimTeleport.getCurrentFrame()
