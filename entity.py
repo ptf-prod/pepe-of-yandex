@@ -76,8 +76,8 @@ class Entity(sprite.Sprite):
                 # if type(s) == Ice:
                 #     self.previous_block = self.block
                 #     self.block = "ice"
-                if isinstance(s, Platform) and s.hurts:
-                    self.take_dmg(s, s.hurts)
+                if isinstance(s, Platform) and s.dmg:
+                    self.take_dmg(s, s.dmg)
                 return s
         return False
 

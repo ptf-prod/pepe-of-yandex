@@ -121,6 +121,7 @@ def start_level(level_name):
                 lava = Lava(x, y)
                 other_blocks.append(lava)
                 all_sprites.add(lava)
+                platforms_group.add(lava)
                 lava_group.add(lava)
             elif sym == "[":
                 lava = Platform(x, y, "data/framestiles/tiles/lavaleft.png")
