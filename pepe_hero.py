@@ -3,8 +3,9 @@ import pyganim
 from entity import Entity
 from enemies import *
 from bullet import *
-from main import DEBUG, Keys
+from main import Keys
 from constants import *
+import platforms as plat
 
 
 class Player(Entity):
@@ -55,6 +56,11 @@ class Player(Entity):
         self.shoot_start = 0
         self.keys = Keys()
         self.cur_anim = self.boltAnimStay
+        self.last_block_hit = {
+            # Класс блока: время последнего касания
+            plat.Lava: 0,
+            plat.Spikes: 0
+        }
 
     def update(self, t, platforms, blanks, entities, player):
         import time as timetime
@@ -120,7 +126,6 @@ class Player(Entity):
             print(type(who).__name__)
         try:
             a = super().take_dmg(who, dmg)
-            self.immortality()
             return a
         except AttributeError:
             h0 = self.hp

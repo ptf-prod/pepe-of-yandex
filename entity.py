@@ -2,7 +2,7 @@ import pygame
 from pygame import sprite
 import pyganim
 import time
-from platforms import Ice, Platform
+import platforms as plat
 
 from constants import *
 
@@ -53,7 +53,7 @@ class Entity(sprite.Sprite):
     def collide(self, xvel, yvel, group, prevent=True, filt=lambda x: True):
         for s in group:
             if filt(s) and self.hitbox.colliderect(s.hitbox) and s is not self:
-                if isinstance(s, Platform):
+                if isinstance(s, plat.Platform):
                     if self.yvel == 0:
                         self.block = (s, 1)
                     else:
@@ -76,7 +76,7 @@ class Entity(sprite.Sprite):
                 # if type(s) == Ice:
                 #     self.previous_block = self.block
                 #     self.block = "ice"
-                if isinstance(s, Platform) and s.dmg:
+                if isinstance(s, plat.Platform) and s.dmg:
                     self.take_dmg(s, s.dmg)
                 return s
         return False

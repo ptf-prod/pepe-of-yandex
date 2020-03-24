@@ -3,7 +3,7 @@ import pygame
 import time as timetime
 
 from entity import Entity
-from platforms import *
+import platforms as plat
 from bullet import *
 from constants import *
 import pyganim
@@ -50,6 +50,11 @@ class Enemy(Entity):
         self.target_detected = False
         self.blank = None
         self.barriers = None
+        self.last_block_hit = {
+            # Класс блока: время последнего касания
+            plat.Lava: 0,
+            plat.Spikes: 0
+        }
 
     def get_barriers_x(self, platforms, blanks):
         a = platforms.sprites() + blanks.sprites()

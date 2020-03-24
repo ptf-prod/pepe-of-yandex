@@ -71,8 +71,8 @@ def load_image(name, colorkey=-1):
 
 def start_level(level_name):
     global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
-    global all_sprites, platforms_group, boss_group, blanks_group, anim_plat_group, player_group, entities_group
-    global other_blocks, level, camera
+    global all_sprites, platforms_group, boss_group, blanks_group, player_group, entities_group
+    global updating_blocks, level, camera
 
     hero = Player(55, 555)
     hp = HitPoints(hero.hp)
@@ -84,11 +84,14 @@ def start_level(level_name):
     all_sprites.add(hero)
     boss_group = pygame.sprite.Group()
     blanks_group = pygame.sprite.Group()
-    anim_plat_group = pygame.sprite.Group()
+    updating_blocks = {
+        Lava: pygame.sprite.Group(),
+        Spikes: pygame.sprite.Group(),
+        Teleport: pygame.sprite.Group()
+    }
     player_group = pygame.sprite.Group()
     player_group.add(hero)
     entities_group = pygame.sprite.Group()
-    other_blocks = []
     level = load_level("level_1.txt")
 
     x = y = 0  # координаты
@@ -104,7 +107,6 @@ def start_level(level_name):
                 all_sprites.add(plat)
             elif sym == "U":
                 uka = Uka(x, y)
-                # enemies_group.add(uka)
                 entities_group.add(uka)
                 all_sprites.add(uka)
             elif sym == "b":
@@ -119,29 +121,24 @@ def start_level(level_name):
                 all_sprites.add(flyling)
             elif sym == "L":
                 lava = Lava(x, y)
-                other_blocks.append(lava)
                 all_sprites.add(lava)
                 platforms_group.add(lava)
-                anim_plat_group.add(lava)
+                updating_blocks[Lava].add(lava)
             elif sym == "[":
                 lava = Platform(x, y, "data/framestiles/tiles/lavaleft.png")
-                other_blocks.append(lava)
                 all_sprites.add(lava)
                 platforms_group.add(lava)
             elif sym == "]":
                 lava = Platform(x, y, "data/framestiles/tiles/lavaright.png")
-                other_blocks.append(lava)
                 all_sprites.add(lava)
                 platforms_group.add(lava)
             elif sym == "S":
                 spikes = Spikes(x, y, "data/framestiles/tiles/spikes.png")
-                other_blocks.append(spikes)
                 all_sprites.add(spikes)
                 platforms_group.add(spikes)
             elif sym == "T":
                 tp = Teleport(x, y)
-                other_blocks.append(tp)
-                anim_plat_group.add(tp)
+                updating_blocks[Teleport].add(tp)
                 all_sprites.add(tp)
             elif sym == "I":
                 ice = Ice(x, y, "data/framestiles/tiles/icecenter.png")
@@ -175,14 +172,13 @@ def start_level(level_name):
 
 def main():
     global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
-    global all_sprites, platforms_group, boss_group, blanks_group, anim_plat_group, entities_group, player_group
-    global other_blocks, level, camera
+    global all_sprites, platforms_group, boss_group, blanks_group, entities_group, player_group
+    global updating_blocks, level, camera
 
     pygame.init()  # Инициация PyGame, обязательная строчка
     screen = pygame.display.set_mode((WIN_W, WIN_H))
     pygame.display.set_caption("Pepe the Frog")  # Пишем в шапку
-    background = Background('data/Background.jpg', [0, 0], WIN_W,
-                            WIN_H)  # будем использовать как фон
+    background = Background('data/Background.jpg', [0, 0], WIN_W, WIN_H)  # будем использовать как фон
     clock = pygame.time.Clock()
 
     start_level(CURRENT_LEVEL)
@@ -221,7 +217,8 @@ def main():
         # передвижение
         hero.update(t, on_screen, blanks_group, enemies_group, player_group)
         camera.update(hero)
-        anim_plat_group.update()
+        for i in updating_blocks.values():
+            i.update()
         # tp.update()
         # boss_group.update(hero, hp, enemies_group, boss_attacks_group,
         #                   boss_attacks, all_sprites, enemies_group)
