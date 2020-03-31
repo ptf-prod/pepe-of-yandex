@@ -7,7 +7,7 @@ import pyganim
 
 from animation import *
 from constants import *
-
+import time as timetime
 
 PLAT_COLOR = "#FF6262"
 ANIMATION_DELAY = 100
@@ -71,12 +71,56 @@ class Lava(Platform):
         self.image = self.boltAnimLava.getCurrentFrame()
 
 
-class Spikes(Platform):
-    def __init__(self, x, y, filename):
+class InteractivePlatform(Platform):
+    def __init__(self, x, y, filename, parent_group):
         super().__init__(x, y, filename)
-        self.dmg = True
+        self.parent_group = parent_group
+
+    def check_collision_plat(self, who):
+        pass
+
+
+class Spikes(InteractivePlatform):
+    dmg = 7
+    hit_delay_stay = 1.2
+    hit_delay_move = 0.2
+
+    def __init__(self, x, y, filename, spikes_group):
+        super().__init__(x, y, filename, spikes_group)
         self.hitbox = pygame.Rect(x + PLAT_W // 2, y + PLAT_H * 20 // 16,
                                   PLAT_W, PLAT_H * 4 // 16)
+        self.fight_zone = pygame.Rect(x + PLAT_W * 10 // 32, y + PLAT_H * 15 // 32,
+                                      PLAT_W, PLAT_H * 4 // 16)
+        self.damage_zone = pygame.Rect(x + PLAT_W * 10 // 16, y + PLAT_H * 13 // 16,
+                                       PLAT_W * 12 // 16, PLAT_H * 7 // 16)
+
+    def check_collision_plat(self, who):
+        if self.damage_zone.colliderect(who.hitbox):
+            self.parent_group.declare_collision(who)
+
+
+class SpikesGroup(sprite.Group):
+    def declare_collision(self, ent):
+        if ent in self.victims:
+            pass
+        elif ent in self.old_victims:
+            self.victims[ent] = self.old_victims[ent]
+        else:
+            self.victims[ent] = timetime.time() - Spikes.hit_delay_stay
+
+    def __init__(self, *sprites):
+        super().__init__(*sprites)
+        self.victims = {}
+        self.old_victims = {}
+
+    def update(self, t, on_screen, blanks_group, enemies_group, player_group):
+        for i in self.victims.items():
+            dt = timetime.time() - i[1]
+            if dt > Spikes.hit_delay_stay or dt > Spikes.hit_delay_move and i[0].xvel != 0:
+                self.victims[i[0]] = timetime.time()
+                i[0].take_dmg(self, Spikes.dmg)
+        self.old_victims = self.victims
+        self.victims = {}
 
 
 class Ice(Platform):

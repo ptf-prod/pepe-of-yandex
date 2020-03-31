@@ -7,9 +7,9 @@ import os
 from constants import *
 from background import *
 from pepe_hero import *
-from platforms import *
+import platforms as plat
 from enemies import *
-from boss import *
+# from boss import *
 from bullet import *
 from animation import *
 import time as timetime  # time is already defined with pygame
@@ -85,9 +85,9 @@ def start_level(level_name):
     boss_group = pygame.sprite.Group()
     blanks_group = pygame.sprite.Group()
     updating_blocks = {
-        Lava: pygame.sprite.Group(),
-        Spikes: pygame.sprite.Group(),
-        Teleport: pygame.sprite.Group()
+        plat.Lava: pygame.sprite.Group(),
+        plat.Spikes: plat.SpikesGroup(),
+        plat.Teleport: pygame.sprite.Group()
     }
     player_group = pygame.sprite.Group()
     player_group.add(hero)
@@ -98,13 +98,13 @@ def start_level(level_name):
     for row in level:  # вся строка
         for sym in row:  # каждый символ
             if sym == "*":
-                plat = Platform(x, y, None)
-                platforms_group.add(plat)
-                all_sprites.add(plat)
+                p = Platform(x, y, None)
+                platforms_group.add(p)
+                all_sprites.add(p)
             elif sym in PLATFORMS_LEGEND.keys():
-                plat = Platform(x, y, f"data/framestiles/tiles/{PLATFORMS_LEGEND[sym]}.png")
-                platforms_group.add(plat)
-                all_sprites.add(plat)
+                p = Platform(x, y, f"data/framestiles/tiles/{PLATFORMS_LEGEND[sym]}.png")
+                platforms_group.add(p)
+                all_sprites.add(p)
             elif sym == "U":
                 uka = Uka(x, y)
                 entities_group.add(uka)
@@ -120,10 +120,10 @@ def start_level(level_name):
                 entities_group.add(flyling)
                 all_sprites.add(flyling)
             elif sym == "L":
-                lava = Lava(x, y)
+                lava = plat.Lava(x, y)
                 all_sprites.add(lava)
                 platforms_group.add(lava)
-                updating_blocks[Lava].add(lava)
+                updating_blocks[plat.Lava].add(lava)
             elif sym == "[":
                 lava = Platform(x, y, "data/framestiles/tiles/lavaleft.png")
                 all_sprites.add(lava)
@@ -133,23 +133,24 @@ def start_level(level_name):
                 all_sprites.add(lava)
                 platforms_group.add(lava)
             elif sym == "S":
-                spikes = Spikes(x, y, "data/framestiles/tiles/spikes.png")
+                spikes = plat.Spikes(x, y, "data/framestiles/tiles/spikes.png", updating_blocks[plat.Spikes])
+                updating_blocks[plat.Spikes].add(spikes)
                 all_sprites.add(spikes)
                 platforms_group.add(spikes)
             elif sym == "T":
-                tp = Teleport(x, y)
-                updating_blocks[Teleport].add(tp)
+                tp = plat.Teleport(x, y)
+                updating_blocks[plat.Teleport].add(tp)
                 all_sprites.add(tp)
             elif sym == "I":
-                ice = Ice(x, y, "data/framestiles/tiles/icecenter.png")
+                ice = plat.Ice(x, y, "data/framestiles/tiles/icecenter.png")
                 all_sprites.add(ice)
                 platforms_group.add(ice)
             elif sym == "(":
-                ice = Ice(x, y, "data/framestiles/tiles/iceleft.png")
+                ice = plat.Ice(x, y, "data/framestiles/tiles/iceleft.png")
                 all_sprites.add(ice)
                 platforms_group.add(ice)
             elif sym == ")":
-                ice = Ice(x, y, "data/framestiles/tiles/iceright.png")
+                ice = plat.Ice(x, y, "data/framestiles/tiles/iceright.png")
                 all_sprites.add(ice)
                 platforms_group.add(ice)
             elif sym == "C":
@@ -218,8 +219,7 @@ def main():
         hero.update(t, on_screen, blanks_group, enemies_group, player_group)
         camera.update(hero)
         for i in updating_blocks.values():
-            i.update()
-        # tp.update()
+            i.update(t, on_screen, blanks_group, enemies_group, player_group)
         # boss_group.update(hero, hp, enemies_group, boss_attacks_group,
         #                   boss_attacks, all_sprites, enemies_group)
         # boss_attacks_group.update(enemies_group, hero, boss_attacks,
@@ -284,6 +284,7 @@ def main():
             if prev_fps != clock.get_fps():
                 prev_fps = clock.get_fps()
                 print('fps:', prev_fps)
+        on_screen.remove(on_screen)
 
 
 if __name__ == "__main__":

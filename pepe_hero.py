@@ -56,11 +56,6 @@ class Player(Entity):
         self.shoot_start = 0
         self.keys = Keys()
         self.cur_anim = self.boltAnimStay
-        self.last_block_hit = {
-            # Класс блока: время последнего касания
-            plat.Lava: 0,
-            plat.Spikes: 0
-        }
 
     def update(self, t, platforms, blanks, entities, player):
         import time as timetime
