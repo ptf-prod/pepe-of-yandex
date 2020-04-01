@@ -3,8 +3,9 @@ import pyganim
 from entity import Entity
 from enemies import *
 from bullet import *
-from main import DEBUG, Keys
+from main import Keys
 from constants import *
+import platforms as plat
 
 
 class Player(Entity):
@@ -104,14 +105,6 @@ class Player(Entity):
 
         super().update(t, platforms, blanks, entities, player)
 
-        if self.previous_block == "lava" and self.block != "lava":
-            self.hp -= 0.1
-            self.burn_time += 1
-            if self.burn_time == 200 and self.block != "lava":
-                self.burn_time = 0
-                self.previous_block = ""
-        if self.cur_anim is not prev_anim:
-            self.cur_anim[self.right].stop()
         self.cur_anim[self.right].play()
         self.image = self.cur_anim[self.right].getCurrentFrame()
 
@@ -120,7 +113,6 @@ class Player(Entity):
             print(type(who).__name__)
         try:
             a = super().take_dmg(who, dmg)
-            self.immortality()
             return a
         except AttributeError:
             h0 = self.hp

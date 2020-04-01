@@ -2,8 +2,7 @@ from pygame import *
 import pygame
 import time as timetime
 
-from entity import Entity
-from platforms import *
+import platforms as plat
 from bullet import *
 from constants import *
 import pyganim
@@ -161,7 +160,10 @@ class Flyling(Enemy):
     def update(self, t, platforms, blanks, entities, player):
         if self.barriers is None:
             self.get_barriers_x(platforms, blanks)
-        target_coords = player.sprites()[0].hitbox.center
+        try:
+            target_coords = player.sprites()[0].hitbox.center
+        except IndexError:
+            return
         super().update(t, platforms, blanks, entities, player)
         db = timetime.time() - self.last_blast
         if db > self.blast_delay and self.blast_row < 3 or db > self.blast_delay * 3:
