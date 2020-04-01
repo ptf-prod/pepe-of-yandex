@@ -3,6 +3,7 @@ import pygame
 import time as timetime
 
 import platforms as plat
+from entity import Entity
 from bullet import *
 from constants import *
 import pyganim

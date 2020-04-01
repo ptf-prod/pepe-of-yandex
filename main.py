@@ -17,6 +17,8 @@ from bullet import *
 from animation import *
 
 prev_fps = 0
+MODE = 'MENU'
+FIRST_TIME = True
 
 
 class Keys:
@@ -76,7 +78,7 @@ def load_image(name, colorkey=-1):
 def start_level(level_name):
     global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
     global all_sprites, platforms_group, boss_group, blanks_group, player_group, entities_group
-    global updating_blocks, level, camera
+    global updating_blocks, level, camera, clock
 
     hero = Player(55, 555)
     hp = HitPoints(hero.hp)
@@ -175,6 +177,7 @@ def start_level(level_name):
     total_level_width = len(level[0]) * PLAT_W  # Высчитываем фактическую ширину уровня
     total_level_height = len(level) * PLAT_H  # высоту
     camera = Camera(WIN_W, WIN_H)
+    clock = pygame.time.Clock()
 
 
 def start_new_game():
@@ -183,29 +186,33 @@ def start_new_game():
     MODE = 'GAME'
     menu.disable()
     if FIRST_TIME:
-        game_submenu.add_option('CONTINUE', continue_game, option_id='continue')
-        game_submenu.disable()
-        game_submenu.enable()
         FIRST_TIME = False
 
 
 def continue_game():
-    global MODE, menu
-    MODE = 'GAME'
-    menu.disable()
+    global MODE, menu, clock
+    if FIRST_TIME:
+        start_new_game()
+    else:
+        MODE = 'GAME'
+        menu.disable()
+        clock = pygame.time.Clock()
 
 
 def game_cycle(events):
     global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
     global all_sprites, platforms_group, boss_group, blanks_group, lava_group
-    global other_blocks, level, camera, prev_fps
+    global other_blocks, level, camera, prev_fps, MODE, menu
 
     if hero.hp <= 0:
         start_level(CURRENT_LEVEL)
     t = clock.tick() / 1000
-    for event in pygame.event.get():  # Обрабатываем события
-        if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
+    for event in events:  # Обрабатываем события
+        if event.type == QUIT:
             raise SystemExit("QUIT")
+        if event.type == KEYDOWN and event.key == K_ESCAPE:
+            MODE = 'MENU'
+            menu.enable()
         if event.type in (KEYUP, KEYDOWN):
             pressed = event.type == KEYDOWN
             if event.key == K_LEFT:
@@ -315,7 +322,6 @@ def main():
     screen = pygame.display.set_mode((WIN_W, WIN_H))
     pygame.display.set_caption("Pepe of Yandex")  # Пишем в шапку
     background = Background('data/Background.jpg', [0, 0], WIN_W, WIN_H)  # фон
-    clock = pygame.time.Clock()
 
     menu_font = pygameMenu.font.FONT_8BIT
     menu = pygameMenu.Menu(screen, 1280, 720, menu_font, 'Pepe of Yandex',
@@ -325,6 +331,7 @@ def main():
                                    bgfun=background_fun, font_size_title=30,
                                    menu_alpha=70)
     game_submenu.add_option('START NEW GAME', start_new_game)
+    game_submenu.add_option('CONTINUE', continue_game)
     menu.add_option('PLAY', game_submenu)
     menu.add_option('QUIT', pygameMenu.events.EXIT)
     start_level(CURRENT_LEVEL)
