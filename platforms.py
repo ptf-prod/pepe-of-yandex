@@ -49,26 +49,12 @@ class Platform(sprite.Sprite):
 
 
 class Blank(Platform):
-    def __init__(self, x, y):
+    def __init__(self, x, y, edge=0):
         super().__init__(x, y, None)
-
-
-class Lava(Platform):
-    def __init__(self, x, y):
-        super().__init__(x, y, None)
-        self.dmg = True
-        bolt_anim = []
-        for anim in ANIMATION_LAVA:
-            bolt_anim.append((pygame.transform.scale(image.load(anim), (PLAT_W * 2, PLAT_H * 2)),
-                              ANIMATION_DELAY))
-        self.boltAnimLava = pyganim.PygAnimation(bolt_anim)
-        self.boltAnimLava.play()
-        self.image = self.boltAnimLava.getCurrentFrame()
-        self.hitbox.top = y + PLAT_H * 18 // 16
-        self.hitbox.height = PLAT_H * 6 // 16
-
-    def update(self, *args):
-        self.image = self.boltAnimLava.getCurrentFrame()
+        if edge != 0:
+            self.hitbox.width = int(PLAT_W * abs(edge))
+            if edge > 0:
+                self.hitbox.right = x + PLAT_W * 3 // 2
 
 
 class InteractivePlatform(Platform):
@@ -78,6 +64,72 @@ class InteractivePlatform(Platform):
 
     def check_collision_plat(self, who):
         pass
+
+
+class Lava(InteractivePlatform):
+    dmg = 3
+    hit_delay = 0.1
+
+    def __init__(self, x, y, group, filename=None):
+        if filename is None:
+            super().__init__(x, y, None, group)
+            bolt_anim = []
+            for anim in ANIMATION_LAVA:
+                bolt_anim.append((pygame.transform.scale(image.load(anim), (PLAT_W * 2, PLAT_H * 2)),
+                                  ANIMATION_DELAY))
+            self.boltAnimLava = pyganim.PygAnimation(bolt_anim)
+            self.boltAnimLava.play()
+            self.image = self.boltAnimLava.getCurrentFrame()
+        else:
+            super().__init__(x, y, filename, group)
+        self.hitbox.top = y + PLAT_H * 18 // 16
+        self.hitbox.height = PLAT_H * 6 // 16
+        self.damage_zone = pygame.Rect(x + PLAT_W * 8 // 16, y + PLAT_H * 10 // 16,
+                                       PLAT_W, PLAT_H * 10 // 16)
+
+    def check_collision_plat(self, who):
+        if self.damage_zone.colliderect(who.hitbox):
+            self.parent_group.declare_collision(who)
+
+    def update(self, *args):
+        try:
+            self.image = self.boltAnimLava.getCurrentFrame()
+        except AttributeError:
+            pass
+
+
+class LavaGroup(sprite.Group):
+    def __init__(self, *sprites):
+        super().__init__(*sprites)
+        self.victims = {}
+        self.old_victims = {}
+
+    def declare_collision(self, ent):
+        if ent in self.victims:
+            pass
+        elif ent in self.old_victims:
+            self.victims[ent] = self.old_victims[ent]
+        else:
+            self.victims[ent] = [timetime.time(), None, timetime.time()]
+        # (вошёл в лаву, вышел, последний удар)
+
+    def update(self, t, on_screen, blanks_group, enemies_group, player_group):
+        for i in self.victims.items():
+            dt = timetime.time() - i[1][2]
+            if dt > Lava.hit_delay:
+                i[0].take_dmg(self, Lava.dmg)
+        for i in self.old_victims.items():
+            if i[0] not in self.victims:
+                if i[1][1] is None:
+                    i[1][1] = timetime.time()
+                if timetime.time() - i[1][1] > (i[1][1] - i[1][0]) / 2:
+                    continue
+                if timetime.time() - i[1][2] > Lava.hit_delay:
+                    i[1][2] = timetime.time()
+                    i[0].take_dmg(self, Lava.dmg)
+                self.victims[i[0]] = i[1]
+        self.old_victims = self.victims
+        self.victims = {}
 
 
 class Spikes(InteractivePlatform):

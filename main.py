@@ -85,7 +85,7 @@ def start_level(level_name):
     boss_group = pygame.sprite.Group()
     blanks_group = pygame.sprite.Group()
     updating_blocks = {
-        plat.Lava: pygame.sprite.Group(),
+        plat.Lava: plat.LavaGroup(),
         plat.Spikes: plat.SpikesGroup(),
         plat.Teleport: pygame.sprite.Group()
     }
@@ -120,18 +120,20 @@ def start_level(level_name):
                 entities_group.add(flyling)
                 all_sprites.add(flyling)
             elif sym == "L":
-                lava = plat.Lava(x, y)
+                lava = plat.Lava(x, y, updating_blocks[plat.Lava])
                 all_sprites.add(lava)
                 platforms_group.add(lava)
                 updating_blocks[plat.Lava].add(lava)
             elif sym == "[":
-                lava = Platform(x, y, "data/framestiles/tiles/lavaleft.png")
+                lava = Lava(x, y, updating_blocks[plat.Lava], "data/framestiles/tiles/lavaleft.png")
                 all_sprites.add(lava)
                 platforms_group.add(lava)
+                updating_blocks[plat.Lava].add(lava)
             elif sym == "]":
-                lava = Platform(x, y, "data/framestiles/tiles/lavaright.png")
+                lava = Lava(x, y, updating_blocks[plat.Lava], "data/framestiles/tiles/lavaright.png")
                 all_sprites.add(lava)
                 platforms_group.add(lava)
+                updating_blocks[plat.Lava].add(lava)
             elif sym == "S":
                 spikes = plat.Spikes(x, y, "data/framestiles/tiles/spikes.png", updating_blocks[plat.Spikes])
                 updating_blocks[plat.Spikes].add(spikes)
