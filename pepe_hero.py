@@ -105,14 +105,6 @@ class Player(Entity):
 
         super().update(t, platforms, blanks, entities, player)
 
-        if self.previous_block == "lava" and self.block != "lava":
-            self.hp -= 0.1
-            self.burn_time += 1
-            if self.burn_time == 200 and self.block != "lava":
-                self.burn_time = 0
-                self.previous_block = ""
-        if self.cur_anim is not prev_anim:
-            self.cur_anim[self.right].stop()
         self.cur_anim[self.right].play()
         self.image = self.cur_anim[self.right].getCurrentFrame()
 

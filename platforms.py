@@ -68,7 +68,7 @@ class InteractivePlatform(Platform):
 
 class Lava(InteractivePlatform):
     dmg = 3
-    hit_delay = 0.1
+    hit_delay = 0.05
 
     def __init__(self, x, y, group, filename=None):
         if filename is None:
@@ -117,14 +117,18 @@ class LavaGroup(sprite.Group):
         for i in self.victims.items():
             dt = timetime.time() - i[1][2]
             if dt > Lava.hit_delay:
+                print('kiya')
                 i[0].take_dmg(self, Lava.dmg)
+                i[1][2] = timetime.time()
         for i in self.old_victims.items():
             if i[0] not in self.victims:
+                print(i[1], timetime.time())
                 if i[1][1] is None:
                     i[1][1] = timetime.time()
                 if timetime.time() - i[1][1] > (i[1][1] - i[1][0]) / 2:
                     continue
                 if timetime.time() - i[1][2] > Lava.hit_delay:
+                    print('hit')
                     i[1][2] = timetime.time()
                     i[0].take_dmg(self, Lava.dmg)
                 self.victims[i[0]] = i[1]
