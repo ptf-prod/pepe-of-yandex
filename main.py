@@ -339,7 +339,7 @@ def main():
                                    bgfun=background_fun, font_size_title=30,
                                    menu_alpha=70)
     game_submenu.add_option('START NEW GAME', start_new_game)
-    menu.add_option('GAME', game_submenu)
+    menu.add_option('PLAY', game_submenu)
     menu.add_option('QUIT', pygameMenu.events.EXIT)
     start_level(CURRENT_LEVEL)
 
