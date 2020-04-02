@@ -237,7 +237,7 @@ def game_cycle(events):
         if camera.state.colliderect(i.rect):
             on_screen.add(i)
     # передвижение
-    hero.update(t, on_screen, blanks_group, enemies_group, player_group)
+    hero.update(t, on_screen, blanks_group, entities_group, player_group)
     camera.update(hero)
     for i in updating_blocks.values():
         i.update(t, on_screen, blanks_group, enemies_group, player_group)
@@ -263,13 +263,8 @@ def game_cycle(events):
         entities_group.add(bullet)
         all_sprites.add(bullet)
         hero.shoot_start = timetime.time()
-    if hero.hit_done is False and hit is True and not left and not right and not up:
-        if DEBUG:
-            print("hit")
-        smash = Hit(hero.rect.x + 32, hero.rect.y + 24, ('Left', 'Right')[hero.right])
-        bullets_group.add(smash)
-        all_sprites.add(smash)
-        hero.hit_done = True
+    if hit and not hero.hit:
+        hero.start_hit()
 
     screen.blit(background.image, background.rect)
     for i in all_sprites:
