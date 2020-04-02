@@ -56,6 +56,10 @@ class Player(Entity):
         self.shoot_start = 0
         self.keys = Keys()
         self.cur_anim = self.boltAnimStay
+        self.hit = None
+
+    def start_hit(self):
+        self.hit = timetime.time()
 
     def update(self, t, platforms, blanks, entities, player):
         import time as timetime
@@ -96,12 +100,13 @@ class Player(Entity):
             if self.on_ground:
                 self.yvel /= 1.5  # При стрельбе ниже прыгаем
 
-        if self.hit_done is True:
+        elif self.hit or self.hit_done:
             self.cur_anim = self.boltAnimHit
-            self.hit_delay_time += 1
-            if self.hit_delay_time == 45:
-                self.hit_done = False
-                self.hit_delay_time = 0
+            if prev_anim != self.cur_anim:
+                for i in self.boltAnimHit:
+                    i.pause(0)
+            self.hitbox = pygame.Rect(self.hitbox.centerx + 8 * PLAT_W // 32, self.hitbox.top,
+                                      12 * PLAT_W // 32, self.hitbox.height)
 
         super().update(t, platforms, blanks, entities, player)
 
@@ -140,7 +145,6 @@ class Player(Entity):
                 return True, True
             else:
                 return self.hp < h0, False
-
 
     def immortality(self):
         self.hit_take = False
