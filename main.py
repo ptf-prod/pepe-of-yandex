@@ -1,20 +1,17 @@
 # Импортируем все модули проекта
-enemies_group = None
-all_sprites = None
-
 import os
-import time as timetime
-
+import time
+import pygame
+from pygame.constants import *
 import pygameMenu
 
 from constants import *
-from background import *
-from pepe_hero import *
 import platforms as plat
-from enemies import *
-# from boss import *
-from bullet import *
-from animation import *
+import enemies
+from background import Background
+import pepe_hero
+import bullet
+
 
 prev_fps = 0
 MODE = 'MENU'
@@ -33,14 +30,14 @@ class Keys:
 
 class Camera(object):
     def __init__(self, width, height):
-        self.state = Rect(0, 0, width, height)
+        self.state = pygame.Rect(0, 0, width, height)
 
     def apply(self, rect):
         return rect.x - self.state.x, rect.y - self.state.y
 
     def update(self, target):
-        x = target.rect.x - WIN_W // 2 + WIDTH // 2
-        y = target.rect.y - WIN_H // 2 + HEIGHT // 2  # выравниваем камеру по центру
+        x = target.rect.x - WIN_W // 2  # + WIDTH // 2
+        y = target.rect.y - WIN_H // 2  # + HEIGHT // 2  # выравниваем камеру по центру
         x = max(PLAT_W // 2, x)  # Не движемся дальше левой границы
         # x = max(-(camera.width - WIN_WIDTH), x)  # Не движемся дальше правой границы
         # y = max(-(camera.height - WIN_HEIGHT), y)  # Не движемся дальше нижней границы
@@ -49,7 +46,6 @@ class Camera(object):
 
 
 def load_level(filename):
-    global MAX_WIDTH
     filename = "data/" + filename
     # читаем уровень, убирая символы перевода строки
     with open(filename, 'r') as mapFile:
@@ -57,22 +53,9 @@ def load_level(filename):
 
     # и подсчитываем максимальную длину
     max_width = max(map(len, level_map))
-    MAX_WIDTH = max_width
 
     # дополняем каждую строку пустыми клетками (' ')
     return list(map(lambda x: x.ljust(max_width, ' '), level_map))
-
-
-def load_image(name, colorkey=-1):
-    fullname = os.path.join('data', name)
-    image = pygame.image.load(fullname).convert()
-    if colorkey is not None:
-        if colorkey == -1:
-            colorkey = image.get_at((0, 0))
-        image.set_colorkey(colorkey)
-    else:
-        image = image.convert_alpha()
-    return image
 
 
 def start_level(level_name):
@@ -80,8 +63,8 @@ def start_level(level_name):
     global all_sprites, platforms_group, boss_group, blanks_group, player_group, entities_group
     global updating_blocks, level, camera, clock, edge_platforms
 
-    hero = Player(55, 555)
-    hp = HitPoints(hero.hp)
+    hero = pepe_hero.Player(55, 555)
+    hp = pepe_hero.HitPoints(hero.hp)
     left = right = up = down = shoot = hit = False  # по умолчанию — стоим
     enemies_group = pygame.sprite.Group()
     bullets_group = pygame.sprite.Group()
@@ -99,32 +82,29 @@ def start_level(level_name):
     player_group = pygame.sprite.Group()
     player_group.add(hero)
     entities_group = pygame.sprite.Group()
-    level = load_level("level_1.txt")
+    level = load_level(CURRENT_LEVEL)
 
-    x = y = 0  # координаты
     for i, row in enumerate(level):  # вся строка
         for j, sym in enumerate(row):  # каждый символ
             p = None
             if sym == "*":
-                p = Platform(j * PLAT_W, i * PLAT_H, None)
+                p = plat.Platform(j * PLAT_W, i * PLAT_H, None)
                 platforms_group.add(p)
                 all_sprites.add(p)
             elif sym in PLATFORMS_LEGEND.keys():
-                p = Platform(j * PLAT_W, i * PLAT_H, f"data/framestiles/tiles/{PLATFORMS_LEGEND[sym]}.png")
+                p = plat.Platform(j * PLAT_W, i * PLAT_H, f"data/framestiles/tiles/{PLATFORMS_LEGEND[sym]}.png")
                 platforms_group.add(p)
                 all_sprites.add(p)
             elif sym == "U":
-                uka = Uka(j * PLAT_W, i * PLAT_H)
+                uka = enemies.Uka(j * PLAT_W, i * PLAT_H)
                 entities_group.add(uka)
                 all_sprites.add(uka)
             elif sym == "b":
-                blank = Blank(j * PLAT_W, i * PLAT_H)
+                blank = plat.Blank(j * PLAT_W, i * PLAT_H)
                 blanks_group.add(blank)
                 all_sprites.add(blank)
             elif sym == "F":
-                flyling = Flyling(j * PLAT_W, i * PLAT_H)
-                flyling.eg = entities_group
-                flyling.ass = all_sprites
+                flyling = enemies.Flyling(j * PLAT_W, i * PLAT_H, entities_group, all_sprites)
                 entities_group.add(flyling)
                 all_sprites.add(flyling)
             elif sym == "L":
@@ -133,12 +113,13 @@ def start_level(level_name):
                 platforms_group.add(p)
                 updating_blocks[plat.Lava].add(p)
             elif sym == "[":
-                p = Lava(j * PLAT_W, i * PLAT_H, updating_blocks[plat.Lava], "data/framestiles/tiles/lavaleft.png")
+                p = plat.Lava(j * PLAT_W, i * PLAT_H, updating_blocks[plat.Lava], "data/framestiles/tiles/lavaleft.png")
                 all_sprites.add(p)
                 platforms_group.add(p)
                 updating_blocks[plat.Lava].add(p)
             elif sym == "]":
-                p = Lava(j * PLAT_W, i * PLAT_H, updating_blocks[plat.Lava], "data/framestiles/tiles/lavaright.png")
+                p = plat.Lava(j * PLAT_W, i * PLAT_H, updating_blocks[plat.Lava],
+                              "data/framestiles/tiles/lavaright.png")
                 all_sprites.add(p)
                 platforms_group.add(p)
                 updating_blocks[plat.Lava].add(p)
@@ -165,13 +146,13 @@ def start_level(level_name):
                 all_sprites.add(p)
                 platforms_group.add(p)
             elif sym == "C":
-                crack = Crackatoo(j * PLAT_W, i * PLAT_H)
+                crack = enemies.Crackatoo(j * PLAT_W, i * PLAT_H)
                 all_sprites.add(crack)
                 entities_group.add(crack)
-            elif sym == "B":
-                boss = Boss(j * PLAT_W, i * PLAT_H)
-                all_sprites.add(boss)
-                boss_group.add(boss)
+            # elif sym == "B":
+            #     boss = Boss(j * PLAT_W, i * PLAT_H)
+            #     all_sprites.add(boss)
+            #     boss_group.add(boss)
             if isinstance(p, plat.Platform):
                 edge = False
                 for q in level[max(0, i - 1):i + 2]:
@@ -182,8 +163,6 @@ def start_level(level_name):
                 if edge:
                     edge_platforms.add(p)
 
-    total_level_width = len(level[0]) * PLAT_W  # Высчитываем фактическую ширину уровня
-    total_level_height = len(level) * PLAT_H  # высоту
     camera = Camera(WIN_W, WIN_H)
     clock = pygame.time.Clock()
 
@@ -258,19 +237,17 @@ def game_cycle(events):
     entities_group.update(t, edge_platforms, blanks_group, entities_group, player_group)
     bullets_group.update(t, platforms_group, blanks_group, entities_group, player_group)
 
-    if timetime.time() - hero.shoot_start > 1 and shoot is True and hero.on_ground \
-            or timetime.time() - hero.shoot_start > 5 and shoot:
+    if time.time() - hero.shoot_start > 1 and shoot is True and hero.on_ground \
+            or time.time() - hero.shoot_start > 5 and shoot:
         if DEBUG:
             print("bullet")
         if hero.right:
-            bullet = Bullet(hero.hitbox.right, hero.hitbox.y + hero.hitbox.height // 8 * 3,
-                            True)
+            b = bullet.Bullet(hero.hitbox.right + 5, hero.hitbox.y + hero.hitbox.height // 8 * 3, True)
         else:
-            bullet = Bullet(hero.hitbox.left - 10, hero.hitbox.y + hero.hitbox.height // 8 * 3,
-                            False)
-        entities_group.add(bullet)
-        all_sprites.add(bullet)
-        hero.shoot_start = timetime.time()
+            b = bullet.Bullet(hero.hitbox.left - 5, hero.hitbox.y + hero.hitbox.height // 8 * 3, False)
+        entities_group.add(b)
+        all_sprites.add(b)
+        hero.shoot_start = time.time()
     if hit and not hero.hit:
         hero.start_hit()
 
@@ -290,7 +267,7 @@ def game_cycle(events):
         for i in all_sprites:
             if camera.state.colliderect(i.rect):
                 coordi = camera.apply(i.rect)
-                if isinstance(i, Blank):
+                if isinstance(i, plat.Blank):
                     border_color = 'red4'
                 else:
                     border_color = 'red'

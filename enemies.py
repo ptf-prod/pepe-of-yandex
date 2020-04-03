@@ -1,12 +1,12 @@
-from pygame import *
-import pygame
-import time as timetime
+import time
 
-import platforms as plat
-from entity import Entity
-from bullet import *
-from constants import *
+import pygame
 import pyganim
+from pygame import sprite, Rect
+
+import entity
+from animation import load_animation
+from constants import *
 
 ANIMATION_UKA_RUN = ['data/enemyframes/monkeyrunning/monkey running0000.png',
                      'data/enemyframes/monkeyrunning/monkey running0001.png',
@@ -35,7 +35,7 @@ COLOR = "RED"
 JUMP_POWER = 20
 
 
-class Enemy(Entity):
+class Enemy(entity.Entity):
     def __init__(self, x, y, cur_anim=None, hb_shape=None):
         self.cur_anim = None
         self.dmg = 15
@@ -94,11 +94,11 @@ class Enemy(Entity):
                 self.reverse()
 
     def make_dmg(self, who):
-        if timetime.time() - self.last_hit < self.hit_delay:
+        if time.time() - self.last_hit < self.hit_delay:
             return False, False
         a = who.take_dmg(self, self.dmg)
         if a[0]:
-            self.last_hit = timetime.time()
+            self.last_hit = time.time()
         return a
 
     def reverse(self):
@@ -133,7 +133,9 @@ class Uka(Enemy):
 class Flyling(Enemy):
     MOVE_SPEED = 50
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, eg, ass):
+        self.ass = ass
+        self.eg = eg
         self.blast_delay = 3
         self.boltAnimFly = (load_animation(0, 4, ANIMATION_DELAY, 'data', 'enemyframes',
                                            'headflying', 'head flying{:04d}.png'),
@@ -166,7 +168,7 @@ class Flyling(Enemy):
         except IndexError:
             return
         super().update(t, platforms, blanks, entities, player)
-        db = timetime.time() - self.last_blast
+        db = time.time() - self.last_blast
         if db > self.blast_delay and self.blast_row < 3 or db > self.blast_delay * 3:
             if self.blast_row >= 3:
                 self.blast_row = 0
@@ -182,13 +184,14 @@ class Flyling(Enemy):
             else:
                 self.xvel = 0
             if d <= 600:
-                self.boltAnimFire[self.right].play(0)
-                self.last_blast = timetime.time()
+                for i in self.boltAnimFire:
+                    i.currentFrameNum = 0
+                self.last_blast = time.time()
                 self.blast_row += 1
                 self.blast_waiting = True
 
-        if self.last_blast + 0.3 > timetime.time():
-            if self.last_blast + 0.2 < timetime.time() and self.blast_waiting:
+        if self.last_blast + 0.3 > time.time():
+            if self.last_blast + 0.2 < time.time() and self.blast_waiting:
                 if self.right:
                     blast = Blast(self.hitbox.right, self.hitbox.top, 1)
                 else:
@@ -275,7 +278,7 @@ class Crackatoo(Enemy):
 class Blast(Enemy):
     def __init__(self, x, y, target, size_c=2):
         self.target = target
-        im = pygame.transform.scale(image.load("data/enemyframes/fireball.png"),
+        im = pygame.transform.scale(pygame.image.load("data/enemyframes/fireball.png"),
                                     (int(16 * size_c), int(16 * size_c)))
         anim = [pyganim.PygAnimation([(im, 99999)]),
                 pyganim.PygAnimation([(pygame.transform.flip(im, True, False), 99999)])]

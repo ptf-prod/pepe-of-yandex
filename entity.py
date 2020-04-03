@@ -1,9 +1,7 @@
 import pygame
 from pygame import sprite
-import pyganim
-import time
-import platforms as plat
 
+import platforms as plat
 from constants import *
 
 

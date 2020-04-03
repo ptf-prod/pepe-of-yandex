@@ -1,15 +1,15 @@
-from pygame import *
-from boss import *
 import random
 
+import pygame
+
 import enemies
-from entity import Entity
-from main import DEBUG
+import entity
+from constants import *
 
 
-class Bullet(Entity):
+class Bullet(entity.Entity):
     def __init__(self, x, y, right):
-        image = Surface((10, 6))
+        image = pygame.Surface((10, 6))
         image.fill(random.sample(range(0, 256), 3))
         super().__init__(x, y, image)
         if right:

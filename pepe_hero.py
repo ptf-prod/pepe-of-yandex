@@ -1,11 +1,14 @@
-import pyganim
+import time
 
-from entity import Entity
-from enemies import *
-from bullet import *
-from main import Keys
-from constants import *
+import pygame
+from pygame import Color
+
+import enemies
 import platforms as plat
+from animation import load_animation
+from constants import *
+from entity import Entity
+from main import Keys
 
 
 class Player(Entity):
@@ -61,15 +64,14 @@ class Player(Entity):
         self.were_hit = set()
 
     def start_hit(self):
-        self.hit = timetime.time()
+        self.hit = time.time()
         for i in self.boltAnimHit:
-            i.pause(0)
+            i.currentFrameNum = 0
         if DEBUG:
             print('start_hit')
+            print(self.boltAnimHit[1].currentFrameNum)
 
     def update(self, t, platforms, blanks, entities, player):
-        import time as timetime
-        prev_anim = self.cur_anim
         self.cur_anim[self.right].pause()
         self.cur_anim = self.boltAnimRun
         if self.keys.left and not self.keys.right:
@@ -100,7 +102,7 @@ class Player(Entity):
                         self.xvel = Player.MOVE_SPEED
             self.cur_anim = self.boltAnimJump
 
-        if self.keys.shoot or self.shoot_start + 0.5 > timetime.time():
+        if self.keys.shoot or self.shoot_start + 0.5 > time.time():
             self.cur_anim = self.boltAnimShoot
             self.xvel /= 1.5  # При стрельбе медленнее бежим
             if self.on_ground:
@@ -113,10 +115,10 @@ class Player(Entity):
             else:
                 hit_zone = pygame.Rect(self.rect.centerx - 22 * PLAT_W // 16, self.hitbox.top,
                                        14 * PLAT_W // 16, self.hitbox.height)
-            dt = timetime.time() - self.hit
+            dt = time.time() - self.hit
             if dt > ANIMATION_DELAY / 400:
                 for i in entities.sprites():
-                    if isinstance(i, Enemy) and i not in self.were_hit and i.hitbox.colliderect(hit_zone):
+                    if isinstance(i, enemies.Enemy) and i not in self.were_hit and i.hitbox.colliderect(hit_zone):
                         i.take_dmg(self, self.dmg)
                         self.were_hit.add(i)
             if dt > self.boltAnimHit[0].numFrames * ANIMATION_DELAY / 1000:
@@ -134,8 +136,8 @@ class Player(Entity):
 
     def check_portal(self, other_blocks):
         for ob in other_blocks:
-            if sprite.collide_rect(self, ob):
-                if type(ob) == Teleport:
+            if pygame.sprite.collide_rect(self, ob):
+                if type(ob) == plat.Teleport:
                     return True
 
 
