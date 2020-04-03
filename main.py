@@ -83,6 +83,16 @@ def start_level(level_name):
 
     for i, row in enumerate(level):  # вся строка
         for j, sym in enumerate(row):  # каждый символ
+            if sym == "P":
+                hero = pepe_hero.Player(j * PLAT_W, i * PLAT_H - PLAT_H * 3 // 2)
+    if hero is None:
+        hero = pepe_hero.Player(55, 555)
+    all_sprites.add(hero)
+    player_group.add(hero)
+    hp = pepe_hero.HitPoints(hero.hp)
+
+    for i, row in enumerate(level):  # вся строка
+        for j, sym in enumerate(row):  # каждый символ
             p = None
             if sym == "*":
                 p = plat.Platform(j * PLAT_W, i * PLAT_H, None)
@@ -146,8 +156,6 @@ def start_level(level_name):
                 crack = enemies.Crackatoo(j * PLAT_W, i * PLAT_H)
                 all_sprites.add(crack)
                 entities_group.add(crack)
-            elif sym == "P":
-                hero = pepe_hero.Player(j * PLAT_W, i * PLAT_H - PLAT_H * 3 // 2)
             # elif sym == "B":
             #     boss = Boss(j * PLAT_W, i * PLAT_H)
             #     all_sprites.add(boss)
@@ -161,11 +169,6 @@ def start_level(level_name):
                             break
                 if edge:
                     edge_platforms.add(p)
-    if hero is None:
-        hero = pepe_hero.Player(55, 555)
-    all_sprites.add(hero)
-    player_group.add(hero)
-    hp = pepe_hero.HitPoints(hero.hp)
 
     camera = Camera(WIN_W, WIN_H)
     clock = pygame.time.Clock()
