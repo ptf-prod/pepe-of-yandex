@@ -117,18 +117,15 @@ class LavaGroup(sprite.Group):
         for i in self.victims.items():
             dt = time.time() - i[1][2]
             if dt > Lava.hit_delay:
-                print('kiya')
                 i[0].take_dmg(self, Lava.dmg)
                 i[1][2] = time.time()
         for i in self.old_victims.items():
             if i[0] not in self.victims:
-                print(i[1], time.time())
                 if i[1][1] is None:
                     i[1][1] = time.time()
                 if time.time() - i[1][1] > (i[1][1] - i[1][0]) / 2:
                     continue
                 if time.time() - i[1][2] > Lava.hit_delay:
-                    print('hit')
                     i[1][2] = time.time()
                     i[0].take_dmg(self, Lava.dmg)
                 self.victims[i[0]] = i[1]

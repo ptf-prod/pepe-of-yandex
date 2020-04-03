@@ -20,7 +20,7 @@ PLATFORMS_LEGEND = {
     '@': 'connectright',
 }
 
-DEBUG = True
+DEBUG = False
 DRAW_HITBOXES = DEBUG and True
 DRAW_RECTS = DEBUG and False
 SHOW_FPS = DEBUG and True
