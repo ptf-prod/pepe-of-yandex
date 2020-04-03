@@ -36,8 +36,8 @@ class Camera(object):
         return rect.x - self.state.x, rect.y - self.state.y
 
     def update(self, target):
-        x = target.rect.x - WIN_W // 2  # + WIDTH // 2
-        y = target.rect.y - WIN_H // 2  # + HEIGHT // 2  # выравниваем камеру по центру
+        x = target.rect.x - WIN_W // 2 + PLAT_W // 2
+        y = target.rect.y - WIN_H // 2 + PLAT_H // 2  # выравниваем камеру по центру
         x = max(PLAT_W // 2, x)  # Не движемся дальше левой границы
         # x = max(-(camera.width - WIN_WIDTH), x)  # Не движемся дальше правой границы
         # y = max(-(camera.height - WIN_HEIGHT), y)  # Не движемся дальше нижней границы
@@ -63,14 +63,12 @@ def start_level(level_name):
     global all_sprites, platforms_group, boss_group, blanks_group, player_group, entities_group
     global updating_blocks, level, camera, clock, edge_platforms
 
-    hero = pepe_hero.Player(55, 555)
-    hp = pepe_hero.HitPoints(hero.hp)
+    hero = None
     left = right = up = down = shoot = hit = False  # по умолчанию — стоим
     enemies_group = pygame.sprite.Group()
     bullets_group = pygame.sprite.Group()
     all_sprites = pygame.sprite.Group()
     platforms_group = pygame.sprite.Group()
-    all_sprites.add(hero)
     boss_group = pygame.sprite.Group()
     blanks_group = pygame.sprite.Group()
     edge_platforms = pygame.sprite.Group()
@@ -80,7 +78,6 @@ def start_level(level_name):
         plat.Teleport: pygame.sprite.Group()
     }
     player_group = pygame.sprite.Group()
-    player_group.add(hero)
     entities_group = pygame.sprite.Group()
     level = load_level(CURRENT_LEVEL)
 
@@ -149,6 +146,8 @@ def start_level(level_name):
                 crack = enemies.Crackatoo(j * PLAT_W, i * PLAT_H)
                 all_sprites.add(crack)
                 entities_group.add(crack)
+            elif sym == "P":
+                hero = pepe_hero.Player(j * PLAT_W, i * PLAT_H - PLAT_H * 3 // 2)
             # elif sym == "B":
             #     boss = Boss(j * PLAT_W, i * PLAT_H)
             #     all_sprites.add(boss)
@@ -162,6 +161,11 @@ def start_level(level_name):
                             break
                 if edge:
                     edge_platforms.add(p)
+    if hero is None:
+        hero = pepe_hero.Player(55, 555)
+    all_sprites.add(hero)
+    player_group.add(hero)
+    hp = pepe_hero.HitPoints(hero.hp)
 
     camera = Camera(WIN_W, WIN_H)
     clock = pygame.time.Clock()
