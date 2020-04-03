@@ -1,15 +1,15 @@
-from pygame import *
-from boss import *
 import random
 
+import pygame
+
 import enemies
-from entity import Entity
-from main import DEBUG
+import entity
+from constants import *
 
 
-class Bullet(Entity):
+class Bullet(entity.Entity):
     def __init__(self, x, y, right):
-        image = Surface((10, 6))
+        image = pygame.Surface((10, 6))
         image.fill(random.sample(range(0, 256), 3))
         super().__init__(x, y, image)
         if right:
@@ -60,40 +60,3 @@ class Bullet(Entity):
         if DEBUG:
             # print(self.hitbox.x // PLAT_W, self.hitbox.y // PLAT_H)
             print(self.hitbox.x, self.hitbox.y)
-
-
-class Hit(sprite.Sprite):
-    def __init__(self, x, y, direction):
-        sprite.Sprite.__init__(self)
-        if direction == "Right":
-            self.xvel = 100
-        else:
-            self.xvel = -100
-        self.start_x = x
-        self.start_y = y
-        self.image = Surface((64, 64))
-        self.rect = Rect(x, y, 64, 64)  # прямоугольный объект
-
-    def update(self, t, platforms, blanks, entities, player):
-
-        self.rect.x += self.xvel  # переносим положение на xvel
-        self.collide(entities)
-        self.check_range(entities)
-
-    def collide(self, enemies):
-        for e in enemies:
-            if sprite.collide_rect(self, e):
-                if type(e) != Boss:
-                    e.kill()
-                    self.kill_delay = True
-                else:
-                    e.hp -= 5
-                    if DEBUG:
-                        print(e.hp)
-                    self.kill_delay = True
-
-    def check_range(self, bullets):
-        if self.rect.x >= self.start_x + 100 or self.rect.x <= self.start_x - 100:
-            if DEBUG:
-                print("kill")
-            self.kill()

@@ -1,10 +1,14 @@
-import pyganim
+import time
 
-from entity import Entity
-from enemies import *
-from bullet import *
-from main import DEBUG, Keys
+import pygame
+from pygame import Color
+
+import enemies
+import platforms as plat
+from animation import load_animation
 from constants import *
+from entity import Entity
+from main import Keys
 
 
 class Player(Entity):
@@ -40,9 +44,10 @@ class Player(Entity):
 
         self.cur_anim = self.boltAnimStay[1]
         super().__init__(x, y, self.boltAnimStay[1].getCurrentFrame(),
-                         [Player.WIDTH * 3 // 8, Player.HEIGHT * 7 // 32,
-                          Player.WIDTH // 4, Player.HEIGHT // 2])
+                         [Player.WIDTH * 26 // 64, Player.HEIGHT * 7 // 32,
+                          Player.WIDTH * 12 // 64, Player.HEIGHT // 2])
         self.hp = 100
+        self.dmg = 20
         self.hit_take = True
         self.immortal_time = 0
         self.shot_done = False
@@ -55,11 +60,18 @@ class Player(Entity):
         self.shoot_start = 0
         self.keys = Keys()
         self.cur_anim = self.boltAnimStay
-        self.hitbox = pygame.Rect(x + Player.WIDTH * 3 // 8, y + Player.HEIGHT * 7 // 32,
-                                  Player.WIDTH // 4, Player.HEIGHT // 2)
+        self.hit = None
+        self.were_hit = set()
+
+    def start_hit(self):
+        self.hit = time.time()
+        for i in self.boltAnimHit:
+            i.currentFrameNum = 0
+        if DEBUG:
+            print('start_hit')
+            print(self.boltAnimHit[1].currentFrameNum)
 
     def update(self, t, platforms, blanks, entities, player):
-        import time as timetime
         self.cur_anim[self.right].pause()
         self.cur_anim = self.boltAnimRun
         if self.keys.left and not self.keys.right:
@@ -90,81 +102,42 @@ class Player(Entity):
                         self.xvel = Player.MOVE_SPEED
             self.cur_anim = self.boltAnimJump
 
-        if self.keys.shoot or self.shoot_start + 0.5 > timetime.time():
+        if self.keys.shoot or self.shoot_start + 0.5 > time.time():
             self.cur_anim = self.boltAnimShoot
             self.xvel /= 1.5  # При стрельбе медленнее бежим
             if self.on_ground:
                 self.yvel /= 1.5  # При стрельбе ниже прыгаем
-
-        if self.hit_done is True:
+        elif self.hit:
             self.cur_anim = self.boltAnimHit
-            self.hit_delay_time += 1
-            if self.hit_delay_time == 45:
-                self.hit_done = False
-                self.hit_delay_time = 0
-
+            if self.right:
+                hit_zone = pygame.Rect(self.rect.centerx + 8 * PLAT_W // 16, self.hitbox.top,
+                                       14 * PLAT_W // 16, self.hitbox.height)
+            else:
+                hit_zone = pygame.Rect(self.rect.centerx - 22 * PLAT_W // 16, self.hitbox.top,
+                                       14 * PLAT_W // 16, self.hitbox.height)
+            dt = time.time() - self.hit
+            if dt > ANIMATION_DELAY / 400:
+                for i in entities.sprites():
+                    if isinstance(i, enemies.Enemy) and i not in self.were_hit and i.hitbox.colliderect(hit_zone):
+                        i.take_dmg(self, self.dmg)
+                        self.were_hit.add(i)
+            if dt > self.boltAnimHit[0].numFrames * ANIMATION_DELAY / 1000:
+                self.hit = None
+                self.were_hit.clear()
         super().update(t, platforms, blanks, entities, player)
-
-        if self.hit_take is False:
-            self.immortal_time += 1
-            if self.immortal_time == 120:
-                self.hit_take = True
-                self.immortal_time = 0
-
-        if self.previous_block == "lava" and self.block != "lava":
-            self.hp -= 0.1
-            self.burn_time += 1
-            if self.burn_time == 200 and self.block != "lava":
-                self.burn_time = 0
-                self.previous_block = ""
-
-        self.rect.x = self.hitbox.x - Player.WIDTH * 3 // 8
-        self.rect.y = self.hitbox.y - Player.HEIGHT * 7 // 32
         self.cur_anim[self.right].play()
         self.image = self.cur_anim[self.right].getCurrentFrame()
 
     def take_dmg(self, who, dmg):
         if DEBUG:
             print(type(who).__name__)
-        try:
-            a = super().take_dmg(who, dmg)
-            self.immortality()
-            return a
-        except AttributeError:
-            h0 = self.hp
-            if DEBUG:
-                print('No .dmg', type(who))
-            if type(who) == Uka:
-                self.hp -= 10
-                self.immortality()
-            elif type(who) == Flyling:
-                self.hp -= 15
-                self.immortality()
-            elif type(who) == Crackatoo:
-                self.hp -= 20
-                self.immortality()
-            elif type(who) == Lava:
-                self.hp -= 0.05
-                self.previous_block = "lava"
-                self.block = "lava"
-            elif type(who) == Spikes:
-                self.hp -= 15
-                self.immortality()
-            elif type(who) == Blast:
-                self.hp -= who.dmg
-            if self.hp < 0:
-                return True, True
-            else:
-                return self.hp < h0, False
-
-
-    def immortality(self):
-        self.hit_take = False
+        a = super().take_dmg(who, dmg)
+        return a
 
     def check_portal(self, other_blocks):
         for ob in other_blocks:
-            if sprite.collide_rect(self, ob):
-                if type(ob) == Teleport:
+            if pygame.sprite.collide_rect(self, ob):
+                if type(ob) == plat.Teleport:
                     return True
 
 
