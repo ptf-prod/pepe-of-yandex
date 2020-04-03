@@ -107,7 +107,7 @@ def start_level(level_name):
                 entities_group.add(uka)
                 all_sprites.add(uka)
             elif sym == "b":
-                blank = plat.Blank(j * PLAT_W, i * PLAT_H)
+                blank = plat.Trigger(j * PLAT_W, i * PLAT_H)
                 blanks_group.add(blank)
                 all_sprites.add(blank)
             elif sym == "F":
@@ -274,7 +274,7 @@ def game_cycle(events):
         for i in all_sprites:
             if camera.state.colliderect(i.rect):
                 coordi = camera.apply(i.rect)
-                if isinstance(i, plat.Blank):
+                if isinstance(i, plat.Trigger):
                     border_color = 'red4'
                 else:
                     border_color = 'red'

@@ -48,7 +48,7 @@ class Platform(sprite.Sprite):
                                   PLAT_W, PLAT_H)
 
 
-class Blank(Platform):
+class Trigger(Platform):
     def __init__(self, x, y, edge=0):
         super().__init__(x, y, None)
         if edge != 0:
