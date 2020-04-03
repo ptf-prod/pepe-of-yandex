@@ -78,7 +78,7 @@ def load_image(name, colorkey=-1):
 def start_level(level_name):
     global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
     global all_sprites, platforms_group, boss_group, blanks_group, player_group, entities_group
-    global updating_blocks, level, camera, clock
+    global updating_blocks, level, camera, clock, edge_platforms
 
     hero = Player(55, 555)
     hp = HitPoints(hero.hp)
@@ -90,6 +90,7 @@ def start_level(level_name):
     all_sprites.add(hero)
     boss_group = pygame.sprite.Group()
     blanks_group = pygame.sprite.Group()
+    edge_platforms = pygame.sprite.Group()
     updating_blocks = {
         plat.Lava: plat.LavaGroup(),
         plat.Spikes: plat.SpikesGroup(),
@@ -101,78 +102,85 @@ def start_level(level_name):
     level = load_level("level_1.txt")
 
     x = y = 0  # координаты
-    for row in level:  # вся строка
-        for sym in row:  # каждый символ
+    for i, row in enumerate(level):  # вся строка
+        for j, sym in enumerate(row):  # каждый символ
+            p = None
             if sym == "*":
-                p = Platform(x, y, None)
+                p = Platform(j * PLAT_W, i * PLAT_H, None)
                 platforms_group.add(p)
                 all_sprites.add(p)
             elif sym in PLATFORMS_LEGEND.keys():
-                p = Platform(x, y, f"data/framestiles/tiles/{PLATFORMS_LEGEND[sym]}.png")
+                p = Platform(j * PLAT_W, i * PLAT_H, f"data/framestiles/tiles/{PLATFORMS_LEGEND[sym]}.png")
                 platforms_group.add(p)
                 all_sprites.add(p)
             elif sym == "U":
-                uka = Uka(x, y)
+                uka = Uka(j * PLAT_W, i * PLAT_H)
                 entities_group.add(uka)
                 all_sprites.add(uka)
             elif sym == "b":
-                blank = Blank(x, y)
+                blank = Blank(j * PLAT_W, i * PLAT_H)
                 blanks_group.add(blank)
                 all_sprites.add(blank)
             elif sym == "F":
-                flyling = Flyling(x, y)
+                flyling = Flyling(j * PLAT_W, i * PLAT_H)
                 flyling.eg = entities_group
                 flyling.ass = all_sprites
                 entities_group.add(flyling)
                 all_sprites.add(flyling)
             elif sym == "L":
-                lava = plat.Lava(x, y, updating_blocks[plat.Lava])
-                all_sprites.add(lava)
-                platforms_group.add(lava)
-                updating_blocks[plat.Lava].add(lava)
+                p = plat.Lava(j * PLAT_W, i * PLAT_H, updating_blocks[plat.Lava])
+                all_sprites.add(p)
+                platforms_group.add(p)
+                updating_blocks[plat.Lava].add(p)
             elif sym == "[":
-                lava = Lava(x, y, updating_blocks[plat.Lava], "data/framestiles/tiles/lavaleft.png")
-                all_sprites.add(lava)
-                platforms_group.add(lava)
-                updating_blocks[plat.Lava].add(lava)
+                p = Lava(j * PLAT_W, i * PLAT_H, updating_blocks[plat.Lava], "data/framestiles/tiles/lavaleft.png")
+                all_sprites.add(p)
+                platforms_group.add(p)
+                updating_blocks[plat.Lava].add(p)
             elif sym == "]":
-                lava = Lava(x, y, updating_blocks[plat.Lava], "data/framestiles/tiles/lavaright.png")
-                all_sprites.add(lava)
-                platforms_group.add(lava)
-                updating_blocks[plat.Lava].add(lava)
+                p = Lava(j * PLAT_W, i * PLAT_H, updating_blocks[plat.Lava], "data/framestiles/tiles/lavaright.png")
+                all_sprites.add(p)
+                platforms_group.add(p)
+                updating_blocks[plat.Lava].add(p)
             elif sym == "S":
-                spikes = plat.Spikes(x, y, "data/framestiles/tiles/spikes.png", updating_blocks[plat.Spikes])
-                updating_blocks[plat.Spikes].add(spikes)
-                all_sprites.add(spikes)
-                platforms_group.add(spikes)
+                p = plat.Spikes(j * PLAT_W, i * PLAT_H, "data/framestiles/tiles/spikes.png",
+                                updating_blocks[plat.Spikes])
+                updating_blocks[plat.Spikes].add(p)
+                all_sprites.add(p)
+                platforms_group.add(p)
             elif sym == "T":
-                tp = plat.Teleport(x, y)
-                updating_blocks[plat.Teleport].add(tp)
-                all_sprites.add(tp)
-            elif sym == "I":
-                ice = plat.Ice(x, y, "data/framestiles/tiles/icecenter.png")
-                all_sprites.add(ice)
-                platforms_group.add(ice)
+                p = plat.Teleport(j * PLAT_W, i * PLAT_H)
+                updating_blocks[plat.Teleport].add(p)
+                all_sprites.add(p)
+            elif sym == "j":
+                p = plat.Ice(j * PLAT_W, i * PLAT_H, "data/framestiles/tiles/icecenter.png")
+                all_sprites.add(p)
+                platforms_group.add(p)
             elif sym == "(":
-                ice = plat.Ice(x, y, "data/framestiles/tiles/iceleft.png")
-                all_sprites.add(ice)
-                platforms_group.add(ice)
+                p = plat.Ice(j * PLAT_W, i * PLAT_H, "data/framestiles/tiles/iceleft.png")
+                all_sprites.add(p)
+                platforms_group.add(p)
             elif sym == ")":
-                ice = plat.Ice(x, y, "data/framestiles/tiles/iceright.png")
-                all_sprites.add(ice)
-                platforms_group.add(ice)
+                p = plat.Ice(j * PLAT_W, i * PLAT_H, "data/framestiles/tiles/iceright.png")
+                all_sprites.add(p)
+                platforms_group.add(p)
             elif sym == "C":
-                crack = Crackatoo(x, y)
+                crack = Crackatoo(j * PLAT_W, i * PLAT_H)
                 all_sprites.add(crack)
                 entities_group.add(crack)
             elif sym == "B":
-                boss = Boss(x, y)
+                boss = Boss(j * PLAT_W, i * PLAT_H)
                 all_sprites.add(boss)
                 boss_group.add(boss)
-
-            x += PLAT_W  # блоки платформы ставятся на ширине блоков
-        y += PLAT_H  # то же самое и с высотой
-        x = 0  # на каждой новой строчке начинаем с нуля
+            if isinstance(p, plat.Platform):
+                edge = False
+                for q in level[max(0, i - 1):i + 2]:
+                    for w in q[max(0, j - 1):j + 2]:
+                        if w not in PLATFORMS_LEGEND.keys() and w not in '[L]S(I)*':
+                            edge = True
+                            break
+                if edge:
+                    edge_platforms.add(p)
 
     total_level_width = len(level[0]) * PLAT_W  # Высчитываем фактическую ширину уровня
     total_level_height = len(level) * PLAT_H  # высоту
@@ -202,7 +210,7 @@ def continue_game():
 def game_cycle(events):
     global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
     global all_sprites, platforms_group, boss_group, blanks_group, lava_group
-    global other_blocks, level, camera, prev_fps, MODE, menu
+    global other_blocks, level, camera, prev_fps, MODE, menu, edge_platforms
 
     if hero.hp <= 0:
         start_level(CURRENT_LEVEL)
@@ -247,7 +255,7 @@ def game_cycle(events):
     #                           hp, enemies_group, all_sprites)
     enemies_group.update(blanks_group, platforms_group, [hero.hitbox.x, hero.hitbox.y],
                          enemies_group, all_sprites)
-    entities_group.update(t, platforms_group, blanks_group, entities_group, player_group)
+    entities_group.update(t, edge_platforms, blanks_group, entities_group, player_group)
     bullets_group.update(t, platforms_group, blanks_group, entities_group, player_group)
 
     if timetime.time() - hero.shoot_start > 1 and shoot is True and hero.on_ground \

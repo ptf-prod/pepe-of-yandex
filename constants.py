@@ -22,7 +22,7 @@ PLATFORMS_LEGEND = {
 
 DEBUG = True
 DRAW_HITBOXES = DEBUG and True
-DRAW_RECTS = DEBUG and True
+DRAW_RECTS = DEBUG and False
 SHOW_FPS = DEBUG and True
 CURRENT_LEVEL = 'level_1.txt'
 
