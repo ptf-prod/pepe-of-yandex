@@ -195,7 +195,7 @@ def continue_game():
 def game_over():
     global MODE, FIRST_TIME
     game_over_menu.enable()
-    MODE = 'GAMEOVER'
+    MODE = 'GAME_OVER'
     FIRST_TIME = True
 
 
@@ -356,9 +356,9 @@ def main():
             game_cycle(events)
         elif MODE == 'MENU':
             menu.mainloop(events)
-        elif MODE == 'GAMEOVER':
+        elif MODE == 'GAME_OVER':
             game_over_menu.mainloop(events)
-        elif MODE == 'YOUWIN':
+        elif MODE == 'YOU_WIN':
             you_win_menu.mainloop(events)
 
 
