@@ -215,7 +215,7 @@ def game_cycle(events):
 
     if hero.hp <= 0:
         game_over()
-    t = clock.tick() / 1000
+    t = clock.tick() / 1000 * TIMESCALE
     for event in events:  # Обрабатываем события
         if event.type == QUIT:
             raise SystemExit("QUIT")

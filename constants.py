@@ -24,6 +24,7 @@ DEBUG = False
 DRAW_HITBOXES = DEBUG and True
 DRAW_RECTS = DEBUG and False
 SHOW_FPS = DEBUG and True
+TIMESCALE = 1
 CURRENT_LEVEL = 'level_1.txt'
 
 # Объявляем константы
