@@ -1,5 +1,4 @@
 # Импортируем все модули проекта
-import os
 import time
 import pygame
 from pygame.constants import *
@@ -193,13 +192,29 @@ def continue_game():
         clock = pygame.time.Clock()
 
 
+def game_over():
+    global MODE, FIRST_TIME
+    game_over_menu.enable()
+    MODE = 'GAMEOVER'
+    FIRST_TIME = True
+
+
+def back(menu_2):
+    def f():
+        global MODE
+        menu_2.disable()
+        menu.enable()
+        MODE = 'MENU'
+    return f
+
+
 def game_cycle(events):
     global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
     global all_sprites, platforms_group, boss_group, blanks_group, lava_group
     global other_blocks, level, camera, prev_fps, MODE, menu, edge_platforms
 
     if hero.hp <= 0:
-        start_level(CURRENT_LEVEL)
+        game_over()
     t = clock.tick() / 1000
     for event in events:  # Обрабатываем события
         if event.type == QUIT:
@@ -295,15 +310,17 @@ def game_cycle(events):
     on_screen.remove(on_screen)
 
 
-def background_fun():
-    global screen
-    screen.fill((51, 153, 255))
+def background_fun(color):
+    def f():
+        screen.fill(color)
+    return f
 
 
 def main():
     global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
     global all_sprites, platforms_group, boss_group, blanks_group, lava_group
     global other_blocks, level, camera, clock, background, screen, menu, game_submenu
+    global game_over_menu, you_win_menu
 
     pygame.init()  # Инициация PyGame, обязательная строчка
     screen = pygame.display.set_mode((WIN_W, WIN_H))
@@ -312,23 +329,37 @@ def main():
 
     menu_font = pygameMenu.font.FONT_8BIT
     menu = pygameMenu.Menu(screen, 1280, 720, menu_font, 'Pepe of Yandex',
-                           bgfun=background_fun, font_size_title=30,
+                           bgfun=background_fun((51, 153, 255)), font_size_title=30,
                            menu_alpha=70)
-    game_submenu = pygameMenu.Menu(screen, 1280, 720, menu_font, 'Game',
-                                   bgfun=background_fun, font_size_title=30,
+    game_submenu = pygameMenu.Menu(screen, 1280, 720, menu_font, 'Play',
+                                   bgfun=background_fun((51, 153, 255)), font_size_title=30,
                                    menu_alpha=70)
-    game_submenu.add_option('START NEW GAME', start_new_game)
-    game_submenu.add_option('CONTINUE', continue_game)
-    menu.add_option('PLAY', game_submenu)
-    menu.add_option('QUIT', pygameMenu.events.EXIT)
-    start_level(CURRENT_LEVEL)
+    game_submenu.add_option('Start new game', start_new_game)
+    game_submenu.add_option('Continue', continue_game)
+    game_submenu.add_option('Back', pygameMenu.events.BACK)
+    menu.add_option('Play', game_submenu)
+    menu.add_option('Quit', pygameMenu.events.EXIT)
+
+    game_over_menu = pygameMenu.Menu(screen, 1280, 720, menu_font, 'Game Over',
+                                     bgfun=background_fun((250, 128, 114)), font_size_title=30,
+                                     menu_alpha=70)
+    game_over_menu.add_option('Back', back(game_over_menu))
+
+    you_win_menu = pygameMenu.Menu(screen, 1280, 720, menu_font, 'You Win',
+                                   bgfun=background_fun((0, 255, 127)), font_size_title=30,
+                                   menu_alpha=70)
+    you_win_menu.add_option('Back', back(you_win_menu))
 
     while True:  # Основной цикл программы
         events = pygame.event.get()
         if MODE == 'GAME':
             game_cycle(events)
-        else:
+        elif MODE == 'MENU':
             menu.mainloop(events)
+        elif MODE == 'GAMEOVER':
+            game_over_menu.mainloop(events)
+        elif MODE == 'YOUWIN':
+            you_win_menu.mainloop(events)
 
 
 if __name__ == "__main__":
