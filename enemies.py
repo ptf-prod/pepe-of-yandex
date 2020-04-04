@@ -160,6 +160,16 @@ class Flyling(Enemy):
         self.gravity = 0
         self.blast_waiting = False
 
+    def take_dmg(self, who, dmg):
+        if isinstance(who, Blast):
+            return False, False
+        self.hp -= dmg
+        if self.hp <= 0:
+            self.kill()
+            return True, True
+        else:
+            return True, False
+
     def update(self, t, platforms, blanks, entities, player):
         if self.barriers is None:
             self.get_barriers_x(platforms, blanks)
