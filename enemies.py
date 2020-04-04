@@ -286,7 +286,7 @@ class Blast(Enemy):
         anim[1].play()
         super().__init__(x, y, anim[0], [int(5 * size_c), int(6 * size_c),
                                          int(5 * size_c), int(4 * size_c)])
-        self.dmg = 5
+        self.dmg = 20
         self.hero_coords = (0, 0)
         self.gravity = GRAVITY / 4
         self.xvel0 = 250
