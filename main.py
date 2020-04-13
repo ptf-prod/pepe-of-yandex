@@ -259,8 +259,8 @@ def game_cycle(events):
     entities_group.update(t, edge_platforms, blanks_group, entities_group, player_group)
     bullets_group.update(t, platforms_group, blanks_group, entities_group, player_group)
 
-    if time.time() - hero.shoot_start > 1 and shoot is True and hero.on_ground \
-            or time.time() - hero.shoot_start > 5 and shoot:
+    if time.time() * TIMESCALE - hero.shoot_start > 1 and shoot is True and hero.on_ground \
+            or time.time() * TIMESCALE - hero.shoot_start > 5 and shoot:
         if DEBUG:
             print("bullet")
         if hero.right:
@@ -269,7 +269,7 @@ def game_cycle(events):
             b = bullet.Bullet(hero.hitbox.left - 5, hero.hitbox.y + hero.hitbox.height // 8 * 3, False)
         entities_group.add(b)
         all_sprites.add(b)
-        hero.shoot_start = time.time()
+        hero.shoot_start = time.time() * TIMESCALE
     if hit and not hero.hit:
         hero.start_hit()
 

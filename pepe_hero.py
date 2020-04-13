@@ -64,7 +64,7 @@ class Player(Entity):
         self.were_hit = set()
 
     def start_hit(self):
-        self.hit = time.time()
+        self.hit = time.time() * TIMESCALE
         for i in self.boltAnimHit:
             i.currentFrameNum = 0
         if DEBUG:
@@ -102,7 +102,7 @@ class Player(Entity):
                         self.xvel = Player.MOVE_SPEED
             self.cur_anim = self.boltAnimJump
 
-        if self.keys.shoot or self.shoot_start + 0.5 > time.time():
+        if self.keys.shoot or self.shoot_start + 0.5 > time.time() * TIMESCALE:
             self.cur_anim = self.boltAnimShoot
             self.xvel /= 1.5  # При стрельбе медленнее бежим
             if self.on_ground:
@@ -115,7 +115,7 @@ class Player(Entity):
             else:
                 hit_zone = pygame.Rect(self.rect.centerx - 22 * PLAT_W // 16, self.hitbox.top,
                                        14 * PLAT_W // 16, self.hitbox.height)
-            dt = time.time() - self.hit
+            dt = time.time() * TIMESCALE - self.hit
             if dt > ANIMATION_DELAY / 400:
                 for i in entities.sprites():
                     if isinstance(i, enemies.Enemy) and i not in self.were_hit and i.hitbox.colliderect(hit_zone):

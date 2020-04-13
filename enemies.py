@@ -94,11 +94,11 @@ class Enemy(entity.Entity):
                 self.reverse()
 
     def make_dmg(self, who):
-        if time.time() - self.last_hit < self.hit_delay:
+        if time.time() * TIMESCALE - self.last_hit < self.hit_delay:
             return False, False
         a = who.take_dmg(self, self.dmg)
         if a[0]:
-            self.last_hit = time.time()
+            self.last_hit = time.time() * TIMESCALE
         return a
 
     def reverse(self):
@@ -178,7 +178,7 @@ class Flyling(Enemy):
         except IndexError:
             return
         super().update(t, platforms, blanks, entities, player)
-        db = time.time() - self.last_blast
+        db = time.time() * TIMESCALE - self.last_blast
         if db > self.blast_delay and self.blast_row < 3 or db > self.blast_delay * 3:
             if self.blast_row >= 3:
                 self.blast_row = 0
@@ -196,12 +196,12 @@ class Flyling(Enemy):
             if d <= 600:
                 for i in self.boltAnimFire:
                     i.currentFrameNum = 0
-                self.last_blast = time.time()
+                self.last_blast = time.time() * TIMESCALE
                 self.blast_row += 1
                 self.blast_waiting = True
 
-        if self.last_blast + 0.3 > time.time():
-            if self.last_blast + 0.2 < time.time() and self.blast_waiting:
+        if self.last_blast + 0.3 > time.time() * TIMESCALE:
+            if self.last_blast + 0.2 < time.time() * TIMESCALE and self.blast_waiting:
                 if self.right:
                     blast = Blast(self.hitbox.right, self.hitbox.top, 1)
                 else:
