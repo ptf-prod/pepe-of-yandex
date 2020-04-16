@@ -131,6 +131,7 @@ class LavaGroup(sprite.Group):
                 self.victims[i[0]] = i[1]
         self.old_victims = self.victims
         self.victims = {}
+        super(LavaGroup, self).update()
 
 
 class Spikes(InteractivePlatform):
@@ -174,6 +175,7 @@ class SpikesGroup(sprite.Group):
                 i[0].take_dmg(self, Spikes.dmg)
         self.old_victims = self.victims
         self.victims = {}
+        super(SpikesGroup, self).update()
 
 
 class Ice(Platform):
