@@ -1,4 +1,5 @@
 # Импортируем все модули проекта
+import os
 import time
 import pygame
 from pygame.constants import *
@@ -10,7 +11,7 @@ import enemies
 from background import Background
 import pepe_hero
 import bullet
-
+from boss import *
 
 prev_fps = 0
 MODE = 'MENU'
@@ -58,9 +59,9 @@ def load_level(filename):
 
 
 def start_level(level_name):
-    global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
+    global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group, enemies_all
     global all_sprites, platforms_group, boss_group, blanks_group, player_group, entities_group
-    global updating_blocks, level, camera, clock, edge_platforms
+    global updating_blocks, level, camera, clock, edge_platforms, boss_attacks_group, boss_attacks, boss_blasts, boss_blasts_group
 
     hero = None
     left = right = up = down = shoot = hit = False  # по умолчанию — стоим
@@ -78,7 +79,12 @@ def start_level(level_name):
     }
     player_group = pygame.sprite.Group()
     entities_group = pygame.sprite.Group()
+    boss_attacks = []
+    boss_attacks_group = pygame.sprite.Group()
+    boss_blasts = []
+    boss_blasts_group = pygame.sprite.Group()
     level = load_level(CURRENT_LEVEL)
+    enemies_all = []
 
     for i, row in enumerate(level):  # вся строка
         for j, sym in enumerate(row):  # каждый символ
@@ -139,8 +145,8 @@ def start_level(level_name):
                 p = plat.Teleport(j * PLAT_W, i * PLAT_H)
                 updating_blocks[plat.Teleport].add(p)
                 all_sprites.add(p)
-            elif sym == "j":
-                p = plat.Ice(j * PLAT_W, i * PLAT_H, "data/framestiles/tiles/icecenter.png")
+            elif sym == "I":
+                p = plat.Ice(j * PLAT_W, i * PLAT_H, "data/framestiles/tiles/icecentre.png")
                 all_sprites.add(p)
                 platforms_group.add(p)
             elif sym == "(":
@@ -155,10 +161,10 @@ def start_level(level_name):
                 crack = enemies.Crackatoo(j * PLAT_W, i * PLAT_H)
                 all_sprites.add(crack)
                 entities_group.add(crack)
-            # elif sym == "B":
-            #     boss = Boss(j * PLAT_W, i * PLAT_H)
-            #     all_sprites.add(boss)
-            #     boss_group.add(boss)
+            elif sym == "B":
+                boss = Boss(j * PLAT_W, i * PLAT_H)
+                all_sprites.add(boss)
+                boss_group.add(boss)
             if isinstance(p, plat.Platform):
                 edge = False
                 for q in level[max(0, i - 1):i + 2]:
@@ -192,30 +198,14 @@ def continue_game():
         clock = pygame.time.Clock()
 
 
-def game_over():
-    global MODE, FIRST_TIME
-    game_over_menu.enable()
-    MODE = 'GAME_OVER'
-    FIRST_TIME = True
-
-
-def back(menu_2):
-    def f():
-        global MODE
-        menu_2.disable()
-        menu.enable()
-        MODE = 'MENU'
-    return f
-
-
 def game_cycle(events):
-    global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
-    global all_sprites, platforms_group, boss_group, blanks_group, lava_group
-    global other_blocks, level, camera, prev_fps, MODE, menu, edge_platforms
+    global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group, enemies_all
+    global all_sprites, platforms_group, boss_group, blanks_group, lava_group, boss_attacks_group
+    global other_blocks, level, camera, prev_fps, MODE, menu, edge_platforms, boss_attacks, boss_blasts, boss_blasts_group
 
     if hero.hp <= 0:
-        game_over()
-    t = clock.tick() / 1000 * TIMESCALE
+        start_level(CURRENT_LEVEL)
+    t = clock.tick() / 1000
     for event in events:  # Обрабатываем события
         if event.type == QUIT:
             raise SystemExit("QUIT")
@@ -250,17 +240,18 @@ def game_cycle(events):
     camera.update(hero)
     for i in updating_blocks.values():
         i.update(t, on_screen, blanks_group, enemies_group, player_group)
-    # boss_group.update(hero, hp, enemies_group, boss_attacks_group,
-    #                   boss_attacks, all_sprites, enemies_group)
-    # boss_attacks_group.update(enemies_group, hero, boss_attacks,
-    #                           hp, enemies_group, all_sprites)
-    enemies_group.update(blanks_group, platforms_group, [hero.hitbox.x, hero.hitbox.y],
-                         enemies_group, all_sprites)
+    boss_group.update(hero, hp, enemies_all, boss_attacks_group,
+                       boss_attacks, all_sprites, enemies_group)
+    boss_attacks_group.update(enemies_group, hero, boss_attacks,
+                              hp, enemies_group, all_sprites)
+    enemies_group.update(t, platforms_group, blanks_group,
+                         entities_group, player_group)
+    boss_blasts_group.update(blanks_group, platforms_group, [hero.hitbox.x, hero.hitbox.y], enemies, enemies_group, all_sprites)
     entities_group.update(t, edge_platforms, blanks_group, entities_group, player_group)
     bullets_group.update(t, platforms_group, blanks_group, entities_group, player_group)
 
-    if time.time() * TIMESCALE - hero.shoot_start > 1 and shoot is True and hero.on_ground \
-            or time.time() * TIMESCALE - hero.shoot_start > 5 and shoot:
+    if time.time() - hero.shoot_start > 1 and shoot is True and hero.on_ground \
+            or time.time() - hero.shoot_start > 5 and shoot:
         if DEBUG:
             print("bullet")
         if hero.right:
@@ -269,7 +260,7 @@ def game_cycle(events):
             b = bullet.Bullet(hero.hitbox.left - 5, hero.hitbox.y + hero.hitbox.height // 8 * 3, False)
         entities_group.add(b)
         all_sprites.add(b)
-        hero.shoot_start = time.time() * TIMESCALE
+        hero.shoot_start = time.time()
     if hit and not hero.hit:
         hero.start_hit()
 
@@ -310,17 +301,15 @@ def game_cycle(events):
     on_screen.remove(on_screen)
 
 
-def background_fun(color):
-    def f():
-        screen.fill(color)
-    return f
+def background_fun():
+    global screen
+    screen.fill((51, 153, 255))
 
 
 def main():
     global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
     global all_sprites, platforms_group, boss_group, blanks_group, lava_group
     global other_blocks, level, camera, clock, background, screen, menu, game_submenu
-    global game_over_menu, you_win_menu
 
     pygame.init()  # Инициация PyGame, обязательная строчка
     screen = pygame.display.set_mode((WIN_W, WIN_H))
@@ -329,37 +318,23 @@ def main():
 
     menu_font = pygameMenu.font.FONT_8BIT
     menu = pygameMenu.Menu(screen, 1280, 720, menu_font, 'Pepe of Yandex',
-                           bgfun=background_fun((51, 153, 255)), font_size_title=30,
+                           bgfun=background_fun, font_size_title=30,
                            menu_alpha=70)
-    game_submenu = pygameMenu.Menu(screen, 1280, 720, menu_font, 'Play',
-                                   bgfun=background_fun((51, 153, 255)), font_size_title=30,
+    game_submenu = pygameMenu.Menu(screen, 1280, 720, menu_font, 'Game',
+                                   bgfun=background_fun, font_size_title=30,
                                    menu_alpha=70)
-    game_submenu.add_option('Start new game', start_new_game)
-    game_submenu.add_option('Continue', continue_game)
-    game_submenu.add_option('Back', pygameMenu.events.BACK)
-    menu.add_option('Play', game_submenu)
-    menu.add_option('Quit', pygameMenu.events.EXIT)
-
-    game_over_menu = pygameMenu.Menu(screen, 1280, 720, menu_font, 'Game Over',
-                                     bgfun=background_fun((250, 128, 114)), font_size_title=30,
-                                     menu_alpha=70)
-    game_over_menu.add_option('Back', back(game_over_menu))
-
-    you_win_menu = pygameMenu.Menu(screen, 1280, 720, menu_font, 'You Win',
-                                   bgfun=background_fun((0, 255, 127)), font_size_title=30,
-                                   menu_alpha=70)
-    you_win_menu.add_option('Back', back(you_win_menu))
+    game_submenu.add_option('START NEW GAME', start_new_game)
+    game_submenu.add_option('CONTINUE', continue_game)
+    menu.add_option('PLAY', game_submenu)
+    menu.add_option('QUIT', pygameMenu.events.EXIT)
+    start_level(CURRENT_LEVEL)
 
     while True:  # Основной цикл программы
         events = pygame.event.get()
         if MODE == 'GAME':
             game_cycle(events)
-        elif MODE == 'MENU':
+        else:
             menu.mainloop(events)
-        elif MODE == 'GAME_OVER':
-            game_over_menu.mainloop(events)
-        elif MODE == 'YOU_WIN':
-            you_win_menu.mainloop(events)
 
 
 if __name__ == "__main__":
