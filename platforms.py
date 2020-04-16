@@ -35,6 +35,7 @@ class Platform(sprite.Sprite):
     def __init__(self, x, y, filename):
         super().__init__()
         self.dmg = False
+        self.visible = True
         if filename is not None:
             if filename not in tiles_textures:
                 tiles_textures[filename] = \
@@ -43,6 +44,7 @@ class Platform(sprite.Sprite):
         else:
             self.image = Surface((PLAT_W, PLAT_H))
             self.image.set_alpha(0)
+            self.visible = False
         self.rect = Rect(x, y, PLAT_W * 2, PLAT_H * 2)
         self.hitbox = pygame.Rect(x + PLAT_W // 2, y + PLAT_H // 2,
                                   PLAT_W, PLAT_H)
@@ -110,23 +112,23 @@ class LavaGroup(sprite.Group):
         elif ent in self.old_victims:
             self.victims[ent] = self.old_victims[ent]
         else:
-            self.victims[ent] = [time.time() * TIMESCALE, None, time.time() * TIMESCALE]
+            self.victims[ent] = [time.time(), None, time.time()]
         # (вошёл в лаву, вышел, последний удар)
 
     def update(self, t, on_screen, blanks_group, enemies_group, player_group):
         for i in self.victims.items():
-            dt = time.time() * TIMESCALE - i[1][2]
+            dt = time.time() - i[1][2]
             if dt > Lava.hit_delay:
                 i[0].take_dmg(self, Lava.dmg)
-                i[1][2] = time.time() * TIMESCALE
+                i[1][2] = time.time()
         for i in self.old_victims.items():
             if i[0] not in self.victims:
                 if i[1][1] is None:
-                    i[1][1] = time.time() * TIMESCALE
-                if time.time() * TIMESCALE - i[1][1] > (i[1][1] - i[1][0]) / 2:
+                    i[1][1] = time.time()
+                if time.time() - i[1][1] > (i[1][1] - i[1][0]) / 2:
                     continue
-                if time.time() * TIMESCALE - i[1][2] > Lava.hit_delay:
-                    i[1][2] = time.time() * TIMESCALE
+                if time.time() - i[1][2] > Lava.hit_delay:
+                    i[1][2] = time.time()
                     i[0].take_dmg(self, Lava.dmg)
                 self.victims[i[0]] = i[1]
         self.old_victims = self.victims
@@ -159,7 +161,7 @@ class SpikesGroup(sprite.Group):
         elif ent in self.old_victims:
             self.victims[ent] = self.old_victims[ent]
         else:
-            self.victims[ent] = time.time() * TIMESCALE - Spikes.hit_delay_stay
+            self.victims[ent] = time.time() - Spikes.hit_delay_stay
 
     def __init__(self, *sprites):
         super().__init__(*sprites)
@@ -168,9 +170,9 @@ class SpikesGroup(sprite.Group):
 
     def update(self, t, on_screen, blanks_group, enemies_group, player_group):
         for i in self.victims.items():
-            dt = time.time() * TIMESCALE - i[1]
+            dt = time.time() - i[1]
             if dt > Spikes.hit_delay_stay or dt > Spikes.hit_delay_move and i[0].xvel != 0:
-                self.victims[i[0]] = time.time() * TIMESCALE
+                self.victims[i[0]] = time.time()
                 i[0].take_dmg(self, Spikes.dmg)
         self.old_victims = self.victims
         self.victims = {}

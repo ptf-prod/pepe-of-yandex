@@ -94,11 +94,11 @@ class Enemy(entity.Entity):
                 self.reverse()
 
     def make_dmg(self, who):
-        if time.time() * TIMESCALE - self.last_hit < self.hit_delay:
+        if time.time() - self.last_hit < self.hit_delay:
             return False, False
         a = who.take_dmg(self, self.dmg)
         if a[0]:
-            self.last_hit = time.time() * TIMESCALE
+            self.last_hit = time.time()
         return a
 
     def reverse(self):
@@ -160,16 +160,6 @@ class Flyling(Enemy):
         self.gravity = 0
         self.blast_waiting = False
 
-    def take_dmg(self, who, dmg):
-        if isinstance(who, Blast):
-            return False, False
-        self.hp -= dmg
-        if self.hp <= 0:
-            self.kill()
-            return True, True
-        else:
-            return True, False
-
     def update(self, t, platforms, blanks, entities, player):
         if self.barriers is None:
             self.get_barriers_x(platforms, blanks)
@@ -178,7 +168,7 @@ class Flyling(Enemy):
         except IndexError:
             return
         super().update(t, platforms, blanks, entities, player)
-        db = time.time() * TIMESCALE - self.last_blast
+        db = time.time() - self.last_blast
         if db > self.blast_delay and self.blast_row < 3 or db > self.blast_delay * 3:
             if self.blast_row >= 3:
                 self.blast_row = 0
@@ -196,12 +186,12 @@ class Flyling(Enemy):
             if d <= 600:
                 for i in self.boltAnimFire:
                     i.currentFrameNum = 0
-                self.last_blast = time.time() * TIMESCALE
+                self.last_blast = time.time()
                 self.blast_row += 1
                 self.blast_waiting = True
 
-        if self.last_blast + 0.3 > time.time() * TIMESCALE:
-            if self.last_blast + 0.2 < time.time() * TIMESCALE and self.blast_waiting:
+        if self.last_blast + 0.3 > time.time():
+            if self.last_blast + 0.2 < time.time() and self.blast_waiting:
                 if self.right:
                     blast = Blast(self.hitbox.right, self.hitbox.top, 1)
                 else:
@@ -296,9 +286,9 @@ class Blast(Enemy):
         anim[1].play()
         super().__init__(x, y, anim[0], [int(5 * size_c), int(6 * size_c),
                                          int(5 * size_c), int(4 * size_c)])
-        self.dmg = 20
+        self.dmg = 5
         self.hero_coords = (0, 0)
-        self.gravity = GRAVITY / 4
+        self.gravity = 0
         self.xvel0 = 250
         self.xvel = 250
         self.yvel = 100

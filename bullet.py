@@ -13,9 +13,9 @@ class Bullet(entity.Entity):
         image.fill(random.sample(range(0, 256), 3))
         super().__init__(x, y, image)
         if right:
-            self.xvel = 5000
+            self.xvel = 3000
         else:
-            self.xvel = -5000
+            self.xvel = -3000
         self.yvel = random.random() * 200 - 100
         self.kill_delay = False
         self.right = right

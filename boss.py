@@ -1,6 +1,7 @@
 import pygame
 import pyganim
 from pygame import Surface, sprite, Rect, Color, image
+import enemies
 
 ANIMATION_DELAY = 100
 
@@ -122,7 +123,17 @@ class Boss(sprite.Sprite):
     def update(self, hero, hp, enemies, boss_attacks_group, boss_attacks, all_sprites,
                enemies_group):
         if self.attack:
-            if self.rect.x - 64 <= hero.rect.x:
+            if (self.rect.x - 512 <= hero.rect.x or hero.rect.x <= self.rect.x + 640) and hero.rect.y <= self.rect.y + 64:
+                print('stomp')
+                stomp = BossHit(self.rect.x, self.rect.y, self, "stomp", enemies, enemies_group,
+                                all_sprites)
+                all_sprites.add(stomp)
+                boss_attacks.append(stomp)
+                boss_attacks_group.add(stomp)
+                self.attack = False
+                self.walk = False
+                self.stomp = True
+            elif self.rect.x - 64 <= hero.rect.x:
                 print('clapLeft')
                 clap = BossHit(self.rect.x, self.rect.y, self, "clap", enemies, enemies_group,
                                all_sprites)
@@ -142,7 +153,7 @@ class Boss(sprite.Sprite):
                 self.attack = False
                 self.walk = False
                 self.clap = True
-            elif self.rect.x - 512 >= hero.rect.x >= self.rect.x + 640 and hero.rect.y <= self.rect.y + 300:
+            elif (self.rect.x - 512 <= hero.rect.x or hero.rect.x <= self.rect.x + 640) and hero.rect.y <= self.rect.y + 64:
                 print('stomp')
                 stomp = BossHit(self.rect.x, self.rect.y, self, "stomp", enemies, enemies_group,
                                 all_sprites)
@@ -221,7 +232,7 @@ class Boss(sprite.Sprite):
 
 
 class BossHit(sprite.Sprite):
-    def __init__(self, x, y, boss, type, enemies, enemies_group, all_sprites):
+    def __init__(self, x, y, boss, type, enemieslist, enemies_group, all_sprites):
         sprite.Sprite.__init__(self)
         self.start_x = x
         self.start_y = y
@@ -234,12 +245,14 @@ class BossHit(sprite.Sprite):
                 self.xvel = -100
             self.image = Surface((128, 256))
             self.rect = Rect(x + 64, y + 128, 128, 256)  # прямоугольный объект
+            self.image.set_alpha(0)
         elif type == "stomp":
             if boss.direction == "Right":
                 self.xvel = 100
             else:
                 self.xvel = -100
             self.image = Surface((128, 64))
+            self.image.set_alpha(0)
             self.rect = Rect(x + 64, y + 192, 128, 64)  # прямоугольный объект
         else:
             if boss.direction == "Right":
@@ -248,10 +261,11 @@ class BossHit(sprite.Sprite):
             else:
                 self.xvel = -100
             self.image = Surface((64, 64))
+            self.image.set_alpha(0)
             self.rect = Rect(x + 64, y + 256, 256, 64)  # прямоугольный объект
             for r in range(10):
-                boss_blast = enemies.Blast(self.rect.x, self.rect.y - 64, 256, 256)
-                enemies.append(boss_blast)
+                boss_blast = enemies.Blast(self.rect.x, self.rect.y - 64, 1)
+                enemieslist.append(boss_blast)
                 enemies_group.add(boss_blast)
                 all_sprites.add(boss_blast)
 

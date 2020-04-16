@@ -57,6 +57,7 @@ class Player(Entity):
         self.burn_time = 0
         self.previous_block = ""
         self.block = ""
+        self.previous_move = "Right"
         self.shoot_start = 0
         self.keys = Keys()
         self.cur_anim = self.boltAnimStay
@@ -64,7 +65,7 @@ class Player(Entity):
         self.were_hit = set()
 
     def start_hit(self):
-        self.hit = time.time() * TIMESCALE
+        self.hit = time.time()
         for i in self.boltAnimHit:
             i.currentFrameNum = 0
         if DEBUG:
@@ -73,16 +74,33 @@ class Player(Entity):
 
     def update(self, t, platforms, blanks, entities, player):
         self.cur_anim[self.right].pause()
-        self.cur_anim = self.boltAnimRun
-        if self.keys.left and not self.keys.right:
+        if not(self.on_ground is False and self.block == "ice"):
+            self.cur_anim = self.boltAnimRun
+        if self.keys.left and not self.keys.right and not (self.on_ground is False and self.block == 'ice'):
             self.right = False
-            self.xvel = -Player.MOVE_SPEED  # Лево = x - n
-        elif self.keys.right and not self.keys.left:
+            if self.block != 'ice':
+                self.xvel = -Player.MOVE_SPEED  # Лево = x - n
+            else:
+                self.xvel = -Player.MOVE_SPEED - 10
+        elif self.keys.right and not self.keys.left and not (self.on_ground is False and self.block == 'ice'):
             self.right = True
-            self.xvel = Player.MOVE_SPEED  # Право = x + n
+            if self.block != 'ice':
+                self.xvel = Player.MOVE_SPEED  # Лево = x - n
+            else:
+                self.xvel = Player.MOVE_SPEED + 10
         elif not self.keys.right and not self.keys.left:
-            self.cur_anim = self.boltAnimStay
+            if self.on_ground:
+                self.cur_anim = self.boltAnimStay
+            else:
+                self.cur_anim = self.boltAnimJump
             self.xvel = 0
+            if self.block == "ice":
+                while self.xvel == 0:
+                    if self.right:
+                        self.xvel = +Player.MOVE_SPEED - 10
+                    else:
+                        self.xvel = -Player.MOVE_SPEED + 10
+
         elif self.right:
             self.xvel = Player.MOVE_SPEED  # Право = x + n
         else:
@@ -100,9 +118,10 @@ class Player(Entity):
                         self.xvel = -Player.MOVE_SPEED
                     else:
                         self.xvel = Player.MOVE_SPEED
+            self.on_ground = False
             self.cur_anim = self.boltAnimJump
 
-        if self.keys.shoot or self.shoot_start + 0.5 > time.time() * TIMESCALE:
+        if self.keys.shoot or self.shoot_start + 0.5 > time.time():
             self.cur_anim = self.boltAnimShoot
             self.xvel /= 1.5  # При стрельбе медленнее бежим
             if self.on_ground:
@@ -115,7 +134,7 @@ class Player(Entity):
             else:
                 hit_zone = pygame.Rect(self.rect.centerx - 22 * PLAT_W // 16, self.hitbox.top,
                                        14 * PLAT_W // 16, self.hitbox.height)
-            dt = time.time() * TIMESCALE - self.hit
+            dt = time.time() - self.hit
             if dt > ANIMATION_DELAY / 400:
                 for i in entities.sprites():
                     if isinstance(i, enemies.Enemy) and i not in self.were_hit and i.hitbox.colliderect(hit_zone):
@@ -127,6 +146,7 @@ class Player(Entity):
         super().update(t, platforms, blanks, entities, player)
         self.cur_anim[self.right].play()
         self.image = self.cur_anim[self.right].getCurrentFrame()
+
 
     def take_dmg(self, who, dmg):
         if DEBUG:
