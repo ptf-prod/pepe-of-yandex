@@ -93,7 +93,8 @@ class Player(Entity):
         if self.keys.down and not self.keys.up:
             if not self.on_ground:
                 self.yvel += Player.JUMP_POWER // 2
-                self.xvel = 0
+                if not isinstance(self.block[0], plat.Ice):
+                    self.xvel = 0
         elif self.keys.up:
             if self.on_ground:  # прыгаем, только когда можем оттолкнуться от земли
                 self.yvel = -Player.JUMP_POWER
@@ -106,9 +107,10 @@ class Player(Entity):
 
         if self.keys.shoot or self.shoot_start + 0.5 > time.time() * TIMESCALE:
             self.cur_anim = self.boltAnimShoot
-            self.xvel /= 1.5  # При стрельбе медленнее бежим
-            if self.on_ground:
-                self.yvel /= 1.5  # При стрельбе ниже прыгаем
+            if not isinstance(self.block[0], plat.Ice):
+                self.xvel /= 1.5  # При стрельбе медленнее бежим
+                if self.on_ground:
+                    self.yvel /= 1.5  # При стрельбе ниже прыгаем
         elif self.hit:
             self.cur_anim = self.boltAnimHit
             if self.right:
