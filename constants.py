@@ -25,7 +25,7 @@ DRAW_HITBOXES = DEBUG and False
 DRAW_RECTS = DEBUG and False
 SHOW_FPS = DEBUG and True
 TIMESCALE = 1
-CURRENT_LEVEL = 'level_1.txt'
+CURRENT_LEVEL = 'level_2.txt'
 
 # Объявляем константы
 WIN_W = 1280  # Ширина создаваемого окна

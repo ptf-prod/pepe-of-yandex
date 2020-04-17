@@ -139,8 +139,8 @@ def start_level(level_name):
                 p = plat.Teleport(j * PLAT_W, i * PLAT_H)
                 updating_blocks[plat.Teleport].add(p)
                 all_sprites.add(p)
-            elif sym == "j":
-                p = plat.Ice(j * PLAT_W, i * PLAT_H, "data/framestiles/tiles/icecenter.png")
+            elif sym == "I":
+                p = plat.Ice(j * PLAT_W, i * PLAT_H, "data/framestiles/tiles/icecentre.png")
                 all_sprites.add(p)
                 platforms_group.add(p)
             elif sym == "(":

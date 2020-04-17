@@ -55,8 +55,8 @@ class Player(Entity):
         self.reload_time = 0
         self.hit_delay_time = 0
         self.burn_time = 0
-        self.previous_block = ""
-        self.block = ""
+        self.previous_block = (None, None)
+        self.block = (None, None)
         self.shoot_start = 0
         self.keys = Keys()
         self.cur_anim = self.boltAnimStay
@@ -74,19 +74,21 @@ class Player(Entity):
     def update(self, t, platforms, blanks, entities, player):
         self.cur_anim[self.right].pause()
         self.cur_anim = self.boltAnimRun
-        if self.keys.left and not self.keys.right:
+        if self.keys.left and not self.keys.right and not(isinstance(self.block[0], plat.Ice)):
+            print(self.block)
             self.right = False
             self.xvel = -Player.MOVE_SPEED  # Лево = x - n
-        elif self.keys.right and not self.keys.left:
+        elif self.keys.right and not self.keys.left and not(isinstance(self.block[0], plat.Ice)):
             self.right = True
             self.xvel = Player.MOVE_SPEED  # Право = x + n
         elif not self.keys.right and not self.keys.left:
             self.cur_anim = self.boltAnimStay
             self.xvel = 0
-        elif self.right:
-            self.xvel = Player.MOVE_SPEED  # Право = x + n
-        else:
-            self.xvel = -Player.MOVE_SPEED  # Лево = x - n
+            if isinstance(self.block[0], plat.Ice):
+                if self.right:
+                    self.xvel = Player.MOVE_SPEED + 10 # Право = x + n
+                else:
+                    self.xvel = -Player.MOVE_SPEED + 10 # Лево = x - n
 
         if self.keys.down and not self.keys.up:
             if not self.on_ground:
@@ -95,7 +97,7 @@ class Player(Entity):
         elif self.keys.up:
             if self.on_ground:  # прыгаем, только когда можем оттолкнуться от земли
                 self.yvel = -Player.JUMP_POWER
-                if self.block == "ice":
+                if isinstance(self.block[0], plat.Ice):
                     if not self.right:
                         self.xvel = -Player.MOVE_SPEED
                     else:

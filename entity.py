@@ -75,9 +75,11 @@ class Entity(sprite.Sprite):
                         elif yvel < 0:  # если движется вверх
                             self.hitbox.top = s.hitbox.bottom  # то не движется вверх
                             self.yvel = 0  # и энергия прыжка пропадает
-                    # if type(s) == Ice:
-                    #     self.previous_block = self.block
-                    #     self.block = "ice"
+                    if isinstance(s, plat.Ice):
+                        if self.yvel == 0:
+                            self.block = (s, 1)
+                        else:
+                            self.block = (s, 0)
                     if isinstance(s, plat.Platform) and s.dmg:
                         self.take_dmg(s, s.dmg)
                     return s
