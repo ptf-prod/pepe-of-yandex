@@ -1,6 +1,7 @@
 import pygame
 import pyganim
 from pygame import Surface, sprite, Rect, Color, image
+import enemies
 
 ANIMATION_DELAY = 100
 
@@ -40,7 +41,7 @@ ANIMATION_WALK = ['data/bossframes/bosswalk/boss walk0000.png',
                   'data/bossframes/bosswalk/boss walk0007.png']
 
 
-class Boss(sprite.Sprite):
+class Boss(enemies.Enemy):
     def __init__(self, x, y):
         sprite.Sprite.__init__(self)
         self.xvel = 1
@@ -219,9 +220,15 @@ class Boss(sprite.Sprite):
                 self.walk = True
                 self.stand_time = 0
 
+    def take_dmg(self, dmg):
+        self.hp -= dmg
+        print(self.hp)
+        if self.hp <= 0:
+            self.kill()
+
 
 class BossHit(sprite.Sprite):
-    def __init__(self, x, y, boss, type, enemies, enemies_group, all_sprites):
+    def __init__(self, x, y, boss, type, enemieslist, enemies_group, all_sprites):
         sprite.Sprite.__init__(self)
         self.start_x = x
         self.start_y = y
@@ -250,8 +257,7 @@ class BossHit(sprite.Sprite):
             self.image = Surface((64, 64))
             self.rect = Rect(x + 64, y + 256, 256, 64)  # прямоугольный объект
             for r in range(10):
-                boss_blast = enemies.Blast(self.rect.x, self.rect.y - 64, 256, 256)
-                enemies.append(boss_blast)
+                boss_blast = enemies.Blast(self.rect.x, self.rect.y - 64, 1, 4)
                 enemies_group.add(boss_blast)
                 all_sprites.add(boss_blast)
 

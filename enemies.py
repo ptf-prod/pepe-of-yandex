@@ -298,9 +298,9 @@ class Blast(Enemy):
                                          int(5 * size_c), int(4 * size_c)])
         self.dmg = 20
         self.hero_coords = (0, 0)
-        self.gravity = GRAVITY / 4
-        self.xvel0 = 250
-        self.xvel = 250
+        #self.gravity = GRAVITY / 4
+        self.xvel0 = 500
+        self.xvel = 500
         self.yvel = 100
 
     def check_collision(self, xvel, yvel, platforms, blanks, entities, player):

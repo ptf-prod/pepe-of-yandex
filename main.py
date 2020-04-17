@@ -10,6 +10,7 @@ import enemies
 from background import Background
 import pepe_hero
 import bullet
+from boss import Boss
 
 
 prev_fps = 0
@@ -60,7 +61,7 @@ def load_level(filename):
 def start_level(level_name):
     global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
     global all_sprites, platforms_group, boss_group, blanks_group, player_group, entities_group
-    global updating_blocks, level, camera, clock, edge_platforms
+    global updating_blocks, level, camera, clock, edge_platforms, boss_attacks, boss_attacks_group
 
     hero = None
     left = right = up = down = shoot = hit = False  # по умолчанию — стоим
@@ -69,6 +70,8 @@ def start_level(level_name):
     all_sprites = pygame.sprite.Group()
     platforms_group = pygame.sprite.Group()
     boss_group = pygame.sprite.Group()
+    boss_attacks_group = pygame.sprite.Group()
+    boss_attacks = []
     blanks_group = pygame.sprite.Group()
     edge_platforms = pygame.sprite.Group()
     updating_blocks = {
@@ -155,10 +158,10 @@ def start_level(level_name):
                 crack = enemies.Crackatoo(j * PLAT_W, i * PLAT_H)
                 all_sprites.add(crack)
                 entities_group.add(crack)
-            # elif sym == "B":
-            #     boss = Boss(j * PLAT_W, i * PLAT_H)
-            #     all_sprites.add(boss)
-            #     boss_group.add(boss)
+            elif sym == "B":
+                 boss = Boss(j * PLAT_W, i * PLAT_H)
+                 all_sprites.add(boss)
+                 boss_group.add(boss)
             if isinstance(p, plat.Platform):
                 edge = False
                 for q in level[max(0, i - 1):i + 2]:
@@ -211,7 +214,7 @@ def back(menu_2):
 def game_cycle(events):
     global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
     global all_sprites, platforms_group, boss_group, blanks_group, lava_group
-    global other_blocks, level, camera, prev_fps, MODE, menu, edge_platforms
+    global other_blocks, level, camera, prev_fps, MODE, menu, edge_platforms, boss_attacks, boss_attacks_group
 
     if hero.hp <= 0:
         game_over()
@@ -250,12 +253,11 @@ def game_cycle(events):
     camera.update(hero)
     for i in updating_blocks.values():
         i.update(t, on_screen, blanks_group, enemies_group, player_group)
-    # boss_group.update(hero, hp, enemies_group, boss_attacks_group,
-    #                   boss_attacks, all_sprites, enemies_group)
-    # boss_attacks_group.update(enemies_group, hero, boss_attacks,
-    #                           hp, enemies_group, all_sprites)
-    enemies_group.update(blanks_group, platforms_group, [hero.hitbox.x, hero.hitbox.y],
-                         enemies_group, all_sprites)
+    boss_group.update(hero, hp, enemies_group, boss_attacks_group,
+                       boss_attacks, all_sprites, enemies_group)
+    boss_attacks_group.update(enemies_group, hero, boss_attacks,
+                               hp, enemies_group, all_sprites)
+    enemies_group.update(t, platforms_group, blanks_group, entities_group, player_group)
     entities_group.update(t, edge_platforms, blanks_group, entities_group, player_group)
     bullets_group.update(t, platforms_group, blanks_group, entities_group, player_group)
 
@@ -319,7 +321,7 @@ def background_fun(color):
 def main():
     global hero, hp, left, right, up, down, shoot, hit, enemies_group, bullets_group
     global all_sprites, platforms_group, boss_group, blanks_group, lava_group
-    global other_blocks, level, camera, clock, background, screen, menu, game_submenu
+    global other_blocks, level, camera, clock, background, screen, menu, game_submenu, boss_attacks, boss_attacks_group
     global game_over_menu, you_win_menu
 
     pygame.init()  # Инициация PyGame, обязательная строчка
