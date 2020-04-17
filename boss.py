@@ -256,10 +256,9 @@ class BossHit(sprite.Sprite):
                 self.xvel = -100
             self.image = Surface((64, 64))
             self.rect = Rect(x + 64, y + 256, 256, 64)  # прямоугольный объект
-            for r in range(10):
-                boss_blast = enemies.Blast(self.rect.x, self.rect.y - 64, 1, 4)
-                enemies_group.add(boss_blast)
-                all_sprites.add(boss_blast)
+            boss_blast = enemies.Blast(self.rect.x, self.rect.y - 64, 1, 4, 50)
+            enemies_group.add(boss_blast)
+            all_sprites.add(boss_blast)
 
     def update(self, enemies, hero, boss_bullets, hp, enemies_group, all_sprites):
 
