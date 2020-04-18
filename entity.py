@@ -55,17 +55,14 @@ class Entity(sprite.Sprite):
                 if isinstance(s, plat.InteractivePlatform):
                     s.check_collision_plat(self)
                 if filt(s) and self.hitbox.colliderect(s.hitbox) and s is not self:
-                    if isinstance(s, plat.Platform):
-                        if self.yvel == 0:
-                            self.block = (s, 1)
-                        else:
-                            self.block = (s, 0)
                     if prevent:
                         if xvel > 0:  # если движется вправо
                             self.hitbox.right = s.hitbox.left  # то не движется вправо
+                            self.xvel = 0
 
                         elif xvel < 0:  # если движется влево
                             self.hitbox.left = s.hitbox.right  # то не движется вправо
+                            self.xvel = 0
 
                         elif yvel > 0:  # если падает вниз
                             self.hitbox.bottom = s.hitbox.top  # то не падает вниз
@@ -75,11 +72,6 @@ class Entity(sprite.Sprite):
                         elif yvel < 0:  # если движется вверх
                             self.hitbox.top = s.hitbox.bottom  # то не движется вверх
                             self.yvel = 0  # и энергия прыжка пропадает
-                    if isinstance(s, plat.Ice):
-                        if self.yvel == 0:
-                            self.block = (s, 1)
-                        else:
-                            self.block = (s, 0)
                     if isinstance(s, plat.Platform) and s.dmg:
                         self.take_dmg(s, s.dmg)
                     return s

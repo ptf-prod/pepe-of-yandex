@@ -36,6 +36,8 @@ JUMP_POWER = 20
 
 
 class Enemy(entity.Entity):
+    MOVE_SPEED = 1
+
     def __init__(self, x, y, cur_anim=None, hb_shape=None):
         self.cur_anim = None
         self.dmg = 15
@@ -102,8 +104,11 @@ class Enemy(entity.Entity):
         return a
 
     def reverse(self):
-        self.xvel *= -1
         self.right = not self.right
+        if self.xvel:
+            self.xvel *= -1
+        else:
+            self.xvel = type(self).MOVE_SPEED * (self.right * 2 - 1)
 
 
 class Uka(Enemy):
@@ -203,9 +208,9 @@ class Flyling(Enemy):
         if self.last_blast + 0.3 > time.time() * TIMESCALE:
             if self.last_blast + 0.2 < time.time() * TIMESCALE and self.blast_waiting:
                 if self.right:
-                    blast = Blast(self.hitbox.right, self.hitbox.top, 1, 5)
+                    blast = Blast(self.hitbox.right, self.hitbox.top, 1)
                 else:
-                    blast = Blast(self.hitbox.left - PLAT_W, self.hitbox.top, 1, 5)
+                    blast = Blast(self.hitbox.left - PLAT_W, self.hitbox.top, 1)
                 self.eg.add(blast)
                 self.ass.add(blast)
                 self.blast_waiting = False
@@ -286,7 +291,7 @@ class Crackatoo(Enemy):
 
 
 class Blast(Enemy):
-    def __init__(self, x, y, target, size_c=2, dmg=5):
+    def __init__(self, x, y, target, size_c=2, dmg=15):
         self.target = target
         im = pygame.transform.scale(pygame.image.load("data/enemyframes/fireball.png"),
                                     (int(16 * size_c), int(16 * size_c)))
@@ -298,7 +303,7 @@ class Blast(Enemy):
                                          int(5 * size_c), int(4 * size_c)])
         self.dmg = dmg
         self.hero_coords = (0, 0)
-        #self.gravity = GRAVITY / 4
+        # self.gravity = GRAVITY / 4
         self.xvel0 = 500
         self.xvel = 500
         self.yvel = 100

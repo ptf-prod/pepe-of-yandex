@@ -55,12 +55,12 @@ class Player(Entity):
         self.reload_time = 0
         self.hit_delay_time = 0
         self.burn_time = 0
-        self.previous_block = (None, None)
-        self.block = (None, None)
+        self.block = [None, None]
         self.shoot_start = 0
         self.keys = Keys()
         self.cur_anim = self.boltAnimStay
         self.hit = None
+        self.dy = 0
         self.were_hit = set()
 
     def start_hit(self):
@@ -74,11 +74,10 @@ class Player(Entity):
     def update(self, t, platforms, blanks, entities, player):
         self.cur_anim[self.right].pause()
         self.cur_anim = self.boltAnimRun
-        if self.keys.left and not self.keys.right and not(isinstance(self.block[0], plat.Ice)):
-            print(self.block)
+        if self.keys.left and not self.keys.right and not (isinstance(self.block[0], plat.Ice) and self.xvel):
             self.right = False
             self.xvel = -Player.MOVE_SPEED  # Лево = x - n
-        elif self.keys.right and not self.keys.left and not(isinstance(self.block[0], plat.Ice)):
+        elif self.keys.right and not self.keys.left and not (isinstance(self.block[0], plat.Ice) and self.xvel):
             self.right = True
             self.xvel = Player.MOVE_SPEED  # Право = x + n
         elif not self.keys.right and not self.keys.left:
@@ -86,9 +85,9 @@ class Player(Entity):
             self.xvel = 0
             if isinstance(self.block[0], plat.Ice):
                 if self.right:
-                    self.xvel = Player.MOVE_SPEED + 10 # Право = x + n
+                    self.xvel = Player.MOVE_SPEED + 10  # Право = x + n
                 else:
-                    self.xvel = -Player.MOVE_SPEED + 10 # Лево = x - n
+                    self.xvel = -Player.MOVE_SPEED + 10  # Лево = x - n
 
         if self.keys.down and not self.keys.up:
             if not self.on_ground:
@@ -128,7 +127,16 @@ class Player(Entity):
             if dt > self.boltAnimHit[0].numFrames * ANIMATION_DELAY / 1000:
                 self.hit = None
                 self.were_hit.clear()
+        self.dy = -self.hitbox.y
         super().update(t, platforms, blanks, entities, player)
+        self.dy += self.hitbox.y
+        if self.dy == 0:
+            for i in platforms:
+                if i.hitbox.collidepoint(self.hitbox.centerx, self.hitbox.bottom + 1):
+                    self.block = [i, True]
+                    break
+        else:
+            self.block[1] = False
         self.cur_anim[self.right].play()
         self.image = self.cur_anim[self.right].getCurrentFrame()
 
